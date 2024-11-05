@@ -87,56 +87,56 @@ class _ServiceAreaState extends State<ServiceArea> {
                             fontWeight: FontWeight.bold),
                       )),
                   const SizedBox(height: 10),
-                  (_loaded != false && serviceLocations.isNotEmpty)
-                      ? Expanded(
-                          child: SingleChildScrollView(
-                          child: Column(
-                            children: serviceLocations
-                                .asMap()
-                                .map((i, value) => MapEntry(
-                                    i,
-                                    Container(
-                                      padding: const EdgeInsets.only(
-                                        top: 10,
-                                        bottom: 10,
-                                      ),
-                                      width: media.width * 1,
-                                      alignment: Alignment.centerLeft,
-                                      child: InkWell(
-                                        onTap: () {
-                                          setState(() {
-                                            myServiceId =
-                                                serviceLocations[i]['id'];
-                                          });
-                                        },
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              serviceLocations[i]['name'],
-                                              style: GoogleFonts.roboto(
-                                                  fontSize:
-                                                      media.width * twenty,
-                                                  color: textColor),
-                                            ),
-                                            (myServiceId ==
-                                                    serviceLocations[i]['id'])
-                                                ? Icon(
-                                                    Icons.done,
-                                                    color: buttonColor,
-                                                  )
-                                                : Container()
-                                          ],
-                                        ),
-                                      ),
-                                    )))
-                                .values
-                                .toList(),
+                (_loaded && serviceLocations.isNotEmpty)
+                    ? Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: (serviceLocations..sort((a, b) => a['name'].compareTo(b['name'])))
+                          .asMap()
+                          .map((i, value) => MapEntry(
+                        i,
+                        Container(
+                          padding: const EdgeInsets.only(
+                            top: 10,
+                            bottom: 10,
                           ),
-                        ))
-                      : Container(),
-                  (myServiceId != '')
+                          width: media.width,
+                          alignment: Alignment.centerLeft,
+                          child: InkWell(
+                            onTap: () {
+                              setState(() {
+                                myServiceId = serviceLocations[i]['id'];
+                              });
+                            },
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  serviceLocations[i]['name'],
+                                  style: GoogleFonts.roboto(
+                                    fontSize: media.width * twenty,
+                                    color: textColor,
+                                  ),
+                                ),
+                                (myServiceId == serviceLocations[i]['id'])
+                                    ? Icon(
+                                  Icons.done,
+                                  color: buttonColor,
+                                )
+                                    : Container(),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ))
+                          .values
+                          .toList(),
+                    ),
+                  ),
+                )
+                    : Container(),
+
+                (myServiceId != '')
                       ? Container(
                           padding: const EdgeInsets.only(top: 10, bottom: 10),
                           child: Button(
