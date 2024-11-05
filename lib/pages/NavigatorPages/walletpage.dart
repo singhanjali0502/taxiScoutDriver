@@ -1003,26 +1003,27 @@ class _WalletPageState extends State<WalletPage> {
                                                           width:
                                                               media.width * 0.7,
                                                           child: InkWell(
-                                                            onTap: () async {
-                                                              var val = await Navigator.push(
-                                                                  context,
-                                                                  MaterialPageRoute(
-                                                                      builder:
-                                                                          (context) =>
-                                                                              const CashFreePage()));
-                                                              if (val) {
-                                                                setState(() {
-                                                                  _choosePayment =
-                                                                      false;
-                                                                  _addPayment =
-                                                                      false;
-                                                                  addMoney =
-                                                                      null;
-                                                                  addMoneyController
-                                                                      .clear();
-                                                                });
-                                                              }
-                                                            },
+                                                            onTap: () async {},
+                                                            // {
+                                                            //   var val = await Navigator.push(
+                                                            //       context,
+                                                            //       MaterialPageRoute(
+                                                            //           builder:
+                                                            //               (context) =>
+                                                            //                   const CashFreePage()));
+                                                            //   if (val) {
+                                                            //     setState(() {
+                                                            //       _choosePayment =
+                                                            //           false;
+                                                            //       _addPayment =
+                                                            //           false;
+                                                            //       addMoney =
+                                                            //           null;
+                                                            //       addMoneyController
+                                                            //           .clear();
+                                                            //     });
+                                                            //   }
+                                                            // },
                                                             child: Container(
                                                               width:
                                                                   media.width *

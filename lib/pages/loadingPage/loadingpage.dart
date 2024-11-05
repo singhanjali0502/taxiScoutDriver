@@ -11,15 +11,11 @@ import 'package:tagyourtaxi_driver/pages/loadingPage/loading.dart';
 import 'package:tagyourtaxi_driver/pages/login/start_screen.dart';
 import 'package:tagyourtaxi_driver/pages/onTripPage/map_page.dart';
 import 'package:tagyourtaxi_driver/pages/noInternet/nointernet.dart';
-import 'package:tagyourtaxi_driver/pages/vehicleInformations/docs_onprocess.dart';
-import 'package:tagyourtaxi_driver/pages/vehicleInformations/upload_docs.dart';
 import 'package:tagyourtaxi_driver/widgets/widgets.dart';
 import '../../styles/styles.dart';
 import '../../functions/functions.dart';
 import 'package:http/http.dart' as http;
 
-import '../login/login.dart';
-import '../login/signupmethod.dart';
 
 class LoadingPage extends StatefulWidget {
   const LoadingPage({Key? key}) : super(key: key);
@@ -149,39 +145,20 @@ class _LoadingPageState extends State<LoadingPage> {
 
     return Material(
       child: Scaffold(
-        backgroundColor: Color(0xff68706f),
-        body: Stack(
+        backgroundColor: Colors.white,
+        body: Column(
           children: [
             Container(
-              // height: media.height * 1,
-              // width: media.width * 1,
+              height: media.height * 1,
+              width: media.width * 1,
+              decoration:  BoxDecoration(
 
-              // decoration: BoxDecoration(
-              //        color: yellowcolor.withOpacity(0.9)
-              //   //color: buttonColor4`  q1wio 7
-              //     // Color(0xffF7F7F7),
-              //     ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Image.asset(
-                  //   'assets/images/logomain.png',
-                  //   fit: BoxFit.fill,
-                  //   height:MediaQuery.of(context).size.height,
-                  //   width: MediaQuery.of(context).size.width,
-                  // ),
-                  Container(
-                    // padding: EdgeInsets.all(media.width * 0.01),
-                    width: media.width * 2 ,
-                    height: media.width * 2,
-                    decoration: const BoxDecoration(
-                        image: DecorationImage(
-                            image: AssetImage('assets/images/splashNew.png'),
-                            fit: BoxFit.contain)),
-                  ),
-                ],
+                //.withOpacity(0.5)
+                //Color(0xffE70000),
               ),
-            ),
+              child:  Image.asset('assets/images/splashNew.png'),
+              ),
+
 
             //update available
 

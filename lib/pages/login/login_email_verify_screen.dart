@@ -137,7 +137,7 @@ class _Login_otpState extends State<Login_otp> {
                               });
                               if (resendSuccess) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
+                                  const SnackBar(
                                     content: Text('OTP resent successfully!'),
                                   ),
                                 );

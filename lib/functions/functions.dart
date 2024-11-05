@@ -577,6 +577,7 @@ Future<String> registerDriver({
   String? myVehicleId,
   String? driverLicence,
   String? companyId,
+  String? recaptchaToken,
 }) async {
   bearerToken.clear();
   dynamic result;
@@ -610,7 +611,8 @@ Future<String> registerDriver({
       // 'transport_type': transportType ?? "Taxi",
       'driving_license':driverLicence ??"",
       'gender':'',
-      'owner_id':companyId ?? ""
+      'owner_id':companyId ?? "",
+      'recaptchaToken':recaptchaToken ?? "",
     });
 
     print("Request Fields: ${response.fields}"); // Debugging line

@@ -57,14 +57,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
-  cashfree_pg:
-    dependency: "direct main"
-    description:
-      name: cashfree_pg
-      sha256: "2224880f43f798d8d696dac064a00530394bb52e7041f64dc65708c8eba876b5"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.12+32"
   characters:
     dependency: transitive
     description:
@@ -391,7 +383,7 @@ packages:
     source: sdk
     version: "0.0.0"
   flutter_inappwebview:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: flutter_inappwebview
       sha256: d198297060d116b94048301ee6749cd2e7d03c1f2689783f52d210a6b7aba350
@@ -496,6 +488,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.4.1"
+  g_recaptcha_v3:
+    dependency: "direct main"
+    description:
+      name: g_recaptcha_v3
+      sha256: ee754d0a5621646e200b2d5d9c918d64725fb53d6a1b65cbd6f294c08e0fe529
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.5"
   geolocator:
     dependency: "direct main"
     description:
@@ -548,10 +548,10 @@ packages:
     dependency: "direct main"
     description:
       name: google_fonts
-      sha256: "8f099045e2f2a30e4d4d0a35f40c6bc941a8f2ca0e10ad9d214ee9edd3f37483"
+      sha256: "6b6f10f0ce3c42f6552d1c70d2c28d764cf22bb487f50f66cca31dcd5194f4d6"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.1"
+    version: "4.0.4"
   google_maps:
     dependency: transitive
     description:
@@ -1004,10 +1004,10 @@ packages:
     dependency: transitive
     description:
       name: quiver
-      sha256: b1c1ac5ce6688d77f65f3375a9abb9319b3cb32486bdc7a1e0fdf004d7ba4e47
+      sha256: ea0b925899e64ecdfbf9c7becb60d5b50e706ade44a85b2363be2a22d88117d2
       url: "https://pub.dev"
     source: hosted
-    version: "3.2.1"
+    version: "3.2.2"
   razorpay_flutter:
     dependency: "direct main"
     description:
