@@ -12,7 +12,7 @@ import Firebase
     FirebaseApp.configure()
     GMSServices.provideAPIKey("AIzaSyBTgq6JXA_Cn3F-w8qmT2Ssudq8Uy24o18")
     GeneratedPluginRegistrant.register(with: self)
-    if #available(iOS 13.0, *) {
+    if #available(iOS 14.0, *) {
      UNUserNotificationCenter.current().delegate = self as? UNUserNotificationCenterDelegate
     }
     application.registerForRemoteNotifications()

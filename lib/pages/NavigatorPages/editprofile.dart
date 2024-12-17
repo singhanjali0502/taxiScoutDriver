@@ -29,13 +29,27 @@ class _EditProfileState extends State<EditProfile> {
   TextEditingController email = TextEditingController();
 
 //get gallery permission
-  getGalleryPermission() async {
+
+  Future<PermissionStatus> getGalleryPermission() async {
+    // Check current permission status
     var status = await Permission.photos.status;
-    if (status != PermissionStatus.granted) {
+
+    if (status.isDenied) {
+      // Request permission if denied
       status = await Permission.photos.request();
+    } else if (status.isPermanentlyDenied) {
+      // If permanently denied, guide the user to settings
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gallery permission permanently denied. Please enable it from settings.'),
+        ),
+      );
+      openAppSettings();
     }
+
     return status;
   }
+
 
 //get camera permission
   getCameraPermission() async {
@@ -47,20 +61,43 @@ class _EditProfileState extends State<EditProfile> {
   }
 
 //pick image from gallery
-  pickImageFromGallery() async {
+  Future<void> pickImageFromGallery() async {
     var permission = await getGalleryPermission();
+    print("Gallery permission status: $permission"); // Debug log
+
     if (permission == PermissionStatus.granted) {
-      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-      setState(() {
-        proImageFile = pickedFile?.path;
-        _pickImage = false;
-      });
+      try {
+        final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+        print("Picked file: ${pickedFile?.path}"); // Debug log
+
+        if (pickedFile != null) {
+          setState(() {
+            proImageFile = pickedFile.path;
+            _pickImage = false;
+          });
+        } else {
+          print("No image selected"); // Debug log
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No image selected')),
+          );
+        }
+      } catch (e) {
+        print("Error picking image: $e"); // Debug log
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to pick image: $e')),
+        );
+      }
     } else {
+      print("Gallery access denied"); // Debug log
       setState(() {
         _permission = 'noPhotos';
       });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Gallery access denied')),
+      );
     }
   }
+
 
 //pick image from camera
   pickImageFromCamera() async {

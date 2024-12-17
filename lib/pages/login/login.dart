@@ -150,57 +150,84 @@ class _LoginState extends State<Login> {
                       ),
                       const SizedBox(height: 20),
                       Container(
-                        width: media.width * 1 - media.width * 0.08,
+                        width: media.width * 0.92,
                         alignment: Alignment.center,
                         child: Button(
                           onTap: () async {
                             if (_formKey.currentState!.validate()) {
+                              FocusManager.instance.primaryFocus?.unfocus(); // Dismiss keyboard
                               setState(() {
                                 _errorMessage = null;
-                                _isLoggingIn = true;
+                                _isLoggingIn = true; // Show loading indicator
                               });
-                              _errorMessage =
-                                  validateEmail(_emailController.text);
+
+                              // Step 1: Validate email and password
+                              _errorMessage = validateEmail(_emailController.text);
                               if (_errorMessage == null) {
-                                _errorMessage = validatePassword(
-                                    _passwordController.text);
+                                _errorMessage = validatePassword(_passwordController.text);
                               }
 
+                              // Step 2: Check validation and proceed with login
                               if (_errorMessage == null) {
-                                var loginResult = await driverLogin(
+                                bool loginResult = await driverLogin(
                                   email: _emailController.text,
                                   password: _passwordController.text,
                                 );
 
-                                if (loginResult == true) {
+                                if (loginResult) {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) =>
-                                            Login_otp(
-                                                email: _emailController
-                                                    .text)),
+                                      builder: (context) => Login_otp(email: _emailController.text),
+                                    ),
                                   );
+                                  // Show dialog after successful login
+                                  // showDialog(
+                                  //   context: context,
+                                  //   builder: (BuildContext context) {
+                                  //     return AlertDialog(
+                                  //       title: Text("Login Successful"),
+                                  //       content: Text("Please check your email for OTP verification."),
+                                  //       actions: [
+                                  //         TextButton(
+                                  //           onPressed: () {
+                                  //             Navigator.of(context).pop(); // Close the dialog
+                                  //             Navigator.push(
+                                  //               context,
+                                  //               MaterialPageRoute(
+                                  //                 builder: (context) => Login_otp(email: _emailController.text),
+                                  //               ),
+                                  //             );
+                                  //           },
+                                  //           child: Text("OK"),
+                                  //         ),
+                                  //       ],
+                                  //     );
+                                  //   },
+                                  // );
                                 } else {
                                   setState(() {
-                                    _errorMessage =
-                                    'Email or password is incorrect';
+                                    _errorMessage = 'Email or password is incorrect';
                                   });
                                 }
                               } else {
+                                // Show error if validation fails
                                 setState(() {
                                   _errorMessage = _errorMessage;
                                 });
                               }
+
+                              // Hide loading indicator
                               setState(() {
                                 _isLoggingIn = false;
                               });
                             }
-                            FocusManager.instance.primaryFocus?.unfocus();
                           },
                           text: languages[choosenLanguage]['text_login'],
                         ),
                       ),
+
+
                       if (_errorMessage != null) ...[
                         const SizedBox(height: 20),
                         Text(

@@ -398,16 +398,29 @@ class _SignupScreenState extends State<SignupScreen> {
                               _isLoading = false; // Hide loading indicator
                             });
                             if (registrationResult == "true") {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Please verify your email'),
-                                ),
-                              );
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => Login_otp(email: _emailController.text),
-                                ),
+                              // Show dialog after successful registration
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: Text("Registration Successful"),
+                                    content: Text("Please check your email for OTP verification."),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => Login_otp(email: _emailController.text),
+                                            ),
+                                          );
+                                        },
+                                        child: Text("OK"),
+                                      ),
+                                    ],
+                                  );
+                                },
                               );
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -422,6 +435,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         text: languages[choosenLanguage]['text_signup'],
                       ),
                     ),
+
                     const SizedBox(height: 20),
                   ],
                 ),

@@ -471,15 +471,15 @@ class _DropLocationState extends State<DropLocation>
                                               _isLoading = false;
                                               droplocation = true;
                                             });
-                                            // var val =
-                                            //     await Navigator.pushReplacement(
-                                            //         context,
-                                            //         MaterialPageRoute(
-                                            //             builder: (context) =>
-                                            //                 Maps()));
-                                            // if (val) {
-                                            //   setState(() {});
-                                            // }
+                                            var val =
+                                                await Navigator.pushReplacement(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            Maps()));
+                                            if (val) {
+                                              setState(() {});
+                                            }
                                           }
                                         }
                                       },

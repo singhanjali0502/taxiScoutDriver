@@ -45,6 +45,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'geohash.dart';
 import 'dart:developer' as dev;
 
+import 'location_update_controller.dart';
+
 //languages code
 dynamic phcode;
 dynamic platform;
@@ -70,7 +72,7 @@ String url = 'https://admin.taxiscout24.com/';
 
 String mapkey = 'AIzaSyAL0hd3a2l1k1uLSAxQNN511PWkguNxzE4';
 String mapStyle = '';
-
+DriverService driverService = DriverService();
 getDetailsOfDevice() async {
   var connectivityResult = await (Connectivity().checkConnectivity());
   if (connectivityResult == ConnectivityResult.none) {
@@ -603,7 +605,7 @@ Future<String> registerDriver({
       "service_location_id": serviceId ?? "",
       "login_by": (platform == TargetPlatform.android) ? 'android' : 'ios',
       "vehicle_type": myVehicleId ?? "",
-      "vehicle_types": '["${myVehicleId}"]',  // Make sure this is the correct format
+      // "vehicle_types": '["${myVehicleId}"]',  // Make sure this is the correct format
       // "car_color": vehicleColor ?? "Red",
       // "car_number": vehicleNumber ?? "1234",
       // "vehicle_year": modelYear ?? "Frari",
@@ -1804,33 +1806,42 @@ ValueNotifyingNotification valueNotifierNotification =
     ValueNotifyingNotification();
 
 //driver online offline status
-driverStatus() async {
-  dynamic result;
-  try {
-    var response = await http.post(
-        Uri.parse('${url}api/v1/driver/online-offline'),
-        headers: {'Authorization': 'Bearer ${bearerToken[0].token}'});
-    if (response.statusCode == 200) {
-      userDetails = jsonDecode(response.body)['data'];
-      result = true;
-      if (userDetails['active'] == false) {
-        userInactive();
-      } else {
-        userActive();
-      }
-      valueNotifierHome.incrementNotifier();
-    } else {
-      debugPrint(response.body);
-      result = false;
-    }
-  } catch (e) {
-    if (e is SocketException) {
-      internet = false;
-      result = 'no internet';
-    }
-  }
-  return result;
-}
+// driverStatus() async {
+//   dynamic result;
+//   try {
+//     var response = await http.post(
+//       Uri.parse('${url}api/v1/driver/online-offline'),
+//       headers: {
+//         'Authorization': 'Bearer ${bearerToken[0].token}',
+//         'Content-Type': 'application/json',  // Added Content-Type
+//       },
+//       body: jsonEncode({
+//         "latitude": center.latitude,  // Ensure these are numbers
+//         "longitude": center.longitude,
+//       }),
+//     );
+//
+//     if (response.statusCode == 200) {
+//       userDetails = jsonDecode(response.body)['data'];
+//       result = true;
+//       if (userDetails['active'] == false) {
+//         userInactive();
+//       } else {
+//         userActive();
+//       }
+//       valueNotifierHome.incrementNotifier();
+//     } else {
+//       debugPrint(response.body);
+//       result = false;
+//     }
+//   } catch (e) {
+//     if (e is SocketException) {
+//       internet = false;
+//       result = 'no internet';
+//     }
+//   }
+//   return result;
+// }
 
 const platforms = MethodChannel('flutter.app/awake');
 
@@ -1917,7 +1928,7 @@ currentPositionUpdate() async {
           positionStreamData();
         }
       } else if (serviceEnabled == false && userDetails['active'] == true) {
-        await driverStatus();
+        await driverService.driverStatus();
         await location.requestService();
       }
       if (userDetails['role'] == 'driver') {
@@ -1928,7 +1939,7 @@ currentPositionUpdate() async {
             userDetails['approve'] == true) {
           await getUserDetails();
           if (userDetails['active'] == true) {
-            await driverStatus();
+            await driverService.driverStatus();
           }
           valueNotifierHome.incrementNotifier();
           audioPlayer.play(audio);

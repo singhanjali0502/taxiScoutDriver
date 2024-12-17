@@ -46,7 +46,7 @@ class _NavDrawerState extends State<NavDrawer> {
         child: Column(
           children: [
             Container(
-              decoration: BoxDecoration(color: yellowcolor),
+              decoration: BoxDecoration(color: Colors.white),
               width: media.width * 0.8,
               child: DrawerHeader(
                   child: Image.asset(

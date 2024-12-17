@@ -4,8 +4,14 @@
 <dict>
 	<key>Allow contact access to select your contacts for adding in SOS</key>
 	<string>Program requires GPS to track cars and job orders</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+    <string>We need access to your photo library to pick images.</string>
+    <key>NSCameraUsageDescription</key>
+    <string>We need access to your camera to capture images.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>NSPhotoLibraryUsageDescription</key>
+    <string>Your reason for accessing the photo library</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>

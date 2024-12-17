@@ -35,7 +35,7 @@ class _StartScreenState extends State<StartScreen> {
                 children: [
                   ElevatedButton(
                     onPressed: () {
-                      _launchURL('https://taxi-scout-webapp.vercel.app/Signup');
+                      _launchURL('https://www.taxiscout24.com/signup');
                     },
                     child: Text(
                       'Yes',

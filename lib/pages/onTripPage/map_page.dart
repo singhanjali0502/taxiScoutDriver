@@ -11,6 +11,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:location/location.dart';
 import 'package:tagyourtaxi_driver/functions/functions.dart';
 import 'package:tagyourtaxi_driver/functions/geohash.dart';
+import 'package:tagyourtaxi_driver/functions/location_update_controller.dart';
 import 'package:tagyourtaxi_driver/functions/notifications.dart';
 import 'package:tagyourtaxi_driver/pages/NavigatorPages/notification.dart';
 import 'package:tagyourtaxi_driver/pages/chatPage/chat_page.dart';
@@ -71,7 +72,7 @@ class _MapsState extends State<Maps>
   bool cancelRequest = false;
   bool _pickAnimateDone = false;
   bool _dropMarkerDone = false;
-
+  DriverService driverService = DriverService();
   late geolocator.LocationPermission permission;
   Location location = Location();
   String state = '';
@@ -145,7 +146,7 @@ class _MapsState extends State<Maps>
         userDetails['owner_id'] != null &&
         userDetails['vehicle_type_id'] == null &&
         userDetails['active'] == true) {
-      await driverStatus();
+      await driverService.driverStatus();
     }
   }
 
@@ -220,7 +221,7 @@ class _MapsState extends State<Maps>
       if (gettingPerm > 1) {
         locationAllowed = false;
         if (userDetails['active'] == true) {
-          await driverStatus();
+          await driverService.driverStatus();
         }
         state = '3';
       } else {
@@ -248,7 +249,7 @@ class _MapsState extends State<Maps>
         markerIcon = await getBytesFromAsset('assets/images/top-taxi.png', 40);
         markerIcon2 = await getBytesFromAsset('assets/images/bike.png', 40);
         markerIcon3 =
-            await getBytesFromAsset('assets/images/vehicle-marker.png', 40);
+            await getBytesFromAsset('assets/images/3774062.png', 80);
         if (userDetails['role'] == 'owner') {
           onlinebikeicon1 =
               await getBytesFromAsset('assets/images/bike_online.png', 40);
@@ -341,7 +342,7 @@ class _MapsState extends State<Maps>
       }
 
       if (makeOnline == true && userDetails['active'] == false) {
-        await driverStatus();
+        await driverService.driverStatus();
       }
       makeOnline = false;
       if (mounted) {
@@ -1955,169 +1956,170 @@ class _MapsState extends State<Maps>
                                                                 })),
 
                                                         //driver status
-                                                        (userDetails['role'] ==
-                                                                'owner')
-                                                            ? Container()
-                                                            : Positioned(
-                                                                top: MediaQuery.of(
-                                                                            context)
-                                                                        .padding
-                                                                        .top +
-                                                                    25,
-                                                                child:
-                                                                    Container(
-                                                                  padding: EdgeInsets.fromLTRB(
-                                                                      media.width *
-                                                                          0.05,
-                                                                      media.width *
-                                                                          0.025,
-                                                                      media.width *
-                                                                          0.05,
-                                                                      media.width *
-                                                                          0.025),
-                                                                  decoration: BoxDecoration(
-                                                                      borderRadius:
-                                                                          BorderRadius.circular(
-                                                                              10),
-                                                                      boxShadow: [
-                                                                        BoxShadow(
-                                                                            blurRadius:
-                                                                                2,
-                                                                            color:
-                                                                                Colors.black.withOpacity(0.2),
-                                                                            spreadRadius: 2)
-                                                                      ],
-                                                                      color:
-                                                                          page),
-                                                                  //driver status display
-                                                                  child: Row(
-                                                                    mainAxisAlignment:
-                                                                        MainAxisAlignment
-                                                                            .center,
-                                                                    children: [
-
-                                                                      /// Driver Status  Live  like  online or offline
-                                                                     
-                                                                      InkWell(
-                                                                        onTap:
-                                                                            () async {
-                                                                          addressList
-                                                                              .clear();
-                                                                          var val = await geoCoding(
-                                                                              center.latitude,
-                                                                              center.longitude);
-                                                                          setState(
-                                                                              () {
-                                                                            if (addressList.where((element) => element.id == 'pickup').isNotEmpty) {
-                                                                              var add = addressList.firstWhere((element) => element.id == 'pickup');
-                                                                              add.address = val;
-                                                                              add.latlng = LatLng(center.latitude, center.longitude);
-                                                                            } else {
-                                                                              addressList.add(AddressList(id: 'pickup', address: val, latlng: LatLng(center.latitude, center.longitude)));
-                                                                            }
-                                                                          });
-                                                                          // var val =
-                                                                          //     await geoCodingForLatLng('pickup');
-
-                                                                          // if (_pickaddress ==
-                                                                          //     true) {
-                                                                          //   setState(() {
-                                                                          //     if (addressList.where((element) => element.id == 'pickup').isEmpty) {
-                                                                          //       addressList.add(AddressList(id: 'pickup', address: val, latlng: LatLng(_centerLocation.latitude, _centerLocation.longitude)));
-                                                                          //     } else {
-                                                                          //       addressList.firstWhere((element) => element.id == 'pickup').address = val;
-                                                                          //       addressList.firstWhere((element) => element.id == 'pickup').latlng = LatLng(_centerLocation.latitude, _centerLocation.longitude);
-                                                                          //     }
-                                                                          //   });
-                                                                          // }
-                                                                          if (addressList
-                                                                              .isNotEmpty) {
-                                                                            // ignore: use_build_context_synchronously
-                                                                            Navigator.push(context,
-                                                                                MaterialPageRoute(builder: (context) => const DropLocation()));
-                                                                            // if(nav != null){
-                                                                            //   if(nav){
-                                                                            //     addressList.clear();
-                                                                            //   }
-                                                                            // }
-                                                                          }
-                                                                        },
-                                                                        child:
-                                                                            Container(
-                                                                          height:
-                                                                              15,
-                                                                          width:
-                                                                              MediaQuery.of(context).size.width * 0.5,
-                                                                          decoration:
-                                                                              BoxDecoration(
-                                                                            // shape: BoxShape
-                                                                            //     .circle,
-                                                                            boxShadow: [
-                                                                              BoxShadow(blurRadius: 1, color: Colors.white.withOpacity(0.1), spreadRadius: 2)
-                                                                            ],
-                                                                            // color: (driverReq.isEmpty)
-                                                                            //     ? (userDetails['active'] == false)
-                                                                            //         ? const Color(0xff666666)
-                                                                            //         : const Color(0xff319900)
-                                                                            //     : (driverReq['accepted_at'] != null && driverReq['arrived_at'] == null)
-                                                                            //         ? const Color(0xff2E67D5)
-                                                                            //         : (driverReq['accepted_at'] != null && driverReq['arrived_at'] != null && driverReq['is_trip_start'] == 0)
-                                                                            //             ? const Color(0xff319900)
-                                                                            //             : (driverReq['accepted_at'] != null && driverReq['arrived_at'] != null && driverReq['is_trip_start'] != null)
-                                                                            //                 ? const Color(0xffFF0000)
-                                                                            //                 : (driverReq['accepted'] == null && userDetails['active'] == false)
-                                                                            //                     ? const Color(0xff666666)
-                                                                            //                     : const Color(0xff319900)
-                                                                          ),
-                                                                          child:
-                                                                              Center(
-                                                                            child:
-                                                                                Text(
-                                                                              'Enter 4 letters to search',
-                                                                              style: TextStyle(color: Colors.grey.withOpacity(0.4)),
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                      ),
-
-                                                                      // SizedBox(
-                                                                      //   width: media.width *
-                                                                      //       0.02,
-                                                                      // ),
-
-                                                                      // Text(
-                                                                      //   (driverReq.isEmpty)
-                                                                      //       ? (userDetails['active'] == false)
-                                                                      //           ? languages[choosenLanguage]['text_youareoffline']
-                                                                      //           : languages[choosenLanguage]['text_youareonline']
-                                                                      //       : (driverReq['accepted_at'] != null && driverReq['arrived_at'] == null)
-                                                                      //           ? languages[choosenLanguage]['text_arriving']
-                                                                      //           : (driverReq['accepted_at'] != null && driverReq['arrived_at'] != null && driverReq['is_trip_start'] == 0)
-                                                                      //               ? languages[choosenLanguage]['text_arrived']
-                                                                      //               : (driverReq['accepted_at'] != null && driverReq['arrived_at'] != null && driverReq['is_trip_start'] != null)
-                                                                      //                   ? languages[choosenLanguage]['text_onride']
-                                                                      //                   : (driverReq['accepted'] == null && userDetails['active'] == false)
-                                                                      //                       ? languages[choosenLanguage]['text_youareoffline']
-                                                                      //                       : languages[choosenLanguage]['text_youareonline'],
-                                                                      //   style: GoogleFonts.roboto(
-                                                                      //       fontSize: media.width * twelve,
-                                                                      //       color: (driverReq.isEmpty)
-                                                                      //           ? (userDetails['active'] == false)
-                                                                      //               ? const Color(0xff666666)
-                                                                      //               : const Color(0xff319900)
-                                                                      //           : (driverReq['accepted_at'] != null && driverReq['arrived_at'] == null)
-                                                                      //               ? const Color(0xff2E67D5)
-                                                                      //               : (driverReq['accepted_at'] != null && driverReq['arrived_at'] != null && driverReq['is_trip_start'] == 0)
-                                                                      //                   ? const Color(0xff319900)
-                                                                      //                   : (driverReq['accepted_at'] != null && driverReq['arrived_at'] != null && driverReq['is_trip_start'] == 1)
-                                                                      //                       ? const Color(0xffFF0000)
-                                                                      //                       : (driverReq['accepted'] == null && userDetails['active'] == false)
-                                                                      //                           ? const Color(0xff666666)
-                                                                      //                           : const Color(0xff319900)),
-                                                                      // )
-                                                                    ],
-                                                                  ),
-                                                                )),
+                                                        // (userDetails['role'] ==
+                                                        //         'owner')
+                                                        //     ? Container()
+                                                        //     : SizedBox.shrink,
+                                                        // Positioned(
+                                                            //     top: MediaQuery.of(
+                                                            //                 context)
+                                                            //             .padding
+                                                            //             .top +
+                                                            //         25,
+                                                            //     child:
+                                                            //         Container(
+                                                            //       padding: EdgeInsets.fromLTRB(
+                                                            //           media.width *
+                                                            //               0.05,
+                                                            //           media.width *
+                                                            //               0.025,
+                                                            //           media.width *
+                                                            //               0.05,
+                                                            //           media.width *
+                                                            //               0.025),
+                                                            //       decoration: BoxDecoration(
+                                                            //           borderRadius:
+                                                            //               BorderRadius.circular(
+                                                            //                   10),
+                                                            //           boxShadow: [
+                                                            //             BoxShadow(
+                                                            //                 blurRadius:
+                                                            //                     2,
+                                                            //                 color:
+                                                            //                     Colors.black.withOpacity(0.2),
+                                                            //                 spreadRadius: 2)
+                                                            //           ],
+                                                            //           color:
+                                                            //               page),
+                                                            //       //driver status display
+                                                            //       child: Row(
+                                                            //         mainAxisAlignment:
+                                                            //             MainAxisAlignment
+                                                            //                 .center,
+                                                            //         children: [
+                                                            //
+                                                            //           /// Driver Status  Live  like  online or offline
+                                                            //         
+                                                            //           // InkWell(
+                                                            //           //   onTap:
+                                                            //           //       () async {
+                                                            //           //     addressList
+                                                            //           //         .clear();
+                                                            //           //     var val = await geoCoding(
+                                                            //           //         center.latitude,
+                                                            //           //         center.longitude);
+                                                            //           //     setState(
+                                                            //           //         () {
+                                                            //           //       if (addressList.where((element) => element.id == 'pickup').isNotEmpty) {
+                                                            //           //         var add = addressList.firstWhere((element) => element.id == 'pickup');
+                                                            //           //         add.address = val;
+                                                            //           //         add.latlng = LatLng(center.latitude, center.longitude);
+                                                            //           //       } else {
+                                                            //           //         addressList.add(AddressList(id: 'pickup', address: val, latlng: LatLng(center.latitude, center.longitude)));
+                                                            //           //       }
+                                                            //           //     });
+                                                            //           //     // var val =
+                                                            //           //     //     await geoCodingForLatLng('pickup');
+                                                            //           //
+                                                            //           //     // if (_pickaddress ==
+                                                            //           //     //     true) {
+                                                            //           //     //   setState(() {
+                                                            //           //     //     if (addressList.where((element) => element.id == 'pickup').isEmpty) {
+                                                            //           //     //       addressList.add(AddressList(id: 'pickup', address: val, latlng: LatLng(_centerLocation.latitude, _centerLocation.longitude)));
+                                                            //           //     //     } else {
+                                                            //           //     //       addressList.firstWhere((element) => element.id == 'pickup').address = val;
+                                                            //           //     //       addressList.firstWhere((element) => element.id == 'pickup').latlng = LatLng(_centerLocation.latitude, _centerLocation.longitude);
+                                                            //           //     //     }
+                                                            //           //     //   });
+                                                            //           //     // }
+                                                            //           //     if (addressList
+                                                            //           //         .isNotEmpty) {
+                                                            //           //       // ignore: use_build_context_synchronously
+                                                            //           //       Navigator.push(context,
+                                                            //           //           MaterialPageRoute(builder: (context) => const DropLocation()));
+                                                            //           //       // if(nav != null){
+                                                            //           //       //   if(nav){
+                                                            //           //       //     addressList.clear();
+                                                            //           //       //   }
+                                                            //           //       // }
+                                                            //           //     }
+                                                            //           //   },
+                                                            //           //   child:
+                                                            //           //       Container(
+                                                            //           //     height:
+                                                            //           //         15,
+                                                            //           //     width:
+                                                            //           //         MediaQuery.of(context).size.width * 0.5,
+                                                            //           //     decoration:
+                                                            //           //         BoxDecoration(
+                                                            //           //       // shape: BoxShape
+                                                            //           //       //     .circle,
+                                                            //           //       boxShadow: [
+                                                            //           //         BoxShadow(blurRadius: 1, color: Colors.white.withOpacity(0.1), spreadRadius: 2)
+                                                            //           //       ],
+                                                            //           //       // color: (driverReq.isEmpty)
+                                                            //           //       //     ? (userDetails['active'] == false)
+                                                            //           //       //         ? const Color(0xff666666)
+                                                            //           //       //         : const Color(0xff319900)
+                                                            //           //       //     : (driverReq['accepted_at'] != null && driverReq['arrived_at'] == null)
+                                                            //           //       //         ? const Color(0xff2E67D5)
+                                                            //           //       //         : (driverReq['accepted_at'] != null && driverReq['arrived_at'] != null && driverReq['is_trip_start'] == 0)
+                                                            //           //       //             ? const Color(0xff319900)
+                                                            //           //       //             : (driverReq['accepted_at'] != null && driverReq['arrived_at'] != null && driverReq['is_trip_start'] != null)
+                                                            //           //       //                 ? const Color(0xffFF0000)
+                                                            //           //       //                 : (driverReq['accepted'] == null && userDetails['active'] == false)
+                                                            //           //       //                     ? const Color(0xff666666)
+                                                            //           //       //                     : const Color(0xff319900)
+                                                            //           //     ),
+                                                            //           //     child:
+                                                            //           //         Center(
+                                                            //           //       child:
+                                                            //           //           Text(
+                                                            //           //         'Enter 4 letters to search',
+                                                            //           //         style: TextStyle(color: Colors.grey.withOpacity(0.4)),
+                                                            //           //       ),
+                                                            //           //     ),
+                                                            //           //   ),
+                                                            //           // ),
+                                                            //
+                                                            //           // SizedBox(
+                                                            //           //   width: media.width *
+                                                            //           //       0.02,
+                                                            //           // ),
+                                                            //
+                                                            //           // Text(
+                                                            //           //   (driverReq.isEmpty)
+                                                            //           //       ? (userDetails['active'] == false)
+                                                            //           //           ? languages[choosenLanguage]['text_youareoffline']
+                                                            //           //           : languages[choosenLanguage]['text_youareonline']
+                                                            //           //       : (driverReq['accepted_at'] != null && driverReq['arrived_at'] == null)
+                                                            //           //           ? languages[choosenLanguage]['text_arriving']
+                                                            //           //           : (driverReq['accepted_at'] != null && driverReq['arrived_at'] != null && driverReq['is_trip_start'] == 0)
+                                                            //           //               ? languages[choosenLanguage]['text_arrived']
+                                                            //           //               : (driverReq['accepted_at'] != null && driverReq['arrived_at'] != null && driverReq['is_trip_start'] != null)
+                                                            //           //                   ? languages[choosenLanguage]['text_onride']
+                                                            //           //                   : (driverReq['accepted'] == null && userDetails['active'] == false)
+                                                            //           //                       ? languages[choosenLanguage]['text_youareoffline']
+                                                            //           //                       : languages[choosenLanguage]['text_youareonline'],
+                                                            //           //   style: GoogleFonts.roboto(
+                                                            //           //       fontSize: media.width * twelve,
+                                                            //           //       color: (driverReq.isEmpty)
+                                                            //           //           ? (userDetails['active'] == false)
+                                                            //           //               ? const Color(0xff666666)
+                                                            //           //               : const Color(0xff319900)
+                                                            //           //           : (driverReq['accepted_at'] != null && driverReq['arrived_at'] == null)
+                                                            //           //               ? const Color(0xff2E67D5)
+                                                            //           //               : (driverReq['accepted_at'] != null && driverReq['arrived_at'] != null && driverReq['is_trip_start'] == 0)
+                                                            //           //                   ? const Color(0xff319900)
+                                                            //           //                   : (driverReq['accepted_at'] != null && driverReq['arrived_at'] != null && driverReq['is_trip_start'] == 1)
+                                                            //           //                       ? const Color(0xffFF0000)
+                                                            //           //                       : (driverReq['accepted'] == null && userDetails['active'] == false)
+                                                            //           //                           ? const Color(0xff666666)
+                                                            //           //                           : const Color(0xff319900)),
+                                                            //           // )
+                                                            //         ],
+                                                            //       ),
+                                                            //     )),
                                                         //menu bar
                                                         Positioned(
                                                             top: MediaQuery.of(
@@ -2443,7 +2445,7 @@ class _MapsState extends State<Maps>
                                                                               true;
                                                                         });
 
-                                                                        await driverStatus();
+                                                                        await driverService.driverStatus();
                                                                         setState(
                                                                             () {
                                                                           _isLoading =
@@ -2467,7 +2469,7 @@ class _MapsState extends State<Maps>
                                                                                 true;
                                                                           });
 
-                                                                          await driverStatus();
+                                                                          await driverService.driverStatus();
                                                                           setState(
                                                                               () {
                                                                             _isLoading =
@@ -3474,10 +3476,7 @@ class _MapsState extends State<Maps>
                                                                                                   onTap: () {
                                                                                                     makingPhoneCall(driverReq['userDetail']['data']['mobile']);
                                                                                                   },
-                                                                                                  child: Image.asset(
-                                                                                                    'assets/images/Call.png',
-                                                                                                    width: media.width * 0.06,
-                                                                                                  )),
+                                                                                                  child: const Icon(Icons.call)),
                                                                                               Text(
                                                                                                 languages[choosenLanguage]['text_call'],
                                                                                                 style: GoogleFonts.roboto(

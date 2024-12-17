@@ -1019,11 +1019,7 @@ class _TripDetailState extends State<TripDetail> {
                                               SizedBox(
                                                 width: 30.0,
                                                 height: 30.0,
-                                                child: Image.asset(
-                                                  "assets/images/Call.png",
-                                                  width: 30.0,
-                                                  height: 30.0,
-                                                ),
+                                                child: Icon(Icons.call)
                                               ),
                                               const SizedBox(
                                                 height: 10.0,
