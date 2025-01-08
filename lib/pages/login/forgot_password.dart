@@ -15,7 +15,6 @@ import '../vehicleInformations/vehicle_type.dart';
 class ForgotPassword extends StatefulWidget {
   ForgotPassword({key});
 
-
   @override
   State<ForgotPassword> createState() => _ForgotPasswordState();
 }
@@ -24,7 +23,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
   TextEditingController _emailController = TextEditingController();
   String? _errorMessage;
   bool _isLoading = false;
-  bool _isLoggingIn = false;// Track loading state
+  bool _isLoggingIn = false; // Track loading state
   final _formKey = GlobalKey<FormState>();
   final _emailRegex = RegExp(
       r"(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'"
@@ -34,6 +33,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
       r'[0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9]'
       r'[0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\'
       r'x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])');
+
   // Function to handle API call and set loading state
   Future<void> _handleAPICall() async {
     setState(() {
@@ -54,7 +54,8 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     return Scaffold(
       body: Stack(
         children: [
-          Container( // Ensure the Form takes full height
+          Container(
+            // Ensure the Form takes full height
             height: MediaQuery.of(context).size.height,
             child: Form(
               key: _formKey,
@@ -103,62 +104,68 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                         child: Button(
                           onTap: () async {
                             if (_formKey.currentState!.validate()) {
-                              FocusManager.instance.primaryFocus?.unfocus(); // Dismiss keyboard
+                              FocusManager.instance.primaryFocus
+                                  ?.unfocus(); // Dismiss keyboard
                               setState(() {
                                 _errorMessage = null;
                                 _isLoggingIn = true; // Show loading indicator
                               });
 
                               // Simulate API call
-                              bool resetPassword = await forgotPassword(email: _emailController.text);
+                              bool resetPassword = await forgotPassword(
+                                  email: _emailController.text);
 
                               setState(() {
                                 _isLoggingIn = false; // Hide loading indicator
                               });
-    if (resetPassword) {
-    // Show dialog after successful login
-    showDialog(
-    context: context,
-    builder: (BuildContext context) {
-    return AlertDialog(
-    title: Text("Check Your Email"),
-    content: Text("Please check your email for OTP verification."),
-    actions: [
-    TextButton(
-    onPressed: () {
-    Navigator.of(context).pop(); // Close the dialog
-    Navigator.push(
-    context,
-    MaterialPageRoute(
-    builder: (context) =>ResetPassword(
-    email: _emailController.text,
-    ),
-    ),
-    );
-    },
-    child: Text("OK"),
-    ),
-    ],
-    );
-    },
-    );
-    } else {
-    setState(() {
-    _errorMessage = 'Email or password is incorrect';
-    });
-    }
-    } else {
-    // Show error if validation fails
-    setState(() {
-    _errorMessage = _errorMessage;
-    });
-    }
+                              if (resetPassword) {
+                                // Show dialog after successful login
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: Text("Check Your Email"),
+                                      content: Text(
+                                          "Please check your email for OTP verification."),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.of(context)
+                                                .pop(); // Close the dialog
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    ResetPassword(
+                                                  email: _emailController.text,
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                          child: Text("OK"),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              } else {
+                                setState(() {
+                                  _errorMessage =
+                                      'Email or password is incorrect';
+                                });
+                              }
+                            } else {
+                              // Show error if validation fails
+                              setState(() {
+                                _errorMessage = _errorMessage;
+                              });
+                            }
 
-    // Hide loading indicator
-    setState(() {
-    _isLoggingIn = false;
-    });
-    },
+                            // Hide loading indicator
+                            setState(() {
+                              _isLoggingIn = false;
+                            });
+                          },
                           text: languages[choosenLanguage]['text_resetPasswor'],
                         ),
                       ),
@@ -171,7 +178,8 @@ class _ForgotPasswordState extends State<ForgotPassword> {
           ),
           // Display loader if API call is in progress
           if (_isLoggingIn)
-            Positioned.fill( // This ensures it covers the entire screen
+            Positioned.fill(
+              // This ensures it covers the entire screen
               child: Container(
                 color: Colors.black54,
                 child: const Center(
@@ -182,8 +190,8 @@ class _ForgotPasswordState extends State<ForgotPassword> {
         ],
       ),
     );
-
   }
+
   String? validateEmail(String? value) {
     if (value!.isEmpty) {
       return "Email is required";
@@ -192,6 +200,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     }
     return null;
   }
+
   String? validatePassword(String? value) {
     if (value!.isEmpty) {
       return "Otp is required";

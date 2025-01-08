@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:tagyourtaxi_driver/functions/functions.dart';
@@ -11,7 +12,14 @@ void main() async {
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   await Firebase.initializeApp();
   initMessaging();
-  // FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  Future<void>  _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  }
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  // Optional: Handle onMessage before runApp
+  FirebaseMessaging.onMessage.listen((event) {
+    // _handleIncomingMessage(event);
+  });
   // FirebaseMessaging.onBackgroundMessage((val){ return print(val.toString());});
   checkInternetConnection();
 

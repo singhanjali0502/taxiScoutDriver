@@ -8,6 +8,7 @@ import '../../styles/styles.dart';
 import '../../functions/functions.dart';
 import '../../translation/translation.dart';
 import '../../widgets/widgets.dart';
+import '../onTripPage/map_page.dart';
 import 'forgot_password.dart';
 import 'login_email_verify_screen.dart';
 
@@ -169,7 +170,7 @@ class _LoginState extends State<Login> {
 
                               // Step 2: Check validation and proceed with login
                               if (_errorMessage == null) {
-                                bool loginResult = await driverLogin(
+                                final loginResult = await driverLogin(
                                   email: _emailController.text,
                                   password: _passwordController.text,
                                 );
@@ -178,7 +179,7 @@ class _LoginState extends State<Login> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => Login_otp(email: _emailController.text),
+                                      builder: (context) => Maps(),
                                     ),
                                   );
                                   // Show dialog after successful login

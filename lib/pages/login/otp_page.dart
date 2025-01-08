@@ -71,7 +71,7 @@ class _OtpState extends State<Otp> {
           userDetails['approve'] == true) {
         Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (context) => const Maps()),
+            MaterialPageRoute(builder: (context) => Maps()),
             (route) => false);
       }
     } else {

@@ -36,7 +36,9 @@ import '../login/signupmethod.dart';
 import 'dart:developer' as dev;
 
 class Maps extends StatefulWidget {
-  const Maps({Key? key}) : super(key: key);
+   Maps({Key? key, this.companyId,  this.serviceId}) : super(key: key);
+  String? companyId;
+  String? serviceId;
 
   @override
   State<Maps> createState() => _MapsState();
@@ -749,7 +751,7 @@ class _MapsState extends State<Maps>
                     ? TextDirection.rtl
                     : TextDirection.ltr,
                 child: Scaffold(
-                  drawer: NavDrawer(),
+                  drawer: NavDrawer(companyId:widget.companyId,serviceId:widget.serviceId),
                   body: StreamBuilder(
                       stream: userDetails['role'] == 'owner'
                           ? FirebaseDatabase.instance
@@ -4169,67 +4171,67 @@ class _MapsState extends State<Maps>
                                                                       ),
                                                                     ))
                                                             : Container(),
-                                                        if (driverReq.isEmpty)
-                                                          Positioned(
-                                                            right: 10,
-                                                            top: 150,
-                                                            child: InkWell(
-                                                              onTap: () async {
-                                                                // if (contactus ==
-                                                                //     false) {
-                                                                //   setState(() {
-                                                                //     contactus =
-                                                                //         true;
-                                                                //   });
-                                                                // } else {
-                                                                //   setState(() {
-                                                                //     contactus =
-                                                                //         false;
-                                                                //   });
-                                                                // }
-                                                              },
-                                                              child: Container(
-                                                                height: media
-                                                                        .width *
-                                                                    0.1,
-                                                                width: media
-                                                                        .width *
-                                                                    0.1,
-                                                                decoration: BoxDecoration(
-                                                                    boxShadow: [
-                                                                      BoxShadow(
-                                                                          blurRadius:
-                                                                              2,
-                                                                          color: Colors.black.withOpacity(
-                                                                              0.2),
-                                                                          spreadRadius:
-                                                                              2)
-                                                                    ],
-                                                                    color: page,
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(media.width *
-                                                                            0.02)),
-                                                                alignment:
-                                                                    Alignment
-                                                                        .center,
-                                                                child:
-                                                                    Image.asset(
-                                                                  'assets/images/customercare.png',
-                                                                  fit: BoxFit
-                                                                      .contain,
-                                                                  width: media
-                                                                          .width *
-                                                                      0.06,
-                                                                ),
-                                                                // Icon(
-                                                                //     Icons
-                                                                //         .my_location_sharp,
-                                                                //     size: media
-                                                                //             .width *
-                                                                //         0.06),
-                                                              ),
-                                                            ),
-                                                          ),
+                                                        // if (driverReq.isEmpty)
+                                                        //   Positioned(
+                                                        //     right: 10,
+                                                        //     top: 150,
+                                                        //     child: InkWell(
+                                                        //       onTap: () async {
+                                                        //         // if (contactus ==
+                                                        //         //     false) {
+                                                        //         //   setState(() {
+                                                        //         //     contactus =
+                                                        //         //         true;
+                                                        //         //   });
+                                                        //         // } else {
+                                                        //         //   setState(() {
+                                                        //         //     contactus =
+                                                        //         //         false;
+                                                        //         //   });
+                                                        //         // }
+                                                        //       },
+                                                        //       child: Container(
+                                                        //         height: media
+                                                        //                 .width *
+                                                        //             0.1,
+                                                        //         width: media
+                                                        //                 .width *
+                                                        //             0.1,
+                                                        //         decoration: BoxDecoration(
+                                                        //             boxShadow: [
+                                                        //               BoxShadow(
+                                                        //                   blurRadius:
+                                                        //                       2,
+                                                        //                   color: Colors.black.withOpacity(
+                                                        //                       0.2),
+                                                        //                   spreadRadius:
+                                                        //                       2)
+                                                        //             ],
+                                                        //             color: page,
+                                                        //             borderRadius:
+                                                        //                 BorderRadius.circular(media.width *
+                                                        //                     0.02)),
+                                                        //         alignment:
+                                                        //             Alignment
+                                                        //                 .center,
+                                                        //         child:
+                                                        //             Image.asset(
+                                                        //           'assets/images/customercare.png',
+                                                        //           fit: BoxFit
+                                                        //               .contain,
+                                                        //           width: media
+                                                        //                   .width *
+                                                        //               0.06,
+                                                        //         ),
+                                                        //         // Icon(
+                                                        //         //     Icons
+                                                        //         //         .my_location_sharp,
+                                                        //         //     size: media
+                                                        //         //             .width *
+                                                        //         //         0.06),
+                                                        //       ),
+                                                        //     ),
+                                                        //   ),
                                                         (contactus == true)
                                                             ? Positioned(
                                                                 right: 10,

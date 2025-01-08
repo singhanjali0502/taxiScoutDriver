@@ -27,6 +27,9 @@ import '../NavigatorPages/subscriptions.dart';
 import '../../addons/trip_requests_page.dart';
 
 class NavDrawer extends StatefulWidget {
+  NavDrawer({Key? key, this.companyId,  this.serviceId}) : super(key: key);
+  String? companyId;
+  String? serviceId;
   @override
   _NavDrawerState createState() => _NavDrawerState();
 }
@@ -181,7 +184,7 @@ class _NavDrawerState extends State<NavDrawer> {
                   ),
 
                   //wallet
-                  userDetails['owner_id'] == null
+                  userDetails['owner_id'] != null
                       ? InkWell(
                           onTap: () {
                             Navigator.push(
@@ -456,7 +459,7 @@ class _NavDrawerState extends State<NavDrawer> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) =>
-                                        const ManageVehicles()));
+                                         ManageVehicles(companyId:widget.companyId,serviceId:widget.serviceId)));
                           },
                           child: Container(
                             padding: EdgeInsets.all(media.width * 0.025),
@@ -528,15 +531,15 @@ class _NavDrawerState extends State<NavDrawer> {
                       : Container(),
                   //update vehicles
 
-                  userDetails['owner_id'] == null &&
-                          userDetails['role'] == 'driver'
+                  userDetails['owner_id'] != null &&
+                      userDetails['role'] == 'driver'
                       ? InkWell(
                           onTap: () {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) =>
-                                        const UpdateVehicle()));
+                                         UpdateVehicle(companyId:widget.companyId,serviceId:widget.serviceId)));
                           },
                           child: Container(
                             padding: EdgeInsets.all(media.width * 0.025),
@@ -606,7 +609,7 @@ class _NavDrawerState extends State<NavDrawer> {
                         )
                       : Container(),
                   //earnings
-                  userDetails['owner_id'] == null
+                  userDetails['id'] == null
                       ? InkWell(
                           onTap: () {
                             Navigator.push(
@@ -800,7 +803,7 @@ class _NavDrawerState extends State<NavDrawer> {
                   ),
 
                   //bank details
-                  userDetails['owner_id'] == null
+                  userDetails['owner_id'] != null
                       ? InkWell(
                           onTap: () {
                             Navigator.push(

@@ -2,8 +2,6 @@
 // import 'package:tagyourtaxi_driver/functions/functions.dart';
 // import 'package:tagyourtaxi_driver/pages/loadingPage/loading.dart';
 // import 'package:tagyourtaxi_driver/pages/noInternet/nointernet.dart';
-// import 'package:tagyourtaxi_driver/pages/signupPage/signup_screen.dart';
-// import 'package:tagyourtaxi_driver/pages/vehicleInformations/vehicle_make.dart';
 // import 'package:tagyourtaxi_driver/styles/styles.dart';
 // import 'package:google_fonts/google_fonts.dart';
 // import 'package:tagyourtaxi_driver/translation/translation.dart';
@@ -12,15 +10,9 @@
 // import '../onTripPage/map_page.dart';
 //
 // class VehicleType extends StatefulWidget {
-//   VehicleType({Key? key,  this.serviceId, this.companyId, this.name, this.email, this.password, this.phNumber, this.confPassword, this.driverLicence}) : super(key: key);
+//   VehicleType({Key? key,  this.serviceId, this.companyId}) : super(key: key);
 //   String? serviceId;
 //   String? companyId;
-//   String? name;
-//   String? email;
-//   String? password;
-//   String? phNumber;
-//   String? confPassword;
-//   String? driverLicence;
 //   @override
 //   State<VehicleType> createState() => _VehicleTypeState();
 // }
@@ -43,7 +35,7 @@
 //     myVehicalType = '';
 //     myVehicleId = '';
 //     myVehicleIconFor = '';
-//     await getvehicleType(widget.companyId ?? "");
+//     await getvehicleType(widget.companyId ?? "",widget.serviceId ?? "");
 //     if (mounted) {
 //       setState(() {
 //         _loaded = true;
@@ -174,8 +166,6 @@
 //                     child: Button(
 //                         onTap: () {
 //                           updateDriverCar(
-//                             name: widget.name ?? "",
-//                             email: widget.email ?? "",
 //                             myVehicleId:myVehicleId,
 //                             serviceId: widget.serviceId ?? ""
 //                           );
@@ -183,7 +173,7 @@
 //                               context,
 //                               MaterialPageRoute(
 //                                   builder: (context) =>
-//                                   const Maps()));
+//                                    Maps()));
 //                         },
 //                         text: languages[choosenLanguage]['text_next']),
 //                   )

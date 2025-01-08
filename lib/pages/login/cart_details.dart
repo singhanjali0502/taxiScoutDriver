@@ -240,7 +240,7 @@ class _CarDetailscreenState extends State<CarDetailscreen> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => const Maps()));
+                                  builder: (context) =>  Maps()));
                         },
                         text: languages[choosenLanguage]['text_continue']),
                   )

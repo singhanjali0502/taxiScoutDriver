@@ -31,7 +31,7 @@ class _ReviewState extends State<Review> {
   navigate() {
     Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => const Maps()),
+        MaterialPageRoute(builder: (context) =>  Maps()),
         (route) => false);
   }
 

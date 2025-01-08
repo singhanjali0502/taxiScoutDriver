@@ -8,11 +8,7 @@ import '../../functions/functions.dart';
 import '../../modals/vehicle_type.dart';
 import '../../translation/translation.dart';
 import '../../widgets/widgets.dart';
-import '../NavigatorPages/vehicle_type_update.dart';
 import '../loadingPage/loading.dart';
-import '../login/get_started.dart';
-import '../onTripPage/map_page.dart';
-import '../vehicleInformations/vehicle_type.dart';
 import 'email_verify_screen.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -394,6 +390,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               serviceId: widget.serviceId,
                               myVehicleId: _selectedVehicleType!.id ?? "",
                             );
+                            print("bdhbd${_selectedVehicleType!.id}");
                             setState(() {
                               _isLoading = false; // Hide loading indicator
                             });
@@ -412,7 +409,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (context) => Login_otp(email: _emailController.text),
+                                              builder: (context) => Login_otp(email: _emailController.text,companyId:_companyIdController.text,serviceId:widget.serviceId),
                                             ),
                                           );
                                         },

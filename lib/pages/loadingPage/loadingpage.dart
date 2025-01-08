@@ -51,7 +51,7 @@ class _LoadingPageState extends State<LoadingPage> {
       //status approved
       Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const Maps()),
+          MaterialPageRoute(builder: (context) =>  Maps()),
           (route) => false);
     }
 

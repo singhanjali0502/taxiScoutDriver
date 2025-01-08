@@ -36,7 +36,7 @@ class _VehicleColorState extends State<VehicleColor> {
   navigateMap() {
     Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => const Maps()),
+        MaterialPageRoute(builder: (context) =>  Maps()),
         (route) => false);
   }
 
@@ -173,7 +173,7 @@ class _VehicleColorState extends State<VehicleColor> {
                                                       context,
                                                       MaterialPageRoute(
                                                           builder: (context) =>
-                                                              const ManageVehicles()),
+                                                               ManageVehicles()),
                                                     );
                                                   },
                                                   text: "OK")

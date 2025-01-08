@@ -11,8 +11,10 @@ import '../NavigatorPages/vehicle_type_update.dart';
 import '../onTripPage/map_page.dart';
 
 class Login_otp extends StatefulWidget {
-  Login_otp({key, required this.email,  });
+  Login_otp({key, required this.email,required this.companyId, required this.serviceId  });
   String? email;
+  String? companyId;
+  String? serviceId;
 
   @override
   State<Login_otp> createState() => _Login_otpState();
@@ -41,7 +43,7 @@ class _Login_otpState extends State<Login_otp> {
       _showLoader();
       String errorMessage = '';
       if (errorMessage.isEmpty) {
-        bool isOtpValid = await emailVerify(
+        final isOtpValid = await emailVerify(
           email: widget.email,
           otp: _otpController.text,
         );
@@ -49,7 +51,7 @@ class _Login_otpState extends State<Login_otp> {
         if (isOtpValid) {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => Maps()),
+            MaterialPageRoute(builder: (context) => Maps(companyId:widget.companyId,serviceId:widget.serviceId)),
           );
         } else {
           setState(() {

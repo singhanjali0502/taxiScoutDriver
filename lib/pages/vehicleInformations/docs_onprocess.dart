@@ -31,7 +31,7 @@ class _DocsProcessState extends State<DocsProcess> {
                 Future.delayed(const Duration(milliseconds: 0), () {
                   Navigator.pushAndRemoveUntil(
                       context,
-                      MaterialPageRoute(builder: (context) => const Maps()),
+                      MaterialPageRoute(builder: (context) =>  Maps()),
                       (route) => false);
                 });
               }

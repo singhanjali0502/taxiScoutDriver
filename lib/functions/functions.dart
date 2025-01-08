@@ -579,7 +579,6 @@ Future<String> registerDriver({
   String? myVehicleId,
   String? driverLicence,
   String? companyId,
-  String? recaptchaToken,
 }) async {
   bearerToken.clear();
   dynamic result;
@@ -614,7 +613,6 @@ Future<String> registerDriver({
       'driving_license':driverLicence ??"",
       'gender':'',
       'owner_id':companyId ?? "",
-      'recaptchaToken':recaptchaToken ?? "",
     });
 
     print("Request Fields: ${response.fields}"); // Debugging line
@@ -1603,7 +1601,6 @@ resetPassword({
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          "token":fcm,
           "email":email,
           "password":password,
           "password_confirmation":confirmPassword,

@@ -12,7 +12,9 @@ import 'package:tagyourtaxi_driver/widgets/widgets.dart';
 import '../vehicleInformations/service_area.dart';
 
 class ManageVehicles extends StatefulWidget {
-  const ManageVehicles({Key? key}) : super(key: key);
+   ManageVehicles({Key? key, this.companyId, this.serviceId}) : super(key: key);
+  String? companyId;
+  String? serviceId;
 
   @override
   State<ManageVehicles> createState() => _ManageVehiclesState();
@@ -580,7 +582,7 @@ class _ManageVehiclesState extends State<ManageVehicles> {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) =>  VehicleType()));
+                                    builder: (context) =>  VehicleType(companyId: widget.companyId,serviceId: widget.serviceId,)));
                           },
                           text: languages[choosenLanguage]['text_add_vehicle']),
                     ),
