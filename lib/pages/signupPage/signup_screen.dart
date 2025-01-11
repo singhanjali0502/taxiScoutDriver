@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../functions/functions.dart';
 import '../../modals/vehicle_type.dart';
 import '../../translation/translation.dart';
@@ -395,6 +396,9 @@ class _SignupScreenState extends State<SignupScreen> {
                               _isLoading = false; // Hide loading indicator
                             });
                             if (registrationResult == "true") {
+                              SharedPreferences prefs = await SharedPreferences.getInstance();
+                              await prefs.setString('serviceId', widget.serviceId);
+                              await prefs.setString('companyId', _companyIdController.text);
                               // Show dialog after successful registration
                               showDialog(
                                 context: context,

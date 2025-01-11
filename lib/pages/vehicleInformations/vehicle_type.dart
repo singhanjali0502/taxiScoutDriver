@@ -9,6 +9,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:tagyourtaxi_driver/translation/translation.dart';
 import 'package:tagyourtaxi_driver/widgets/widgets.dart';
 
+import '../../modals/vehicle_type.dart';
 import '../onTripPage/map_page.dart';
 
 class VehicleType extends StatefulWidget {
@@ -35,19 +36,25 @@ class _VehicleTypeState extends State<VehicleType> {
 
   @override
   void initState() {
-    getvehicle();
+    _fetchVehicleTypes();
     super.initState();
   }
 
 //get vehicle type
-  getvehicle() async {
-    myVehicalType = '';
-    myVehicleId = '';
-    myVehicleIconFor = '';
-    await getvehicleType(widget.serviceId ?? "",widget.companyId ?? "");
-    if (mounted) {
+  Future<void> _fetchVehicleTypes() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      VechicalType vechicalType = await getvehicleType(widget.serviceId ?? "", widget.companyId ?? "");
       setState(() {
-        _loaded = true;
+        _isLoading = false;
+      });
+    } catch (e) {
+      debugPrint('Error fetching vehicle types: $e');
+      setState(() {
+        _isLoading = false;
       });
     }
   }
@@ -177,15 +184,12 @@ class _VehicleTypeState extends State<VehicleType> {
                                   setState(() {
                                     _isLoading = true; // Show loading indicator
                                   });
-                                  var registrationResult = await registerDriver(
+                                  var registrationResult = await updateDriverCar(
                                     // image: imagefile,
                                       name: widget.name,
                                       email: widget.email,
-                                      password: widget.password,
                                       phNumber: widget.phNumber,
-                                      confPassword: widget.confPassword,
-                                      driverLicence: widget.driverLicence,
-                                      companyId: widget.companyId,
+                                      // companyId: widget.companyId,
                                       serviceId: widget.serviceId,
                                       myVehicleId:myVehicleId ?? ""
                                   );

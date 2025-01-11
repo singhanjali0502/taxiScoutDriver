@@ -4,6 +4,8 @@
 <dict>
 	<key>Allow contact access to select your contacts for adding in SOS</key>
 	<string>Program requires GPS to track cars and job orders</string>
+	<key>io.flutter.embedded_views_preview</key>
+    <true/>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>

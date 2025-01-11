@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tagyourtaxi_driver/functions/functions.dart';
 import 'package:tagyourtaxi_driver/pages/vehicleInformations/service_area.dart';
 import 'package:tagyourtaxi_driver/styles/styles.dart';
 import 'package:tagyourtaxi_driver/translation/translation.dart';
 import 'package:tagyourtaxi_driver/widgets/widgets.dart';
 
+import '../loadingPage/loading.dart';
 import '../vehicleInformations/vehicle_type.dart';
 
 class UpdateVehicle extends StatefulWidget {
@@ -18,6 +20,21 @@ class UpdateVehicle extends StatefulWidget {
 }
 
 class _UpdateVehicleState extends State<UpdateVehicle> {
+
+  Future<Map<String, String>> _getStoredData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? companyId = prefs.getString('companyId');
+    String? serviceId = prefs.getString('serviceId');
+
+    if (companyId == null || serviceId == null) {
+      throw Exception("Data not found");
+    }
+
+    return {
+      'companyId': companyId,
+      'serviceId': serviceId,
+    };
+  }
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
@@ -186,7 +203,31 @@ class _UpdateVehicleState extends State<UpdateVehicle> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) =>  VehicleType(companyId: widget.companyId,serviceId: widget.serviceId,)));
+                          builder: (context) => FutureBuilder(
+                            future: _getStoredData(),
+                            builder: (context, AsyncSnapshot<Map<String, String>> snapshot) {
+                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                // Show a loading indicator while data is being retrieved
+                                return const Center(child: Loading());
+                              }
+
+                              if (snapshot.hasError || !snapshot.hasData) {
+                                // Handle errors or if no data is found
+                                return const Center(child: Text("Failed to load data"));
+                              }
+
+                              // Retrieve data from the snapshot
+                              String companyId = snapshot.data!['companyId']!;
+                              String serviceId = snapshot.data!['serviceId']!;
+
+                              return VehicleType(
+                                companyId: companyId,
+                                serviceId: serviceId,
+                              );
+                            },
+                          ),
+                        )
+                    );
                   },
                   text: languages[choosenLanguage]['text_edit'])
             ],

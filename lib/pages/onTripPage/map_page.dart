@@ -132,6 +132,7 @@ class _MapsState extends State<Maps>
     polylineGot = false;
     getLocs();
     getonlineoffline();
+    getCurrentMessagesUser();
     super.initState();
   }
 
@@ -3501,9 +3502,9 @@ class _MapsState extends State<Maps>
                                                                                                             'assets/images/message-square.png',
                                                                                                             width: media.width * 0.06,
                                                                                                           ),
-                                                                                                          (chatList.where((element) => element['from_type'] == 1 && element['seen'] == 0).isNotEmpty)
+                                                                                                          (chatListUser.where((element) => element['from_type'] == 2 && element['seen'] == 0).isNotEmpty)
                                                                                                               ? Text(
-                                                                                                                  chatList.where((element) => element['from_type'] == 1 && element['seen'] == 0).length.toString(),
+                                                                                                            chatListUser.where((element) => element['from_type'] == 2 && element['seen'] == 0).length.toString(),
                                                                                                                   style: GoogleFonts.roboto(fontSize: media.width * twelve, color: const Color(0xffFF0000)),
                                                                                                                 )
                                                                                                               : Container()
@@ -4035,9 +4036,9 @@ class _MapsState extends State<Maps>
                                                                                                             'assets/images/message-square.png',
                                                                                                             width: media.width * 0.06,
                                                                                                           ),
-                                                                                                          (chatList.where((element) => element['from_type'] == 1 && element['seen'] == 0).isNotEmpty)
+                                                                                                          (chatListUser.where((element) => element['from_type'] == 2 && element['seen'] == 0).isNotEmpty)
                                                                                                               ? Text(
-                                                                                                                  chatList.where((element) => element['from_type'] == 1 && element['seen'] == 0).length.toString(),
+                                                                                                            chatListUser.where((element) => element['from_type'] == 2 && element['seen'] == 0).length.toString(),
                                                                                                                   style: GoogleFonts.roboto(fontSize: media.width * twelve, color: const Color(0xffFF0000)),
                                                                                                                 )
                                                                                                               : Container()
