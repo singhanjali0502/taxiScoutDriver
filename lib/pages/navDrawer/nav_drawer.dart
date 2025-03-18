@@ -16,15 +16,14 @@ import 'package:tagyourtaxi_driver/pages/NavigatorPages/notification.dart';
 import 'package:tagyourtaxi_driver/pages/NavigatorPages/selectlanguage.dart';
 import 'package:tagyourtaxi_driver/pages/NavigatorPages/sos.dart';
 import 'package:tagyourtaxi_driver/pages/NavigatorPages/updatevehicle.dart';
-import 'package:tagyourtaxi_driver/pages/NavigatorPages/walletpage.dart';
 import 'package:tagyourtaxi_driver/pages/chatPage/chat_page.dart';
 import 'package:tagyourtaxi_driver/pages/onTripPage/map_page.dart';
-import 'package:tagyourtaxi_driver/pages/vehicleInformations/upload_docs.dart';
 import 'package:tagyourtaxi_driver/styles/styles.dart';
 import 'package:tagyourtaxi_driver/translation/translation.dart';
 
 import '../NavigatorPages/subscriptions.dart';
 import '../../addons/trip_requests_page.dart';
+import '../vehicleInformations/vehicle_type.dart';
 
 class NavDrawer extends StatefulWidget {
   NavDrawer({Key? key, this.companyId,  this.serviceId}) : super(key: key);
@@ -184,43 +183,43 @@ class _NavDrawerState extends State<NavDrawer> {
                   ),
 
                   //wallet
-                  userDetails['owner_id'] != null
-                      ? InkWell(
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const WalletPage()));
-                          },
-                          child: Container(
-                            padding: EdgeInsets.all(media.width * 0.025),
-                            child: Row(
-                              children: [
-                                Image.asset(
-                                  'assets/images/walletImage.png',
-                                  fit: BoxFit.contain,
-                                  width: media.width * 0.075,
-                                ),
-                                SizedBox(
-                                  width: media.width * 0.025,
-                                ),
-                                SizedBox(
-                                  width: media.width * 0.55,
-                                  child: Text(
-                                    languages[choosenLanguage]
-                                        ['text_enable_wallet'],
-                                    overflow: TextOverflow.ellipsis,
-                                    style: GoogleFonts.roboto(
-                                        fontSize: media.width * sixteen,
-                                        color: textColor),
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
-                        )
-                      : Container(),
+                  // userDetails['owner_id'] != null
+                  //     ? InkWell(
+                  //         onTap: () {
+                  //           Navigator.push(
+                  //               context,
+                  //               MaterialPageRoute(
+                  //                   builder: (context) =>
+                  //                       const WalletPage()));
+                  //         },
+                  //         child: Container(
+                  //           padding: EdgeInsets.all(media.width * 0.025),
+                  //           child: Row(
+                  //             children: [
+                  //               Image.asset(
+                  //                 'assets/images/walletImage.png',
+                  //                 fit: BoxFit.contain,
+                  //                 width: media.width * 0.075,
+                  //               ),
+                  //               SizedBox(
+                  //                 width: media.width * 0.025,
+                  //               ),
+                  //               SizedBox(
+                  //                 width: media.width * 0.55,
+                  //                 child: Text(
+                  //                   languages[choosenLanguage]
+                  //                       ['text_enable_wallet'],
+                  //                   overflow: TextOverflow.ellipsis,
+                  //                   style: GoogleFonts.roboto(
+                  //                       fontSize: media.width * sixteen,
+                  //                       color: textColor),
+                  //                 ),
+                  //               )
+                  //             ],
+                  //           ),
+                  //         ),
+                  //       )
+                  //     : Container(),
 
                   // InkWell(
                   //   onTap: () {
@@ -539,7 +538,7 @@ class _NavDrawerState extends State<NavDrawer> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) =>
-                                         UpdateVehicle(companyId:widget.companyId,serviceId:widget.serviceId)));
+                                        VehicleType(companyId:widget.companyId,serviceId:widget.serviceId)));
                           },
                           child: Container(
                             padding: EdgeInsets.all(media.width * 0.025),
@@ -570,122 +569,122 @@ class _NavDrawerState extends State<NavDrawer> {
                         )
                       : Container(),
 // //fleet details
-                  userDetails['owner_id'] != null &&
-                          userDetails['role'] == 'driver'
-                      ? InkWell(
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const FleetDetails()));
-                          },
-                          child: Container(
-                            padding: EdgeInsets.all(media.width * 0.025),
-                            child: Row(
-                              children: [
-                                Image.asset(
-                                  'assets/images/updateVehicleInfo.png',
-                                  fit: BoxFit.contain,
-                                  width: media.width * 0.075,
-                                ),
-                                SizedBox(
-                                  width: media.width * 0.025,
-                                ),
-                                SizedBox(
-                                  width: media.width * 0.55,
-                                  child: Text(
-                                    languages[choosenLanguage]
-                                        ['text_fleet_details'],
-                                    overflow: TextOverflow.ellipsis,
-                                    style: GoogleFonts.roboto(
-                                        fontSize: media.width * sixteen,
-                                        color: textColor),
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
-                        )
-                      : Container(),
+//                   userDetails['owner_id'] != null &&
+//                           userDetails['role'] == 'driver'
+//                       ? InkWell(
+//                           onTap: () {
+//                             Navigator.push(
+//                                 context,
+//                                 MaterialPageRoute(
+//                                     builder: (context) =>
+//                                         const FleetDetails()));
+//                           },
+//                           child: Container(
+//                             padding: EdgeInsets.all(media.width * 0.025),
+//                             child: Row(
+//                               children: [
+//                                 Image.asset(
+//                                   'assets/images/updateVehicleInfo.png',
+//                                   fit: BoxFit.contain,
+//                                   width: media.width * 0.075,
+//                                 ),
+//                                 SizedBox(
+//                                   width: media.width * 0.025,
+//                                 ),
+//                                 SizedBox(
+//                                   width: media.width * 0.55,
+//                                   child: Text(
+//                                     languages[choosenLanguage]
+//                                         ['text_fleet_details'],
+//                                     overflow: TextOverflow.ellipsis,
+//                                     style: GoogleFonts.roboto(
+//                                         fontSize: media.width * sixteen,
+//                                         color: textColor),
+//                                   ),
+//                                 )
+//                               ],
+//                             ),
+//                           ),
+//                         )
+//                       : Container(),
                   //earnings
-                  userDetails['id'] == null
-                      ? InkWell(
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const DriverEarnings()));
-                          },
-                          child: Container(
-                            padding: EdgeInsets.all(media.width * 0.025),
-                            child: Row(
-                              children: [
-                                Image.asset(
-                                  'assets/images/Earnings.png',
-                                  fit: BoxFit.contain,
-                                  width: media.width * 0.075,
-                                ),
-                                SizedBox(
-                                  width: media.width * 0.025,
-                                ),
-                                SizedBox(
-                                  width: media.width * 0.55,
-                                  child: Text(
-                                    languages[choosenLanguage]
-                                        ['text_earnings'],
-                                    overflow: TextOverflow.ellipsis,
-                                    style: GoogleFonts.roboto(
-                                        fontSize: media.width * sixteen,
-                                        color: textColor),
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
-                        )
-                      : Container(),
+                  // userDetails['id'] == null
+                  //     ? InkWell(
+                  //         onTap: () {
+                  //           Navigator.push(
+                  //               context,
+                  //               MaterialPageRoute(
+                  //                   builder: (context) =>
+                  //                       const DriverEarnings()));
+                  //         },
+                  //         child: Container(
+                  //           padding: EdgeInsets.all(media.width * 0.025),
+                  //           child: Row(
+                  //             children: [
+                  //               Image.asset(
+                  //                 'assets/images/Earnings.png',
+                  //                 fit: BoxFit.contain,
+                  //                 width: media.width * 0.075,
+                  //               ),
+                  //               SizedBox(
+                  //                 width: media.width * 0.025,
+                  //               ),
+                  //               SizedBox(
+                  //                 width: media.width * 0.55,
+                  //                 child: Text(
+                  //                   languages[choosenLanguage]
+                  //                       ['text_earnings'],
+                  //                   overflow: TextOverflow.ellipsis,
+                  //                   style: GoogleFonts.roboto(
+                  //                       fontSize: media.width * sixteen,
+                  //                       color: textColor),
+                  //                 ),
+                  //               )
+                  //             ],
+                  //           ),
+                  //         ),
+                  //       )
+                  //     : Container(),
 
                   //documents
-                  InkWell(
-                    onTap: () async {
-                      var nav = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => Docs(
-                                    fromPage: '2',
-                                  )));
-                      if (nav) {
-                        setState(() {});
-                      }
-                    },
-                    child: Container(
-                      padding: EdgeInsets.all(media.width * 0.025),
-                      child: Row(
-                        children: [
-                          Image.asset(
-                            'assets/images/manageDocuments.png',
-                            fit: BoxFit.contain,
-                            width: media.width * 0.075,
-                          ),
-                          SizedBox(
-                            width: media.width * 0.025,
-                          ),
-                          SizedBox(
-                            width: media.width * 0.55,
-                            child: Text(
-                              languages[choosenLanguage]['text_manage_docs'],
-                              overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.roboto(
-                                  fontSize: media.width * sixteen,
-                                  color: textColor),
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
+                  // InkWell(
+                  //   onTap: () async {
+                  //     var nav = await Navigator.push(
+                  //         context,
+                  //         MaterialPageRoute(
+                  //             builder: (context) => Docs(
+                  //                   fromPage: '2',
+                  //                 )));
+                  //     if (nav) {
+                  //       setState(() {});
+                  //     }
+                  //   },
+                  //   child: Container(
+                  //     padding: EdgeInsets.all(media.width * 0.025),
+                  //     child: Row(
+                  //       children: [
+                  //         Image.asset(
+                  //           'assets/images/manageDocuments.png',
+                  //           fit: BoxFit.contain,
+                  //           width: media.width * 0.075,
+                  //         ),
+                  //         SizedBox(
+                  //           width: media.width * 0.025,
+                  //         ),
+                  //         SizedBox(
+                  //           width: media.width * 0.55,
+                  //           child: Text(
+                  //             languages[choosenLanguage]['text_manage_docs'],
+                  //             overflow: TextOverflow.ellipsis,
+                  //             style: GoogleFonts.roboto(
+                  //                 fontSize: media.width * sixteen,
+                  //                 color: textColor),
+                  //           ),
+                  //         )
+                  //       ],
+                  //     ),
+                  //   ),
+                  // ),
 
                   //faq
                   // InkWell(
@@ -803,40 +802,40 @@ class _NavDrawerState extends State<NavDrawer> {
                   ),
 
                   //bank details
-                  userDetails['owner_id'] != null
-                      ? InkWell(
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const BankDetails()));
-                          },
-                          child: Container(
-                            padding: EdgeInsets.all(media.width * 0.025),
-                            child: Row(
-                              children: [
-                                Icon(Icons.account_balance,
-                                    size: media.width * 0.075),
-                                SizedBox(
-                                  width: media.width * 0.025,
-                                ),
-                                SizedBox(
-                                  width: media.width * 0.55,
-                                  child: Text(
-                                    languages[choosenLanguage]
-                                        ['text_updateBank'],
-                                    overflow: TextOverflow.ellipsis,
-                                    style: GoogleFonts.roboto(
-                                        fontSize: media.width * sixteen,
-                                        color: textColor),
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
-                        )
-                      : Container(),
+                  // userDetails['owner_id'] != null
+                  //     ? InkWell(
+                  //         onTap: () {
+                  //           Navigator.push(
+                  //               context,
+                  //               MaterialPageRoute(
+                  //                   builder: (context) =>
+                  //                       const BankDetails()));
+                  //         },
+                  //         child: Container(
+                  //           padding: EdgeInsets.all(media.width * 0.025),
+                  //           child: Row(
+                  //             children: [
+                  //               Icon(Icons.account_balance,
+                  //                   size: media.width * 0.075),
+                  //               SizedBox(
+                  //                 width: media.width * 0.025,
+                  //               ),
+                  //               SizedBox(
+                  //                 width: media.width * 0.55,
+                  //                 child: Text(
+                  //                   languages[choosenLanguage]
+                  //                       ['text_updateBank'],
+                  //                   overflow: TextOverflow.ellipsis,
+                  //                   style: GoogleFonts.roboto(
+                  //                       fontSize: media.width * sixteen,
+                  //                       color: textColor),
+                  //                 ),
+                  //               )
+                  //             ],
+                  //           ),
+                  //         ),
+                  //       )
+                  //     : Container(),
                   //make complaints
                   InkWell(
                     onTap: () async {

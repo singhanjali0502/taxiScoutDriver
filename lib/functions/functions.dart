@@ -35,6 +35,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:tagyourtaxi_driver/pages/vehicleInformations/vehicle_year.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../main.dart';
 import '../modals/vehicle_type.dart';
 import '../pages/NavigatorPages/fleetdocuments.dart';
 import '../pages/NavigatorPages/subscriptions.dart';
@@ -42,6 +43,7 @@ import '../pages/login/ownerregister.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import '../widgets/local_notification.dart';
 import 'geohash.dart';
 import 'dart:developer' as dev;
 
@@ -73,6 +75,21 @@ String url = 'https://admin.taxiscout24.com/';
 String mapkey = 'AIzaSyAL0hd3a2l1k1uLSAxQNN511PWkguNxzE4';
 String mapStyle = '';
 DriverService driverService = DriverService();
+
+Future<void> saveToken(String token) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.setString('BearerToken', token); // ✅ Save token persistently
+
+  // ✅ Verify token is saved
+  String? storedToken = prefs.getString('BearerToken');
+  if (storedToken == null || storedToken.isEmpty) {
+    print('❌ Token saving failed!');
+  } else {
+    print('✅ Token saved successfully: $storedToken');
+  }
+}
+
+
 getDetailsOfDevice() async {
   var connectivityResult = await (Connectivity().checkConnectivity());
   if (connectivityResult == ConnectivityResult.none) {
@@ -136,10 +153,12 @@ validateEmail(email) async {
 //lang
 getlangid() async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http
         .post(Uri.parse('${url}api/v1/user/update-my-lang'), headers: {
-      'Authorization': 'Bearer ${bearerToken[0].token}',
+      'Authorization': 'Bearer $token',
     }, body: {
       'lang': choosenLanguage,
     });
@@ -236,11 +255,13 @@ List languagesCode = [
 
 uploadDocs() async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = http.MultipartRequest(
         'POST', Uri.parse('${url}api/v1/driver/upload/documents'));
     response.headers
-        .addAll({'Authorization': 'Bearer ${bearerToken[0].token}'});
+        .addAll({'Authorization': 'Bearer $token'});
     response.files
         .add(await http.MultipartFile.fromPath('document', imageFile));
     if (documentsNeeded[choosenDocs]['has_expiry_date'] == true) {
@@ -283,11 +304,13 @@ uploadDocs() async {
 
 uploadFleetDocs(fleetid) async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = http.MultipartRequest(
         'POST', Uri.parse('${url}api/v1/driver/upload/documents'));
     response.headers
-        .addAll({'Authorization': 'Bearer ${bearerToken[0].token}'});
+        .addAll({'Authorization': 'Bearer $token}'});
 
     response.files
         .add(await http.MultipartFile.fromPath('document', fleetimageFile));
@@ -400,7 +423,6 @@ String lastNotification = '';
 
 getLocalData() async {
   dynamic result;
-  bearerToken.clear;
   var connectivityResult = await (Connectivity().checkConnectivity());
   if (connectivityResult == ConnectivityResult.none) {
     internet = false;
@@ -569,6 +591,43 @@ Future<VechicalType> getvehicleType(String serviceId, String companyId) async {
   }
 }
 
+
+
+
+Future<VechicalType?> fetchDriverTypes() async {
+  final String url = 'https://admin.taxiscout24.com/api/v1/driver/types'; // ✅ Define URL
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
+  try {
+    final response = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json', // ✅ Added content type
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> jsonData = json.decode(response.body);
+
+      if (jsonData['success'] == true) {
+        print('Response Data: ${jsonData['driver_vehicle']}');
+        return VechicalType.fromJson(jsonData); // ✅ Extract only `driver_vehicle`
+      } else {
+        print('Error: Unexpected API response');
+        return null;
+      }
+    } else {
+      print('Failed: ${response.statusCode} - ${response.body}');
+      throw Exception('Failed to load vehicle types');
+    }
+  } catch (e) {
+    print('Error fetching vehicle types: $e');
+    return null;
+  }
+}
+
+
 Future<String> registerDriver({
   String? name,
   String? email,
@@ -580,7 +639,6 @@ Future<String> registerDriver({
   String? driverLicence,
   String? companyId,
 }) async {
-  bearerToken.clear();
   dynamic result;
   try {
     var token = await FirebaseMessaging.instance.getToken();
@@ -668,64 +726,60 @@ Future<String> updateDriverCar({
   String? email,
   String? profile,
   String? phNumber,
-  String? serviceId,
+  String? country,
   String? myVehicleId,
+  String? serviceId,
 }) async {
-  bearerToken.clear();
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
-    var token = await FirebaseMessaging.instance.getToken();
-    var fcm = token.toString();
+    var fcm = await FirebaseMessaging.instance.getToken();
+
     final response = http.MultipartRequest(
-        'POST', Uri.parse('${url}api/v1/user/profile'));
-    response.headers.addAll({'Content-Type': 'application/json'});
+      'POST', Uri.parse('${url}api/v1/user/profile'),
+    );
+
+    response.headers.addAll({
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token', // ✅ Now safe
+    });
+
     if (proImageFile1 != null) {
       response.files.add(
-          await http.MultipartFile.fromPath('profile_picture', proImageFile1));
+        await http.MultipartFile.fromPath('profile_picture', proImageFile1),
+      );
     }
+
     response.fields.addAll({
       "name": name ?? "",
       "email": email ?? "",
-      "device_token": fcm,
-      "vehicle_types": '["${myVehicleId}"]',
-      "login_by": (platform == TargetPlatform.android) ? 'android' : 'ios', // Make sure this is the correct format
+      "country": "+91",
+      "mobile": phNumber ?? "",
+      "vehicle_type": myVehicleId ?? "",
+      // "service_location_id": serviceId ?? "",
+      // "login_by": (platform == TargetPlatform.android) ? 'android' : 'ios',
     });
 
-    print("Request Fields: ${response.fields}"); // Debugging line
+    print("✅ Request Fields: ${response.fields}");
 
     var request = await response.send();
     var respon = await http.Response.fromStream(request);
 
     if (request.statusCode == 200) {
       var jsonVal = jsonDecode(respon.body);
-      if (ischeckownerordriver == 'driver') {
-        platforms.invokeMethod('login');
-      }
-      bearerToken.add(BearerClass(
-          type: jsonVal['token_type'].toString(),
-          token: jsonVal['access_token'].toString()));
-      pref.setString('Bearer', bearerToken[0].token);
+      print('✅ Profile Updated Successfully');
+
       await getUserDetails();
-      if (platform == TargetPlatform.android && package != null) {
-        await FirebaseDatabase.instance
-            .ref()
-            .update({'driver_package_name': package.packageName.toString()});
-      } else if (package != null) {
-        await FirebaseDatabase.instance
-            .ref()
-            .update({'driver_bundle_id': package.packageName.toString()});
-      }
+
       result = 'true';
     } else if (respon.statusCode == 422) {
-      debugPrint(respon.body);
       var error = jsonDecode(respon.body)['errors'];
       result = error[error.keys.toList()[0]]
           .toString()
           .replaceAll('[', '')
-          .replaceAll(']', '')
-          .toString();
+          .replaceAll(']', '');
     } else {
-      debugPrint(respon.body);
       result = jsonDecode(respon.body)['message'];
     }
   } catch (e) {
@@ -738,6 +792,7 @@ Future<String> updateDriverCar({
   }
   return result;
 }
+
 
 // registerDriver({ String? name,
 //   String? email,
@@ -829,7 +884,6 @@ emailVerify({
   String? email,
   String? otp,
 }) async {
-  bearerToken.clear();
   dynamic result;
   try {
     var token = await FirebaseMessaging.instance.getToken();
@@ -873,7 +927,6 @@ emailVerify({
 resendOtpRegister({
   String? email,
 }) async {
-  bearerToken.clear();
   dynamic result;
   try {
     var token = await FirebaseMessaging.instance.getToken();
@@ -917,7 +970,6 @@ loginemailVerify({
   String? email,
   String? otp,
 }) async {
-  bearerToken.clear();
   dynamic result;
   try {
     var response = await http.post(Uri.parse('${url}api/v1/driver/login/validate-otp'),
@@ -958,7 +1010,6 @@ loginemailVerify({
 resendOtpLogin({
   String? email,
 }) async {
-  bearerToken.clear();
   dynamic result;
   try {
     var token = await FirebaseMessaging.instance.getToken();
@@ -1000,11 +1051,13 @@ resendOtpLogin({
 }
 addDriver() async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     final response = await http.post(Uri.parse('${url}api/v1/owner/add-fleet'),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${bearerToken[0].token}',
+          'Authorization': 'Bearer $token',
         },
         body: jsonEncode({
           "vehicle_type": myVehicleId,
@@ -1040,7 +1093,6 @@ addDriver() async {
 //register owner
 
 registerOwner() async {
-  bearerToken.clear();
   dynamic result;
   try {
     var token = await FirebaseMessaging.instance.getToken();
@@ -1114,13 +1166,15 @@ List fleetdriverList = [];
 fleetDriverDetails({fleetid, bool? isassigndriver}) async {
   dynamic result;
   fleetdriverList.clear();
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.get(
       Uri.parse(isassigndriver == true
           ? '${url}api/v1/owner/list-drivers?fleet_id=$fleetid'
           : '${url}api/v1/owner/list-drivers'),
       headers: {
-        'Authorization': 'Bearer ${bearerToken[0].token}',
+        'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
       },
     );
@@ -1144,11 +1198,13 @@ fleetDriverDetails({fleetid, bool? isassigndriver}) async {
 
 assignDriver(driverid, fleet) async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     final response =
         await http.post(Uri.parse('${url}api/v1/owner/assign-driver/$fleet'),
             headers: {
-              'Authorization': 'Bearer ${bearerToken[0].token}',
+              'Authorization': 'Bearer $token',
               'Content-Type': 'application/json'
             },
             body: jsonEncode({'driver_id': driverid}));
@@ -1188,11 +1244,12 @@ Map<String, dynamic> notificationHistoryPage = {};
 
 getnotificationHistory() async {
   dynamic result;
-
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.get(
         Uri.parse('${url}api/v1/notifications/get-notification'),
-        headers: {'Authorization': 'Bearer ${bearerToken[0].token}'});
+        headers: {'Authorization': 'Bearer $token'});
     if (response.statusCode == 200) {
       // // printWrapped(response.body);
       notificationHistory = jsonDecode(response.body)['data'];
@@ -1217,11 +1274,12 @@ getnotificationHistory() async {
 
 getNotificationPages(id) async {
   dynamic result;
-
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.get(
         Uri.parse('${url}api/v1/notifications/get-notification?$id'),
-        headers: {'Authorization': 'Bearer ${bearerToken[0].token}'});
+        headers: {'Authorization': 'Bearer $token'});
     if (response.statusCode == 200) {
       List list = jsonDecode(response.body)['data'];
       // ignore: avoid_function_literals_in_foreach_calls
@@ -1250,11 +1308,12 @@ getNotificationPages(id) async {
 //delete notification
 deleteNotification(id) async {
   dynamic result;
-
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.get(
         Uri.parse('${url}api/v1/notifications/delete-notification/$id'),
-        headers: {'Authorization': 'Bearer ${bearerToken[0].token}'});
+        headers: {'Authorization': 'Bearer $token'});
     if (response.statusCode == 200) {
       // notificationHistory = jsonDecode(response.body)['data'];
       // notificationHistoryPage = jsonDecode(response.body)['meta'];
@@ -1278,12 +1337,14 @@ deleteNotification(id) async {
 
 sharewalletfun({mobile, role, amount}) async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.post(
         Uri.parse('${url}api/v1/payment/wallet/transfer-money-from-wallet'),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${bearerToken[0].token}',
+          'Authorization': 'Bearer $token',
         },
         body: jsonEncode({'mobile': mobile, 'role': role, 'amount': amount}));
     if (response.statusCode == 200) {
@@ -1308,11 +1369,13 @@ sharewalletfun({mobile, role, amount}) async {
 
 fleetDriver(Map<String, dynamic> map) async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     final response =
         await http.post(Uri.parse('${url}api/v1/owner/add-drivers'),
             headers: {
-              'Authorization': 'Bearer ${bearerToken[0].token}',
+              'Authorization': 'Bearer $token',
               'Content-Type': 'application/json'
             },
             body: jsonEncode(map));
@@ -1350,11 +1413,13 @@ fleetDriver(Map<String, dynamic> map) async {
 
 updateReferral() async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response =
         await http.post(Uri.parse('${url}api/v1/update/driver/referral'),
             headers: {
-              'Authorization': 'Bearer ${bearerToken[0].token}',
+              'Authorization': 'Bearer $token',
               'Content-Type': 'application/json'
             },
             body: jsonEncode({"refferal_code": referralCode}));
@@ -1385,10 +1450,12 @@ bool enableDocumentSubmit = false;
 
 getDocumentsNeeded() async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     final response = await http
         .get(Uri.parse('${url}api/v1/driver/documents/needed'), headers: {
-      'Authorization': 'Bearer ${bearerToken[0].token}',
+      'Authorization': 'Bearer $token',
       'Content-Type': 'application/json'
     });
     if (response.statusCode == 200) {
@@ -1414,12 +1481,14 @@ bool enablefleetDocumentSubmit = false;
 
 getFleetDocumentsNeeded(fleetid) async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     final response = await http.get(
         Uri.parse(
             '${url}api/v1/owner/fleet/documents/needed?fleet_id=$fleetid'),
         headers: {
-          'Authorization': 'Bearer ${bearerToken[0].token}',
+          'Authorization': 'Bearer $token',
           'Content-Type': 'application/json'
         });
     if (response.statusCode == 200) {
@@ -1492,59 +1561,37 @@ verifyUser(String number) async {
 }
 
 //driver login
-driverLogin({String? email, String? password}) async {
-  bearerToken.clear();
-  dynamic result;
+
+
+Future<bool> driverLogin({String? email, String? password}) async {
   try {
-    var response = await http.post(Uri.parse('${url}api/v1/driver/login'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          "email":email,
-          "password":password,
-          // "mobile": phnumber,
-          // 'device_token': fcm,
-          // "login_by": (platform == TargetPlatform.android) ? 'android' : 'ios',
-          // "role": ischeckownerordriver,
-        }));
-    debugPrint('ashds fcm $debugPrint');
+    var response = await http.post(
+      Uri.parse('${url}api/v1/driver/login'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({"email": email, "password": password}),
+    );
+
     if (response.statusCode == 200) {
       var jsonVal = jsonDecode(response.body);
-      if (ischeckownerordriver == 'driver') {
-        platforms.invokeMethod('login');
-      }
-      bearerToken.add(BearerClass(
-          type: jsonVal['token_type'].toString(),
-          token: jsonVal['access_token'].toString()));
-      result = true;
-      pref.setString('Bearer', bearerToken[0].token);
-      if (platform == TargetPlatform.android && package != null) {
-        await FirebaseDatabase.instance
-            .ref()
-            .update({'driver_package_name': package.packageName.toString()});
-      } else if (package != null) {
-        await FirebaseDatabase.instance
-            .ref()
-            .update({'driver_bundle_id': package.packageName.toString()});
-      }
+      String token = jsonVal['access_token'].toString();
+
+      await saveToken(token); // ✅ Save token globally
+
+      return true;
     } else {
-      debugPrint(response.body);
-      result = false;
+      print('❌ Login Failed: ${response.body}');
+      return false;
     }
   } catch (e) {
-    if (e is SocketException) {
-      internet = false;
-      result = 'no internet';
-    }
+    print('❌ Error during login: $e');
+    return false;
   }
-  return result;
 }
+
 
 forgotPassword({
   String? email,
 }) async {
-  bearerToken.clear();
   dynamic result;
   try {
     var token = await FirebaseMessaging.instance.getToken();
@@ -1591,7 +1638,6 @@ resetPassword({
   String? confirmPassword,
   String? otp,
 }) async {
-  bearerToken.clear();
   dynamic result;
   try {
     var token = await FirebaseMessaging.instance.getToken();
@@ -1650,111 +1696,79 @@ void startTimer() {
   });
 }
 
-//user current state
-getUserDetails() async {
-  dynamic result;
+
+
+Future<bool> getUserDetails() async {
+  dynamic result = false;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
 
   try {
     var response = await http.get(
       Uri.parse('${url}api/v1/user'),
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ${bearerToken[0].token}'
+        'Authorization': 'Bearer $token',
       },
     );
+
     if (response.statusCode == 200) {
-      // printWrapped(response.body);
       userDetails = jsonDecode(response.body)['data'];
-      if (userDetails['notifications_count'] != 0 &&
-          userDetails['notifications_count'] != null) {
+
+      if (userDetails['notifications_count'] != null &&
+          userDetails['notifications_count'] != 0) {
         valueNotifierNotification.incrementNotifier();
       }
-      var transportType = userDetails['transport_type'];
-      if (transportType != null) {
-        // userDetails['transport_type'] is not null, so assign it to transportType
-        transportType = transportType.toString(); // Optional if 'transport_type' can be other types than String
-      } else {
-        transportType = "";
-      }
+
       if (userDetails['role'] != 'owner') {
         if (userDetails['sos']['data'] != null) {
           sosData = userDetails['sos']['data'];
         }
 
-        if (userDetails['onTripRequest'] != null) {
-          driverReq = userDetails['onTripRequest']['data'];
-
-          if (payby == 0 && driverReq['is_paid'] == 1) {
-            payby = 1;
-            audioPlayer.play(audio);
-          }
-
-          if (driverReq['is_driver_arrived'] == 1 &&
-              driverReq['is_trip_start'] == 0 &&
-              arrivedTimer == null &&
-              driverReq['is_rental'] != true) {
-            waitingBeforeStart();
-          }
-          if (driverReq['is_completed'] == 0 &&
-              driverReq['is_trip_start'] == 1 &&
-              rideTimer == null &&
-              driverReq['is_rental'] != true) {
-            waitingAfterStart();
-          }
-
-          if (driverReq['accepted_at'] != null) {
-            getCurrentMessagesCompany();
-          }
-          tripStops =
-              userDetails['onTripRequest']['data']['requestStops']['data'];
-          valueNotifierHome.incrementNotifier();
-        } else if (userDetails['metaRequest'] != null) {
-          driverReject = false;
-          userReject = false;
+        if (userDetails['metaRequest'] != null) {
           driverReq = userDetails['metaRequest']['data'];
-          tripStops =
-              userDetails['metaRequest']['data']['requestStops']['data'];
-
-          if (duration == 0 || duration == 0.0) {
-            if (isBackground == true && platform == TargetPlatform.android) {
-              platforms.invokeMethod('awakeapp');
-            }
-            duration = double.parse(
-                userDetails['trip_accept_reject_duration_for_driver']
-                    .toString());
-            sound();
-          }
-
+          tripStops = userDetails['metaRequest']['data']['requestStops']['data'];
           valueNotifierHome.incrementNotifier();
+
+
         } else {
           duration = 0;
-          if (driverReq.isNotEmpty) {
-            audioPlayer.play(audio);
-          }
           chatList.clear();
           driverReq = {};
           valueNotifierHome.incrementNotifier();
         }
 
-        if (userDetails['active'] == false) {
-          isActive = 'false';
-        } else {
-          isActive = 'true';
-        }
+        isActive = userDetails['active'] == false ? 'false' : 'true';
       }
+
       result = true;
-    } else {
+    }
+    else if (response.statusCode == 401) {
+      print("⚠ Unauthorized (401), redirecting to login...");
+      await prefs.remove('BearerToken');
+      navigatorKey.currentState?.pushNamedAndRemoveUntil('/login', (route) => false);
+      result = false;
+    }
+    else {
       debugPrint(response.body);
       result = false;
     }
-  } catch (e) {
+  }
+  catch (e) {
     if (e is SocketException) {
       internet = false;
-      result = 'no internet';
+      result = false;
+    } else {
+      print("❌ Exception: $e");
+      result = false;
     }
   }
+
   return result;
 }
+
+
+
 
 class BearerClass {
   final String type;
@@ -2125,10 +2139,12 @@ calculateIdleDistance(lat1, lon1, lat2, lon2) {
 requestAccept() async {
   dev.log("${{'request_id': driverReq['id'], 'is_accept': 1}}",
       name: "Accept Request===============>");
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.post(Uri.parse('${url}api/v1/request/respond'),
         headers: {
-          'Authorization': 'Bearer ${bearerToken[0].token}',
+          'Authorization': 'Bearer $token',
           'Content-Type': 'application/json'
         },
         body: jsonEncode({'request_id': driverReq['id'], 'is_accept': 1}));
@@ -2185,10 +2201,12 @@ requestAccept() async {
 bool driverReject = false;
 
 requestReject() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.post(Uri.parse('${url}api/v1/request/respond'),
         headers: {
-          'Authorization': 'Bearer ${bearerToken[0].token}',
+          'Authorization': 'Bearer $token',
           'Content-Type': 'application/json'
         },
         body: jsonEncode({'request_id': driverReq['id'], 'is_accept': 0}));
@@ -2262,10 +2280,12 @@ sound() async {
 //driver arrived
 
 driverArrived() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.post(Uri.parse('${url}api/v1/request/arrived'),
         headers: {
-          'Authorization': 'Bearer ${bearerToken[0].token}',
+          'Authorization': 'Bearer $token',
           'Content-Type': 'application/json'
         },
         body: jsonEncode({'request_id': driverReq['id']}));
@@ -2312,10 +2332,12 @@ openMap(lat, lng) async {
 
 tripStart() async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.post(Uri.parse('${url}api/v1/request/started'),
         headers: {
-          'Authorization': 'Bearer ${bearerToken[0].token}',
+          'Authorization': 'Bearer $token',
           'Content-Type': 'application/json'
         },
         body: jsonEncode({
@@ -2349,10 +2371,12 @@ tripStart() async {
 
 tripStartDispatcher() async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.post(Uri.parse('${url}api/v1/request/started'),
         headers: {
-          'Authorization': 'Bearer ${bearerToken[0].token}',
+          'Authorization': 'Bearer $token',
           'Content-Type': 'application/json'
         },
         body: jsonEncode({
@@ -2395,10 +2419,12 @@ Map etaDetails = {};
 
 etaRequest() async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.post(Uri.parse('${url}api/v1/request/eta'),
         headers: {
-          'Authorization': 'Bearer ${bearerToken[0].token}',
+          'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
@@ -2461,11 +2487,13 @@ geoCodingForLatLng(placeid) async {
 
 createRequest(name, phone) async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.post(
         Uri.parse('${url}api/v1/request/create-instant-ride'),
         headers: {
-          'Authorization': 'Bearer ${bearerToken[0].token}',
+          'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
@@ -2570,6 +2598,8 @@ geoCoding(double lat, double lng) async {
 //ending trip
 
 endTrip() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     await requestDetailsUpdate(
         double.parse(heading.toString()), center.latitude, center.longitude);
@@ -2597,7 +2627,7 @@ endTrip() async {
 
     var response = await http.post(Uri.parse('${url}api/v1/request/end'),
         headers: {
-          'Authorization': 'Bearer ${bearerToken[0].token}',
+          'Authorization': 'Bearer $token',
           'Content-Type': 'application/json'
         },
         body: jsonEncode({
@@ -2654,12 +2684,13 @@ endTrip() async {
 
 uploadSignatureImage() async {
   dynamic result;
-
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = http.MultipartRequest(
         'POST', Uri.parse('${url}api/v1/request/upload-proof'));
     response.headers
-        .addAll({'Authorization': 'Bearer ${bearerToken[0].token}'});
+        .addAll({'Authorization': 'Bearer $token'});
     response.files.add(
         await http.MultipartFile.fromPath('proof_image', signatureFile.path));
     response.fields['after_unload'] = '1';
@@ -2875,10 +2906,12 @@ class PointLatLng {
 
 userRating() async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.post(Uri.parse('${url}api/v1/request/rating'),
         headers: {
-          'Authorization': 'Bearer ${bearerToken[0].token}',
+          'Authorization': 'Bearer $token',
           'Content-Type': 'application/json'
         },
         body: jsonEncode({
@@ -2923,11 +2956,13 @@ cancelRequestDriver(reason) async {
   dev.log("${{'request_id': driverReq['id'], 'custom_reason': reason}}",
       name: "Aquib Raw");
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.post(
         Uri.parse('${url}api/v1/request/cancel/by-driver'),
         headers: {
-          'Authorization': 'Bearer ${bearerToken[0].token}',
+          'Authorization': 'Bearer $token',
           'Content-Type': 'application/json'
         },
         body: jsonEncode(
@@ -2963,11 +2998,13 @@ cancelRequestDriver(reason) async {
 List sosData = [];
 
 getSosData(lat, lng) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.get(
       Uri.parse('${url}api/v1/common/sos/list/$lat/$lng'),
       headers: {
-        'Authorization': 'Bearer ${bearerToken[0].token}',
+        'Authorization': 'Bearer $token',
         'Content-Type': 'application/json'
       },
     );
@@ -2990,11 +3027,13 @@ getSosData(lat, lng) async {
 List chatList = [];
 
 getCurrentMessagesCompany() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.get(
       Uri.parse('${url}api/v1/driver/chat-history'),
       headers: {
-        'Authorization': 'Bearer ${bearerToken[0].token}',
+        'Authorization': 'Bearer $token',
         'Content-Type': 'application/json'
       },
     );
@@ -3020,12 +3059,14 @@ getCurrentMessagesCompany() async {
 }
 
 sendMessageCompany(chat) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var token = await FirebaseMessaging.instance.getToken();
   var fcm = token.toString();
     var response = await http.post(Uri.parse('${url}api/v1/driver/send'),
         headers: {
-          'Authorization': 'Bearer ${bearerToken[0].token}',
+          'Authorization': 'Bearer $token',
           'Content-Type': 'application/json'
         },
         body: jsonEncode({'message': chat}));
@@ -3045,9 +3086,11 @@ sendMessageCompany(chat) async {
 }
 
 messageSeenCompany() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   var response = await http.post(Uri.parse('${url}api/v1/driver/seen'),
       headers: {
-        'Authorization': 'Bearer ${bearerToken[0].token}',
+        'Authorization': 'Bearer $token',
         'Content-Type': 'application/json'
       },
       body: jsonEncode({'request_id': driverReq['id']}));
@@ -3061,12 +3104,14 @@ messageSeenCompany() async {
 // chat between user and driver
 List chatListUser = [];
 getCurrentMessagesUser() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var token = await FirebaseMessaging.instance.getToken();
     var response = await http.get(
       Uri.parse('${url}api/v1/request/chat-history/${driverReq['id']}'),
       headers: {
-        'Authorization': 'Bearer ${bearerToken[0].token}',
+        'Authorization': 'Bearer $token',
         'Content-Type': 'application/json'
       },
     );
@@ -3092,12 +3137,14 @@ getCurrentMessagesUser() async {
 }
 
 sendMessageUser(chat) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var token = await FirebaseMessaging.instance.getToken();
     var fcm = token.toString();
     var response = await http.post(Uri.parse('${url}api/v1/request/send'),
         headers: {
-          'Authorization': 'Bearer ${bearerToken[0].token}',
+          'Authorization': 'Bearer $token',
           'Content-Type': 'application/json'
         },
         body: jsonEncode({'message': chat,'request_id':driverReq['id']}));
@@ -3117,9 +3164,11 @@ sendMessageUser(chat) async {
 }
 
 messageSeenUser() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   var response = await http.post(Uri.parse('${url}api/v1/request/seen'),
       headers: {
-        'Authorization': 'Bearer ${bearerToken[0].token}',
+        'Authorization': 'Bearer $token',
         'Content-Type': 'application/json'
       },
       body: jsonEncode({'request_id': driverReq['id']}));
@@ -3137,12 +3186,14 @@ cancelReason(reason) async {
       "${url}api/v1/common/cancallation/reasons?arrived=$reason?transport_type=${userDetails['transport_type']}",
       name: "Cancel Reason here!=================>");
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.get(
       Uri.parse(
           '${url}api/v1/common/cancallation/reasons?arrived=$reason?transport_type=${userDetails['transport_type']}'),
       headers: {
-        'Authorization': 'Bearer ${bearerToken[0].token}',
+        'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
       },
     );
@@ -3185,11 +3236,13 @@ List vehicledata = [];
 
 getVehicleInfo() async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.get(
       Uri.parse('${url}api/v1/owner/list-fleets'),
       headers: {
-        'Authorization': 'Bearer ${bearerToken[0].token}',
+        'Authorization': 'Bearer $token',
         'Content-Type': 'application/json'
       },
     );
@@ -3212,11 +3265,13 @@ getVehicleInfo() async {
 
 deletefleetdriver(driverid) async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.get(
       Uri.parse('${url}api/v1/owner/delete-driver/$driverid'),
       headers: {
-        'Authorization': 'Bearer ${bearerToken[0].token}',
+        'Authorization': 'Bearer $token',
         'Content-Type': 'application/json'
       },
     );
@@ -3243,11 +3298,13 @@ deletefleetdriver(driverid) async {
 
 updateVehicle() async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response =
         await http.post(Uri.parse('${url}api/v1/user/driver-profile'),
             headers: {
-              'Authorization': 'Bearer ${bearerToken[0].token}',
+              'Authorization': 'Bearer $token',
               'Content-Type': 'application/json',
             },
             body: jsonEncode({
@@ -3292,13 +3349,15 @@ updateVehicle() async {
 
 updateProfile(name, email) async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = http.MultipartRequest(
       'POST',
       Uri.parse('${url}api/v1/user/driver-profile'),
     );
     response.headers
-        .addAll({'Authorization': 'Bearer ${bearerToken[0].token}'});
+        .addAll({'Authorization': 'Bearer $token'});
     response.files.add(
         await http.MultipartFile.fromPath('profile_picture', proImageFile));
     response.fields['email'] = email;
@@ -3333,13 +3392,15 @@ updateProfile(name, email) async {
 
 updateProfileWithoutImage(name, email) async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = http.MultipartRequest(
       'POST',
       Uri.parse('${url}api/v1/user/driver-profile'),
     );
     response.headers
-        .addAll({'Authorization': 'Bearer ${bearerToken[0].token}'});
+        .addAll({'Authorization': 'Bearer $token'});
     response.fields['email'] = email;
     response.fields['name'] = name;
     var request = await response.send();
@@ -3374,13 +3435,15 @@ updateProfileWithoutImage(name, email) async {
 List faqData = [];
 
 getFaqData(lat, lng) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   dynamic result;
   dev.log("${url}api/v1/common/faq/list/$lat/$lng", name: "FAQ List");
   dev.log("Bearer ${bearerToken[0].token}");
   try {
     var response = await http
         .get(Uri.parse('${url}api/v1/common/faq/list/$lat/$lng'), headers: {
-      'Authorization': 'Bearer ${bearerToken[0].token}',
+      'Authorization': 'Bearer $token',
       'Content-Type': 'application/json'
     });
     if (response.statusCode == 200) {
@@ -3402,13 +3465,15 @@ getFaqData(lat, lng) async {
 
 List<SubscriptionModel> packages = [];
 getVipPackages() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   dynamic result;
   dev.log("${url}api/v1/common/vip-driver-plans", name: "VIP List");
   dev.log("Bearer ${bearerToken[0].token}");
   try {
     var response = await http
         .get(Uri.parse('${url}api/v1/common/vip-driver-plans'), headers: {
-      'Authorization': 'Bearer ${bearerToken[0].token}',
+      'Authorization': 'Bearer $token',
       'Content-Type': 'application/json'
     });
     if (response.statusCode == 200) {
@@ -3440,11 +3505,13 @@ getVipPackages() async {
 //purchase VIP Package
 purchaseVIPPackage(String planId) async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.post(
         Uri.parse('${url}api/v1/driver/vip-plan-subscription'),
         headers: {
-          'Authorization': 'Bearer ${bearerToken[0].token}',
+          'Authorization': 'Bearer $token',
           'Content-Type': 'application/json'
         },
         body: jsonEncode({'driverid': userDetails['id'], 'planid': planId}));
@@ -3468,11 +3535,13 @@ purchaseVIPPackage(String planId) async {
 Map userSubscriptionDetail = {};
 getSubscriptionDetails() async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response =
         await http.post(Uri.parse('${url}api/v1/driver/vip-driver-detail'),
             headers: {
-              'Authorization': 'Bearer ${bearerToken[0].token}',
+              'Authorization': 'Bearer $token',
               'Content-Type': 'application/json'
             },
             body: jsonEncode({'driverid': userDetails['id']}));
@@ -3500,10 +3569,11 @@ Map<String, dynamic> myHistoryPage = {};
 
 getHistory(id) async {
   dynamic result;
-
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.get(Uri.parse('${url}api/v1/request/history?$id'),
-        headers: {'Authorization': 'Bearer ${bearerToken[0].token}'});
+        headers: {'Authorization': 'Bearer $token'});
     if (response.statusCode == 200) {
       myHistory = jsonDecode(response.body)['data'];
       myHistoryPage = jsonDecode(response.body)['meta'];
@@ -3527,10 +3597,11 @@ getHistory(id) async {
 
 getHistoryPages(id) async {
   dynamic result;
-
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.get(Uri.parse('${url}api/v1/request/history?$id'),
-        headers: {'Authorization': 'Bearer ${bearerToken[0].token}'});
+        headers: {'Authorization': 'Bearer $token'});
     if (response.statusCode == 200) {
       List list = jsonDecode(response.body)['data'];
       // ignore: avoid_function_literals_in_foreach_calls
@@ -3572,10 +3643,12 @@ getWalletHistory() async {
   walletHistory.clear();
   walletPages.clear();
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.get(
         Uri.parse('${url}api/v1/payment/wallet/history'),
-        headers: {'Authorization': 'Bearer ${bearerToken[0].token}'});
+        headers: {'Authorization': 'Bearer $token'});
     if (response.statusCode == 200) {
       walletBalance = jsonDecode(response.body);
       walletHistory = walletBalance['wallet_history']['data'];
@@ -3599,10 +3672,12 @@ getWalletHistory() async {
 
 getWalletHistoryPage(page) async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.get(
         Uri.parse('${url}api/v1/payment/wallet/history?page=$page'),
-        headers: {'Authorization': 'Bearer ${bearerToken[0].token}'});
+        headers: {'Authorization': 'Bearer $token'});
     if (response.statusCode == 200) {
       walletBalance = jsonDecode(response.body);
       List list = walletBalance['wallet_history']['data'];
@@ -3632,10 +3707,12 @@ getWalletHistoryPage(page) async {
 
 addSos(name, number) async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.post(Uri.parse('${url}api/v1/common/sos/store'),
         headers: {
-          'Authorization': 'Bearer ${bearerToken[0].token}',
+          'Authorization': 'Bearer $token',
           'Content-Type': 'application/json'
         },
         body: jsonEncode({'name': name, 'number': number}));
@@ -3660,10 +3737,12 @@ addSos(name, number) async {
 
 deleteSos(id) async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http
         .post(Uri.parse('${url}api/v1/common/sos/delete/$id'), headers: {
-      'Authorization': 'Bearer ${bearerToken[0].token}',
+      'Authorization': 'Bearer $token',
       'Content-Type': 'application/json'
     });
     if (response.statusCode == 200) {
@@ -3687,10 +3766,12 @@ deleteSos(id) async {
 Map<String, dynamic> myReferralCode = {};
 getReferral() async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response =
         await http.get(Uri.parse('${url}api/v1/get/referral'), headers: {
-      'Authorization': 'Bearer ${bearerToken[0].token}',
+      'Authorization': 'Bearer $token',
       'Content-Type': 'application/json'
     });
     if (response.statusCode == 200) {
@@ -3716,11 +3797,13 @@ Map<String, dynamic> stripeToken = {};
 
 getStripePayment(money) async {
   dynamic results;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response =
         await http.post(Uri.parse('${url}api/v1/payment/stripe/intent'),
             headers: {
-              'Authorization': 'Bearer ${bearerToken[0].token}',
+              'Authorization': 'Bearer $token',
               'Content-Type': 'application/json'
             },
             body: jsonEncode({'amount': money}));
@@ -3744,11 +3827,13 @@ getStripePayment(money) async {
 
 addMoneyStripe(amount, nonce) async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.post(
         Uri.parse('${url}api/v1/payment/stripe/add/money'),
         headers: {
-          'Authorization': 'Bearer ${bearerToken[0].token}',
+          'Authorization': 'Bearer $token',
           'Content-Type': 'application/json'
         },
         body: jsonEncode(
@@ -3776,11 +3861,13 @@ Map<String, dynamic> paystackCode = {};
 getPaystackPayment(money) async {
   dynamic results;
   paystackCode.clear();
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response =
         await http.post(Uri.parse('${url}api/v1/payment/paystack/initialize'),
             headers: {
-              'Authorization': 'Bearer ${bearerToken[0].token}',
+              'Authorization': 'Bearer $token',
               'Content-Type': 'application/json'
             },
             body: jsonEncode({'amount': money}));
@@ -3807,11 +3894,13 @@ getPaystackPayment(money) async {
 
 addMoneyPaystack(amount, nonce) async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.post(
         Uri.parse('${url}api/v1/payment/paystack/add-money'),
         headers: {
-          'Authorization': 'Bearer ${bearerToken[0].token}',
+          'Authorization': 'Bearer $token',
           'Content-Type': 'application/json'
         },
         body: jsonEncode(
@@ -3838,11 +3927,13 @@ addMoneyPaystack(amount, nonce) async {
 
 addMoneyFlutterwave(amount, nonce) async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.post(
         Uri.parse('${url}api/v1/payment/flutter-wave/add-money'),
         headers: {
-          'Authorization': 'Bearer ${bearerToken[0].token}',
+          'Authorization': 'Bearer $token',
           'Content-Type': 'application/json'
         },
         body: jsonEncode(
@@ -3868,11 +3959,13 @@ addMoneyFlutterwave(amount, nonce) async {
 
 addMoneyRazorpay(amount, nonce) async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.post(
         Uri.parse('${url}api/v1/payment/razerpay/add-money'),
         headers: {
-          'Authorization': 'Bearer ${bearerToken[0].token}',
+          'Authorization': 'Bearer $token',
           'Content-Type': 'application/json'
         },
         body: jsonEncode(
@@ -3901,11 +3994,13 @@ dynamic brainTreeToken;
 getBrianTreeToken() async {
   brainTreeToken = null;
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.get(
       Uri.parse('${url}api/v1/payment/braintree/client/token'),
       headers: {
-        'Authorization': 'Bearer ${bearerToken[0].token}',
+        'Authorization': 'Bearer $token',
         'Content-Type': 'application/json'
       },
     );
@@ -3938,11 +4033,13 @@ getCfToken(money, currency) async {
   cftToken.clear();
   cfSuccessList.clear();
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.post(
         Uri.parse('${url}api/v1/payment/cashfree/generate-cftoken'),
         headers: {
-          'Authorization': 'Bearer ${bearerToken[0].token}',
+          'Authorization': 'Bearer $token',
           'Content-Type': 'application/json'
         },
         body: jsonEncode({'order_amount': money, 'order_currency': currency}));
@@ -3971,11 +4068,13 @@ Map<String, dynamic> cfSuccessList = {};
 
 cashFreePaymentSuccess() async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.post(
         Uri.parse('${url}api/v1/payment/cashfree/add-money-to-wallet-webhooks'),
         headers: {
-          'Authorization': 'Bearer ${bearerToken[0].token}',
+          'Authorization': 'Bearer $token',
           'Content-Type': 'application/json'
         },
         body: jsonEncode({
@@ -4016,9 +4115,11 @@ userLogout() async {
   dynamic result;
   var id = userDetails['id'];
   var role = userDetails['role'];
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.post(Uri.parse('${url}api/v1/logout'), headers: {
-      'Authorization': 'Bearer ${bearerToken[0].token}',
+      'Authorization': 'Bearer $token',
       'Content-Type': 'application/json'
     });
     if (response.statusCode == 200) {
@@ -4085,11 +4186,13 @@ Map<String, dynamic> driverReportEarnings = {};
 
 driverTodayEarning() async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.get(
       Uri.parse('${url}api/v1/driver/today-earnings'),
       headers: {
-        'Authorization': 'Bearer ${bearerToken[0].token}',
+        'Authorization': 'Bearer $token',
         'Content-Type': 'application/json'
       },
     );
@@ -4111,11 +4214,13 @@ driverTodayEarning() async {
 
 driverWeeklyEarning() async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.get(
       Uri.parse('${url}api/v1/driver/weekly-earnings'),
       headers: {
-        'Authorization': 'Bearer ${bearerToken[0].token}',
+        'Authorization': 'Bearer $token',
         'Content-Type': 'application/json'
       },
     );
@@ -4138,11 +4243,13 @@ driverWeeklyEarning() async {
 
 driverEarningReport(fromdate, todate) async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.get(
       Uri.parse('${url}api/v1/driver/earnings-report/$fromdate/$todate'),
       headers: {
-        'Authorization': 'Bearer ${bearerToken[0].token}',
+        'Authorization': 'Bearer $token',
         'Content-Type': 'application/json'
       },
     );
@@ -4166,11 +4273,13 @@ driverEarningReport(fromdate, todate) async {
 
 requestWithdraw(amount) async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.post(
         Uri.parse('${url}api/v1/payment/wallet/request-for-withdrawal'),
         headers: {
-          'Authorization': 'Bearer ${bearerToken[0].token}',
+          'Authorization': 'Bearer $token',
           'Content-Type': 'application/json'
         },
         body: jsonEncode({'requested_amount': amount}));
@@ -4198,11 +4307,13 @@ Map<String, dynamic> withDrawHistoryPages = {};
 
 getWithdrawList() async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.get(
       Uri.parse('${url}api/v1/payment/wallet/withdrawal-requests'),
       headers: {
-        'Authorization': 'Bearer ${bearerToken[0].token}',
+        'Authorization': 'Bearer $token',
         'Content-Type': 'application/json'
       },
     );
@@ -4227,11 +4338,13 @@ getWithdrawList() async {
 
 getWithdrawListPages(page) async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.get(
       Uri.parse('${url}api/v1/payment/wallet/withdrawal-requests?page=$page'),
       headers: {
-        'Authorization': 'Bearer ${bearerToken[0].token}',
+        'Authorization': 'Bearer $token',
         'Content-Type': 'application/json'
       },
     );
@@ -4264,11 +4377,13 @@ Map<String, dynamic> bankData = {};
 getBankInfo() async {
   bankData.clear();
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.get(
       Uri.parse('${url}api/v1/user/get-bank-info'),
       headers: {
-        'Authorization': 'Bearer ${bearerToken[0].token}',
+        'Authorization': 'Bearer $token',
         'Content-Type': 'application/json'
       },
     );
@@ -4290,11 +4405,13 @@ getBankInfo() async {
 
 addBankData(accName, accNo, bankCode, bankName) async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response =
         await http.post(Uri.parse('${url}api/v1/user/update-bank-info'),
             headers: {
-              'Authorization': 'Bearer ${bearerToken[0].token}',
+              'Authorization': 'Bearer $token',
               'Content-Type': 'application/json'
             },
             body: jsonEncode({
@@ -4356,11 +4473,13 @@ notifyAdmin() async {
 List generalComplaintList = [];
 getGeneralComplaint(type) async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.get(
       Uri.parse(
           '${url}api/v1/common/complaint-titles?complaint_type=$type&transport_type=${userDetails['transport_type']}'),
-      headers: {'Authorization': 'Bearer ${bearerToken[0].token}'},
+      headers: {'Authorization': 'Bearer $token'},
     );
     if (response.statusCode == 200) {
       generalComplaintList = jsonDecode(response.body)['data'];
@@ -4380,11 +4499,13 @@ getGeneralComplaint(type) async {
 
 makeGeneralComplaint() async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response =
         await http.post(Uri.parse('${url}api/v1/common/make-complaint'),
             headers: {
-              'Authorization': 'Bearer ${bearerToken[0].token}',
+              'Authorization': 'Bearer $token',
               'Content-Type': 'application/json'
             },
             body: jsonEncode({
@@ -4408,11 +4529,13 @@ makeGeneralComplaint() async {
 
 makeRequestComplaint() async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response =
         await http.post(Uri.parse('${url}api/v1/common/make-complaint'),
             headers: {
-              'Authorization': 'Bearer ${bearerToken[0].token}',
+              'Authorization': 'Bearer $token',
               'Content-Type': 'application/json'
             },
             body: jsonEncode({
@@ -4555,30 +4678,77 @@ StreamSubscription<DatabaseEvent>? requestStreamStart;
 StreamSubscription<DatabaseEvent>? requestStreamEnd;
 StreamSubscription<DatabaseEvent>? rideStreamStart;
 StreamSubscription<DatabaseEvent>? rideStreamChanges;
-
-streamRequest() {
+void streamRequest() {
+  // Cancel existing streams to prevent duplicates
   rideStreamStart?.cancel();
   rideStreamChanges?.cancel();
   requestStreamEnd?.cancel();
   requestStreamStart?.cancel();
+
   rideStreamStart = null;
   rideStreamChanges = null;
   requestStreamStart = null;
   requestStreamEnd = null;
+
+  if (userDetails['id'] == null) {
+    print("User ID is null. Cannot listen for requests.");
+    return;
+  }
+
   requestStreamStart = FirebaseDatabase.instance
       .ref('request-meta')
       .orderByChild('driver_id')
       .equalTo(userDetails['id'])
       .onChildAdded
       .handleError((onError) {
+    print("Error in request stream: $onError");
     requestStreamStart?.cancel();
   }).listen((event) {
-    if (driverReq.isEmpty) {
-      streamEnd(event.snapshot.key.toString());
-      getUserDetails();
+    if (event.snapshot.exists) {
+      Map<String, dynamic> requestData =
+      Map<String, dynamic>.from(event.snapshot.value as Map);
+
+      if (driverReq.isEmpty) {
+        print("New ride request detected: ${event.snapshot.key}");
+        streamEnd(event.snapshot.key.toString());
+        getUserDetails();
+
+        // Notify the driver
+        notifyDriver(requestData);
+      }
+    }
+  });
+
+  // Listen for ride status updates
+  rideStreamChanges = FirebaseDatabase.instance
+      .ref('request-meta')
+      .orderByChild('driver_id')
+      .equalTo(userDetails['id'])
+      .onChildChanged
+      .listen((event) {
+    if (event.snapshot.exists) {
+      Map<String, dynamic> updatedData =
+      Map<String, dynamic>.from(event.snapshot.value as Map);
+
+      print("Ride request updated: ${event.snapshot.key}");
+      notifyDriver(updatedData);
     }
   });
 }
+
+void notifyDriver(Map<String, dynamic> rideRequest) {
+  if (rideRequest.isEmpty) return;
+
+  LocalNotificationService.showLocalNotification(
+    title: "New Ride Assigned",
+    body: "A new ride has been assigned to you. Tap to view details.",
+    payload: rideRequest,
+  );
+
+  // Update UI if needed
+  valueNotifierHome.incrementNotifier();
+}
+
 
 streamEnd(id) {
   requestStreamEnd = FirebaseDatabase.instance
@@ -4666,12 +4836,13 @@ geolocs.LocationSettings locationSettings = (platform == TargetPlatform.android)
 //after load image
 uploadLoadingImage(image) async {
   dynamic result;
-
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = http.MultipartRequest(
         'POST', Uri.parse('${url}api/v1/request/upload-proof'));
     response.headers
-        .addAll({'Authorization': 'Bearer ${bearerToken[0].token}'});
+        .addAll({'Authorization': 'Bearer $token'});
     response.files.add(await http.MultipartFile.fromPath('proof_image', image));
     response.fields['before_load'] = '1';
     response.fields['request_id'] = driverReq['id'];
@@ -4697,12 +4868,13 @@ uploadLoadingImage(image) async {
 // unload image
 uploadUnloadingImage(image) async {
   dynamic result;
-
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = http.MultipartRequest(
         'POST', Uri.parse('${url}api/v1/request/upload-proof'));
     response.headers
-        .addAll({'Authorization': 'Bearer ${bearerToken[0].token}'});
+        .addAll({'Authorization': 'Bearer $token'});
     response.files.add(await http.MultipartFile.fromPath('proof_image', image));
     response.fields['after_load'] = '1';
     response.fields['request_id'] = driverReq['id'];
@@ -4745,10 +4917,12 @@ positionStreamData() {
 
 userDelete() async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http
         .post(Uri.parse('${url}api/v1/user/delete-user-account'), headers: {
-      'Authorization': 'Bearer ${bearerToken[0].token}',
+      'Authorization': 'Bearer $token',
       'Content-Type': 'application/json'
     });
     if (response.statusCode == 200) {
@@ -4770,11 +4944,13 @@ userDelete() async {
 
 addHomeAddress(lat, lng, add) async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.post(
         Uri.parse('${url}api/v1/driver/add-my-route-address'),
         headers: {
-          'Authorization': 'Bearer ${bearerToken[0].token}',
+          'Authorization': 'Bearer $token',
           'Content-Type': 'application/json'
         },
         body: jsonEncode({
@@ -4809,11 +4985,13 @@ addHomeAddress(lat, lng, add) async {
 
 enableMyRouteBookings(lat, lng) async {
   dynamic result;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('BearerToken');
   try {
     var response = await http.post(
         Uri.parse('${url}api/v1/driver/enable-my-route-booking'),
         headers: {
-          'Authorization': 'Bearer ${bearerToken[0].token}',
+          'Authorization': 'Bearer $token',
           'Content-Type': 'application/json'
         },
         body: jsonEncode({

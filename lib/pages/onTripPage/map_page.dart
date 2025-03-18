@@ -122,7 +122,7 @@ class _MapsState extends State<Maps>
   StreamSink<List<Marker>> get _mapMarkerSink => _mapMarkerSC.sink;
   Stream<List<Marker>> get mapMarkerStream => _mapMarkerSC.stream;
   final _debouncer = Debouncer(milliseconds: 1000);
-
+  Timer? _userDetailsTimer;
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
@@ -130,9 +130,17 @@ class _MapsState extends State<Maps>
     show = true;
     filtericon = 0;
     polylineGot = false;
+
     getLocs();
     getonlineoffline();
     getCurrentMessagesUser();
+    getUserDetails(); // Initial call
+
+    // 🔹 Call getUserDetails() every 2 seconds
+    _userDetailsTimer = Timer.periodic(Duration(seconds: 2), (timer) {
+      getUserDetails();
+    });
+
     super.initState();
   }
 
@@ -2429,86 +2437,65 @@ class _MapsState extends State<Maps>
                                                             ? Positioned(
                                                                 bottom: 25,
                                                                 child: InkWell(
-                                                                  onTap:
-                                                                      () async {
-                                                                    // await getUserDetails();
-                                                                    dev.log(
-                                                                        "Token: ===============>${bearerToken[0].token}");
-                                                                    if (userDetails['vehicle_type_id'] !=
-                                                                            null &&
-                                                                        userDetails['role'] ==
-                                                                            'driver') {
-                                                                      if (locationAllowed ==
-                                                                              true &&
-                                                                          serviceEnabled ==
-                                                                              true) {
-                                                                        setState(
-                                                                            () {
-                                                                          _isLoading =
-                                                                              true;
-                                                                        });
+                                                                  onTap: () async {
+                                                                    // Show loader before API call
+                                                                    setState(() {
+                                                                      _isLoading = true;
+                                                                    });
 
-                                                                        await driverService.driverStatus();
-                                                                        setState(
-                                                                            () {
-                                                                          _isLoading =
-                                                                              false;
+                                                                    await driverService.driverStatus(); // Call API
+
+                                                                    if (userDetails['vehicle_type_id'] != null && userDetails['role'] == 'driver') {
+                                                                      if (locationAllowed == true && serviceEnabled == true) {
+                                                                        // API call completed, hide loader
+                                                                        setState(() {
+                                                                          _isLoading = false;
                                                                         });
-                                                                      } else if (locationAllowed ==
-                                                                              true &&
-                                                                          serviceEnabled ==
-                                                                              false) {
-                                                                        await location
-                                                                            .requestService();
-                                                                        if (await geolocator
-                                                                            .GeolocatorPlatform
-                                                                            .instance
-                                                                            .isLocationServiceEnabled()) {
-                                                                          serviceEnabled =
-                                                                              true;
-                                                                          setState(
-                                                                              () {
-                                                                            _isLoading =
-                                                                                true;
+                                                                      } else if (locationAllowed == true && serviceEnabled == false) {
+                                                                        await location.requestService();
+                                                                        if (await geolocator.GeolocatorPlatform.instance.isLocationServiceEnabled()) {
+                                                                          serviceEnabled = true;
+                                                                          setState(() {
+                                                                            _isLoading = true; // Show loader again for next API call
                                                                           });
 
-                                                                          await driverService.driverStatus();
-                                                                          setState(
-                                                                              () {
-                                                                            _isLoading =
-                                                                                false;
+                                                                          await driverService.driverStatus(); // Call API again
+
+                                                                          setState(() {
+                                                                            _isLoading = false; // Hide loader
                                                                           });
                                                                         }
                                                                       } else {
-                                                                        if (serviceEnabled ==
-                                                                            true) {
-                                                                          setState(
-                                                                              () {
-                                                                            makeOnline =
-                                                                                true;
-                                                                            _locationDenied =
-                                                                                true;
+                                                                        if (serviceEnabled == true) {
+                                                                          setState(() {
+                                                                            makeOnline = true;
+                                                                            _locationDenied = true;
                                                                           });
                                                                         } else {
-                                                                          await location
-                                                                              .requestService();
-                                                                          setState(
-                                                                              () {
-                                                                            _isLoading =
-                                                                                true;
+                                                                          await location.requestService();
+                                                                          setState(() {
+                                                                            _isLoading = true; // Show loader
                                                                           });
                                                                           await getLocs();
-                                                                          if (serviceEnabled ==
-                                                                              true) {
+                                                                          if (serviceEnabled == true) {
                                                                             setState(() {
                                                                               makeOnline = true;
                                                                               _locationDenied = true;
                                                                             });
                                                                           }
+                                                                          setState(() {
+                                                                            _isLoading = false; // Hide loader
+                                                                          });
                                                                         }
                                                                       }
+                                                                    } else {
+                                                                      // Hide loader if user is not eligible for API call
+                                                                      setState(() {
+                                                                        _isLoading = false;
+                                                                      });
                                                                     }
                                                                   },
+
                                                                   child:
                                                                       Container(
                                                                     padding: EdgeInsets.only(
@@ -2818,8 +2805,7 @@ class _MapsState extends State<Maps>
                                                                     height: media
                                                                             .width *
                                                                         0.25),
-                                                                (driverReq
-                                                                        .isNotEmpty)
+                                                                (driverReq.isNotEmpty)
                                                                     ? (driverReq['accepted_at'] ==
                                                                             null)
                                                                         //here is the request value, AAAAAAAAAAAAAAA
@@ -2837,18 +2823,274 @@ class _MapsState extends State<Maps>
                                                                                         style: GoogleFonts.roboto(fontSize: media.width * sixteen, color: Colors.white),
                                                                                       ),
                                                                                     )
-                                                                                  : (driverReq['is_rental'] == true && driverReq['is_later'] != 1)
+                                                                                  : (driverReq['is_rental'] != true && driverReq['is_later'] != 1)
                                                                                       ? Container(
-                                                                                          alignment: Alignment.center,
-                                                                                          margin: EdgeInsets.only(bottom: media.width * 0.025),
-                                                                                          padding: EdgeInsets.all(media.width * 0.025),
-                                                                                          decoration: BoxDecoration(color: buttonColor, borderRadius: BorderRadius.circular(6)),
-                                                                                          width: media.width * 0.9,
-                                                                                          child: Text(
-                                                                                            languages[choosenLanguage]['text_rental_ride'] + ' - ' + driverReq['rental_package_name'],
-                                                                                            style: GoogleFonts.roboto(fontSize: media.width * sixteen, color: Colors.white),
+                                                                                width: double.infinity, // Ensures Row gets a finite width
+                                                                                padding: EdgeInsets.fromLTRB(media.width * 0.05, media.width * 0.02, media.width * 0.05, media.width * 0.05),
+                                                                                child: Column(
+                                                                                  children: [
+                                                                                    Row(
+                                                                                      children: [
+                                                                                        Container(
+                                                                                          height: media.width * 0.25,
+                                                                                          width: media.width * 0.25,
+                                                                                          decoration: BoxDecoration(shape: BoxShape.circle, image: DecorationImage(image: NetworkImage(driverReq['userDetail']['data']['profile_picture']), fit: BoxFit.cover)),
+                                                                                        ),
+                                                                                        SizedBox(width: media.width * 0.05),
+                                                                                        SizedBox(
+                                                                                          height: media.width * 0.2,
+                                                                                          child: Column(
+                                                                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                                                                            children: [
+                                                                                              Text(
+                                                                                                driverReq['userDetail']['data']['name'],
+                                                                                                style: GoogleFonts.roboto(fontSize: media.width * eighteen, color: textColor),
+                                                                                              ),
+                                                                                              Row(
+                                                                                                children: [
+                                                                                                  //payment image
+                                                                                                  SizedBox(
+                                                                                                    width: media.width * 0.06,
+                                                                                                    child: (driverReq['payment_opt'].toString() == '1')
+                                                                                                        ? Image.asset(
+                                                                                                      'assets/images/cash.png',
+                                                                                                      fit: BoxFit.contain,
+                                                                                                    )
+                                                                                                        : (driverReq['payment_opt'].toString() == '2')
+                                                                                                        ? Image.asset(
+                                                                                                      'assets/images/wallet.png',
+                                                                                                      fit: BoxFit.contain,
+                                                                                                    )
+                                                                                                        : (driverReq['payment_opt'].toString() == '0')
+                                                                                                        ? Image.asset(
+                                                                                                      'assets/images/card.png',
+                                                                                                      fit: BoxFit.contain,
+                                                                                                    )
+                                                                                                        : Container(),
+                                                                                                  ),
+                                                                                                  SizedBox(
+                                                                                                    width: media.width * 0.03,
+                                                                                                  ),
+                                                                                                  Text(
+                                                                                                    driverReq['payment_type_string'].toString(),
+                                                                                                    style: GoogleFonts.roboto(fontSize: media.width * sixteen, color: textColor),
+                                                                                                  ),
+                                                                                                  SizedBox(width: media.width * 0.03),
+                                                                                                  (driverReq['show_request_eta_amount'] == true && driverReq['request_eta_amount'] != null)
+                                                                                                      ? SizedBox(
+                                                                                                    width: media.width * 0.2,
+                                                                                                    child: FittedBox(
+                                                                                                      child: Text(
+                                                                                                        driverReq['requested_currency_symbol'] + driverReq['request_eta_amount'].toStringAsFixed(2),
+                                                                                                        style: GoogleFonts.roboto(fontSize: media.width * fourteen, color: textColor),
+                                                                                                      ),
+                                                                                                    ),
+                                                                                                  )
+                                                                                                      : Container()
+                                                                                                ],
+                                                                                              ),
+                                                                                            ],
+                                                                                          ),
+                                                                                        ),
+                                                                                        Expanded(
+                                                                                          child: FittedBox(
+                                                                                            child: Text(
+                                                                                              (duration != 0) ? duration.toString().split('.')[0] : '',
+                                                                                              style: GoogleFonts.roboto(fontSize: media.width * twenty, fontWeight: FontWeight.bold),
+                                                                                              textAlign: TextAlign.end,
+                                                                                            ),
                                                                                           ),
                                                                                         )
+                                                                                      ],
+                                                                                    ),
+                                                                                    SizedBox(
+                                                                                      height: media.width * 0.02,
+                                                                                    ),
+                                                                                    if (driverReq['goods_type'] != "-" && driverReq['goods_type'] != null)
+                                                                                      Column(
+                                                                                        children: [
+                                                                                          SizedBox(
+                                                                                            width: media.width * 0.9,
+                                                                                            child: Text(
+                                                                                              driverReq['goods_type'] + ' - ' + driverReq['goods_type_quantity'],
+                                                                                              style: GoogleFonts.roboto(fontSize: media.width * twelve, fontWeight: FontWeight.w600, color: buttonColor),
+                                                                                              textAlign: TextAlign.center,
+                                                                                              maxLines: 1,
+                                                                                              overflow: TextOverflow.ellipsis,
+                                                                                            ),
+                                                                                          ),
+                                                                                          SizedBox(
+                                                                                            height: media.width * 0.02,
+                                                                                          ),
+                                                                                        ],
+                                                                                      ),
+                                                                                    Row(
+                                                                                      children: [
+                                                                                        Image.asset(
+                                                                                          'assets/images/picklocation.png',
+                                                                                          width: media.width * 0.075,
+                                                                                        ),
+                                                                                        SizedBox(width: media.width * 0.05),
+                                                                                        Column(
+                                                                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                          children: [
+                                                                                            Text(
+                                                                                              languages[choosenLanguage]['text_pickpoint'],
+                                                                                              style: GoogleFonts.roboto(fontSize: media.width * twelve, color: textColor.withOpacity(0.7)),
+                                                                                            ),
+                                                                                            SizedBox(height: media.width * 0.02),
+                                                                                            SizedBox(
+                                                                                              width: media.width * 0.6,
+                                                                                              child: Text(
+                                                                                                driverReq['pick_address'],
+                                                                                                style: GoogleFonts.roboto(
+                                                                                                  fontSize: media.width * twelve,
+                                                                                                ),
+                                                                                                maxLines: 2,
+                                                                                                overflow: TextOverflow.ellipsis,
+                                                                                              ),
+                                                                                            ),
+                                                                                          ],
+                                                                                        )
+                                                                                      ],
+                                                                                    ),
+                                                                                    (driverReq['pickup_poc_instruction'] != null)
+                                                                                        ? Container(
+                                                                                        padding: EdgeInsets.only(top: media.width * 0.02),
+                                                                                        child: SizedBox(
+                                                                                          width: media.width * 0.9,
+                                                                                          child: Row(
+                                                                                            mainAxisAlignment: MainAxisAlignment.start,
+                                                                                            children: [
+                                                                                              Text(
+                                                                                                languages[choosenLanguage]['text_instructions'] + ' : ' + driverReq['pickup_poc_instruction'],
+                                                                                                style: GoogleFonts.roboto(fontSize: media.width * twelve, color: buttonColor, fontWeight: FontWeight.w600),
+                                                                                                maxLines: 1,
+                                                                                                overflow: TextOverflow.ellipsis,
+                                                                                              ),
+                                                                                            ],
+                                                                                          ),
+                                                                                        ))
+                                                                                        : Container(),
+                                                                                    (tripStops.isNotEmpty)
+                                                                                        ? Column(
+                                                                                      children: tripStops
+                                                                                          .asMap()
+                                                                                          .map((i, value) {
+                                                                                        return MapEntry(
+                                                                                            i,
+                                                                                            (i < tripStops.length - 1)
+                                                                                                ? Container(
+                                                                                              padding: EdgeInsets.only(top: media.width * 0.025),
+                                                                                              child: Row(
+                                                                                                children: [
+                                                                                                  SizedBox(
+                                                                                                    width: media.width * 0.075,
+                                                                                                    child: Text(
+                                                                                                      (i + 1).toString(),
+                                                                                                      style: GoogleFonts.roboto(fontSize: media.width * twelve, color: Colors.red),
+                                                                                                      textAlign: TextAlign.center,
+                                                                                                    ),
+                                                                                                  ),
+                                                                                                  SizedBox(width: media.width * 0.05),
+                                                                                                  SizedBox(
+                                                                                                    width: media.width * 0.6,
+                                                                                                    child: Text(
+                                                                                                      tripStops[i]['address'],
+                                                                                                      style: GoogleFonts.roboto(
+                                                                                                        fontSize: media.width * twelve,
+                                                                                                      ),
+                                                                                                      maxLines: 1,
+                                                                                                      overflow: TextOverflow.ellipsis,
+                                                                                                    ),
+                                                                                                  )
+                                                                                                ],
+                                                                                              ),
+                                                                                            )
+                                                                                                : Container());
+                                                                                      })
+                                                                                          .values
+                                                                                          .toList(),
+                                                                                    )
+                                                                                        : Container(),
+                                                                                    SizedBox(
+                                                                                      height: media.width * 0.025,
+                                                                                    ),
+                                                                                    (driverReq['is_rental'] != true && driverReq['drop_address'] != null)
+                                                                                        ? Row(
+                                                                                      children: [
+                                                                                        Icon(
+                                                                                          Icons.location_on_outlined,
+                                                                                          size: media.width * 0.075,
+                                                                                          color: Colors.red,
+                                                                                        ),
+                                                                                        SizedBox(width: media.width * 0.05),
+                                                                                        Column(
+                                                                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                          children: [
+                                                                                            Text(languages[choosenLanguage]['text_droppoint'], style: GoogleFonts.roboto(fontSize: media.width * twelve, color: textColor.withOpacity(0.7))),
+                                                                                            SizedBox(
+                                                                                              height: media.width * 0.02,
+                                                                                            ),
+                                                                                            SizedBox(
+                                                                                              width: media.width * 0.6,
+                                                                                              height: media.width * 0.1,
+                                                                                              child: Text(
+                                                                                                driverReq['drop_address'],
+                                                                                                style: GoogleFonts.roboto(
+                                                                                                  fontSize: media.width * twelve,
+                                                                                                ),
+                                                                                                maxLines: 2,
+                                                                                                overflow: TextOverflow.ellipsis,
+                                                                                              ),
+                                                                                            ),
+                                                                                          ],
+                                                                                        )
+                                                                                      ],
+                                                                                    )
+                                                                                        : Container(),
+                                                                                    SizedBox(
+                                                                                      height: media.width * 0.04,
+                                                                                    ),
+                                                                                    Row(
+                                                                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                                      children: [
+                                                                                        Button(
+                                                                                            borcolor: buttonColor,
+                                                                                            textcolor: buttonColor,
+                                                                                            width: media.width * 0.38,
+                                                                                            color: page,
+                                                                                            onTap: () async {
+                                                                                              setState(() {
+                                                                                                _isLoading = true;
+                                                                                              });
+                                                                                              //reject request
+                                                                                              await requestReject();
+                                                                                              setState(() {
+                                                                                                _isLoading = false;
+                                                                                              });
+                                                                                            },
+                                                                                            text: languages[choosenLanguage]['text_decline']),
+                                                                                        //Accept request
+                                                                                        Button(
+                                                                                          onTap: () async {
+                                                                                            setState(() {
+                                                                                              _isLoading = true;
+                                                                                            });
+                                                                                            await requestAccept();
+                                                                                            setState(() {
+                                                                                              _isLoading = false;
+                                                                                            });
+                                                                                          },
+                                                                                          text: languages[choosenLanguage]['text_accept'],
+                                                                                          width: media.width * 0.38,
+                                                                                        )
+                                                                                      ],
+                                                                                    )
+                                                                                  ],
+                                                                                ),
+                                                                              )
                                                                                       : (driverReq['is_rental'] == true && driverReq['is_later'] == 1)
                                                                                           ? Container(
                                                                                               alignment: Alignment.center,
@@ -2902,272 +3144,7 @@ class _MapsState extends State<Maps>
                                                                                                         )),
                                                                                             )
                                                                                           : Container(),
-                                                                                      Container(
-                                                                                        padding: EdgeInsets.fromLTRB(media.width * 0.05, media.width * 0.02, media.width * 0.05, media.width * 0.05),
-                                                                                        child: Column(
-                                                                                          children: [
-                                                                                            Row(
-                                                                                              children: [
-                                                                                                Container(
-                                                                                                  height: media.width * 0.25,
-                                                                                                  width: media.width * 0.25,
-                                                                                                  decoration: BoxDecoration(shape: BoxShape.circle, image: DecorationImage(image: NetworkImage(driverReq['userDetail']['data']['profile_picture']), fit: BoxFit.cover)),
-                                                                                                ),
-                                                                                                SizedBox(width: media.width * 0.05),
-                                                                                                SizedBox(
-                                                                                                  height: media.width * 0.2,
-                                                                                                  child: Column(
-                                                                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                                                                                    children: [
-                                                                                                      Text(
-                                                                                                        driverReq['userDetail']['data']['name'],
-                                                                                                        style: GoogleFonts.roboto(fontSize: media.width * eighteen, color: textColor),
-                                                                                                      ),
-                                                                                                      Row(
-                                                                                                        children: [
-                                                                                                          //payment image
-                                                                                                          SizedBox(
-                                                                                                            width: media.width * 0.06,
-                                                                                                            child: (driverReq['payment_opt'].toString() == '1')
-                                                                                                                ? Image.asset(
-                                                                                                                    'assets/images/cash.png',
-                                                                                                                    fit: BoxFit.contain,
-                                                                                                                  )
-                                                                                                                : (driverReq['payment_opt'].toString() == '2')
-                                                                                                                    ? Image.asset(
-                                                                                                                        'assets/images/wallet.png',
-                                                                                                                        fit: BoxFit.contain,
-                                                                                                                      )
-                                                                                                                    : (driverReq['payment_opt'].toString() == '0')
-                                                                                                                        ? Image.asset(
-                                                                                                                            'assets/images/card.png',
-                                                                                                                            fit: BoxFit.contain,
-                                                                                                                          )
-                                                                                                                        : Container(),
-                                                                                                          ),
-                                                                                                          SizedBox(
-                                                                                                            width: media.width * 0.03,
-                                                                                                          ),
-                                                                                                          Text(
-                                                                                                            driverReq['payment_type_string'].toString(),
-                                                                                                            style: GoogleFonts.roboto(fontSize: media.width * sixteen, color: textColor),
-                                                                                                          ),
-                                                                                                          SizedBox(width: media.width * 0.03),
-                                                                                                          (driverReq['show_request_eta_amount'] == true && driverReq['request_eta_amount'] != null)
-                                                                                                              ? SizedBox(
-                                                                                                                  width: media.width * 0.2,
-                                                                                                                  child: FittedBox(
-                                                                                                                    child: Text(
-                                                                                                                      driverReq['requested_currency_symbol'] + driverReq['request_eta_amount'].toStringAsFixed(2),
-                                                                                                                      style: GoogleFonts.roboto(fontSize: media.width * fourteen, color: textColor),
-                                                                                                                    ),
-                                                                                                                  ),
-                                                                                                                )
-                                                                                                              : Container()
-                                                                                                        ],
-                                                                                                      ),
-                                                                                                    ],
-                                                                                                  ),
-                                                                                                ),
-                                                                                                Expanded(
-                                                                                                  child: FittedBox(
-                                                                                                    child: Text(
-                                                                                                      (duration != 0) ? duration.toString().split('.')[0] : '',
-                                                                                                      style: GoogleFonts.roboto(fontSize: media.width * twenty, fontWeight: FontWeight.bold),
-                                                                                                      textAlign: TextAlign.end,
-                                                                                                    ),
-                                                                                                  ),
-                                                                                                )
-                                                                                              ],
-                                                                                            ),
-                                                                                            SizedBox(
-                                                                                              height: media.width * 0.02,
-                                                                                            ),
-                                                                                            if (driverReq['goods_type'] != "-" && driverReq['goods_type'] != null)
-                                                                                              Column(
-                                                                                                children: [
-                                                                                                  SizedBox(
-                                                                                                    width: media.width * 0.9,
-                                                                                                    child: Text(
-                                                                                                      driverReq['goods_type'] + ' - ' + driverReq['goods_type_quantity'],
-                                                                                                      style: GoogleFonts.roboto(fontSize: media.width * twelve, fontWeight: FontWeight.w600, color: buttonColor),
-                                                                                                      textAlign: TextAlign.center,
-                                                                                                      maxLines: 1,
-                                                                                                      overflow: TextOverflow.ellipsis,
-                                                                                                    ),
-                                                                                                  ),
-                                                                                                  SizedBox(
-                                                                                                    height: media.width * 0.02,
-                                                                                                  ),
-                                                                                                ],
-                                                                                              ),
-                                                                                            Row(
-                                                                                              children: [
-                                                                                                Image.asset(
-                                                                                                  'assets/images/picklocation.png',
-                                                                                                  width: media.width * 0.075,
-                                                                                                ),
-                                                                                                SizedBox(width: media.width * 0.05),
-                                                                                                Column(
-                                                                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                                  children: [
-                                                                                                    Text(
-                                                                                                      languages[choosenLanguage]['text_pickpoint'],
-                                                                                                      style: GoogleFonts.roboto(fontSize: media.width * twelve, color: textColor.withOpacity(0.7)),
-                                                                                                    ),
-                                                                                                    SizedBox(height: media.width * 0.02),
-                                                                                                    SizedBox(
-                                                                                                      width: media.width * 0.6,
-                                                                                                      child: Text(
-                                                                                                        driverReq['pick_address'],
-                                                                                                        style: GoogleFonts.roboto(
-                                                                                                          fontSize: media.width * twelve,
-                                                                                                        ),
-                                                                                                        maxLines: 2,
-                                                                                                        overflow: TextOverflow.ellipsis,
-                                                                                                      ),
-                                                                                                    ),
-                                                                                                  ],
-                                                                                                )
-                                                                                              ],
-                                                                                            ),
-                                                                                            (driverReq['pickup_poc_instruction'] != null)
-                                                                                                ? Container(
-                                                                                                    padding: EdgeInsets.only(top: media.width * 0.02),
-                                                                                                    child: SizedBox(
-                                                                                                      width: media.width * 0.9,
-                                                                                                      child: Row(
-                                                                                                        mainAxisAlignment: MainAxisAlignment.start,
-                                                                                                        children: [
-                                                                                                          Text(
-                                                                                                            languages[choosenLanguage]['text_instructions'] + ' : ' + driverReq['pickup_poc_instruction'],
-                                                                                                            style: GoogleFonts.roboto(fontSize: media.width * twelve, color: buttonColor, fontWeight: FontWeight.w600),
-                                                                                                            maxLines: 1,
-                                                                                                            overflow: TextOverflow.ellipsis,
-                                                                                                          ),
-                                                                                                        ],
-                                                                                                      ),
-                                                                                                    ))
-                                                                                                : Container(),
-                                                                                            (tripStops.isNotEmpty)
-                                                                                                ? Column(
-                                                                                                    children: tripStops
-                                                                                                        .asMap()
-                                                                                                        .map((i, value) {
-                                                                                                          return MapEntry(
-                                                                                                              i,
-                                                                                                              (i < tripStops.length - 1)
-                                                                                                                  ? Container(
-                                                                                                                      padding: EdgeInsets.only(top: media.width * 0.025),
-                                                                                                                      child: Row(
-                                                                                                                        children: [
-                                                                                                                          SizedBox(
-                                                                                                                            width: media.width * 0.075,
-                                                                                                                            child: Text(
-                                                                                                                              (i + 1).toString(),
-                                                                                                                              style: GoogleFonts.roboto(fontSize: media.width * twelve, color: Colors.red),
-                                                                                                                              textAlign: TextAlign.center,
-                                                                                                                            ),
-                                                                                                                          ),
-                                                                                                                          SizedBox(width: media.width * 0.05),
-                                                                                                                          SizedBox(
-                                                                                                                            width: media.width * 0.6,
-                                                                                                                            child: Text(
-                                                                                                                              tripStops[i]['address'],
-                                                                                                                              style: GoogleFonts.roboto(
-                                                                                                                                fontSize: media.width * twelve,
-                                                                                                                              ),
-                                                                                                                              maxLines: 1,
-                                                                                                                              overflow: TextOverflow.ellipsis,
-                                                                                                                            ),
-                                                                                                                          )
-                                                                                                                        ],
-                                                                                                                      ),
-                                                                                                                    )
-                                                                                                                  : Container());
-                                                                                                        })
-                                                                                                        .values
-                                                                                                        .toList(),
-                                                                                                  )
-                                                                                                : Container(),
-                                                                                            SizedBox(
-                                                                                              height: media.width * 0.025,
-                                                                                            ),
-                                                                                            (driverReq['is_rental'] != true && driverReq['drop_address'] != null)
-                                                                                                ? Row(
-                                                                                                    children: [
-                                                                                                      Icon(
-                                                                                                        Icons.location_on_outlined,
-                                                                                                        size: media.width * 0.075,
-                                                                                                        color: Colors.red,
-                                                                                                      ),
-                                                                                                      SizedBox(width: media.width * 0.05),
-                                                                                                      Column(
-                                                                                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                                        children: [
-                                                                                                          Text(languages[choosenLanguage]['text_droppoint'], style: GoogleFonts.roboto(fontSize: media.width * twelve, color: textColor.withOpacity(0.7))),
-                                                                                                          SizedBox(
-                                                                                                            height: media.width * 0.02,
-                                                                                                          ),
-                                                                                                          SizedBox(
-                                                                                                            width: media.width * 0.6,
-                                                                                                            height: media.width * 0.1,
-                                                                                                            child: Text(
-                                                                                                              driverReq['drop_address'],
-                                                                                                              style: GoogleFonts.roboto(
-                                                                                                                fontSize: media.width * twelve,
-                                                                                                              ),
-                                                                                                              maxLines: 2,
-                                                                                                              overflow: TextOverflow.ellipsis,
-                                                                                                            ),
-                                                                                                          ),
-                                                                                                        ],
-                                                                                                      )
-                                                                                                    ],
-                                                                                                  )
-                                                                                                : Container(),
-                                                                                            SizedBox(
-                                                                                              height: media.width * 0.04,
-                                                                                            ),
-                                                                                            Row(
-                                                                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                                                              children: [
-                                                                                                Button(
-                                                                                                    borcolor: buttonColor,
-                                                                                                    textcolor: buttonColor,
-                                                                                                    width: media.width * 0.38,
-                                                                                                    color: page,
-                                                                                                    onTap: () async {
-                                                                                                      setState(() {
-                                                                                                        _isLoading = true;
-                                                                                                      });
-                                                                                                      //reject request
-                                                                                                      await requestReject();
-                                                                                                      setState(() {
-                                                                                                        _isLoading = false;
-                                                                                                      });
-                                                                                                    },
-                                                                                                    text: languages[choosenLanguage]['text_decline']),
-                                                                                                //Accept request
-                                                                                                Button(
-                                                                                                  onTap: () async {
-                                                                                                    setState(() {
-                                                                                                      _isLoading = true;
-                                                                                                    });
-                                                                                                    await requestAccept();
-                                                                                                    setState(() {
-                                                                                                      _isLoading = false;
-                                                                                                    });
-                                                                                                  },
-                                                                                                  text: languages[choosenLanguage]['text_accept'],
-                                                                                                  width: media.width * 0.38,
-                                                                                                )
-                                                                                              ],
-                                                                                            )
-                                                                                          ],
-                                                                                        ),
-                                                                                      )
+                                                                                      
                                                                                     ],
                                                                                   )),
                                                                             ],

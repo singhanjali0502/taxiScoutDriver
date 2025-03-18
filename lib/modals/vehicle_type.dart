@@ -1,17 +1,21 @@
 class VechicalType {
   bool? success;
   String? message;
-  List<Data>? data;
+  DriverVehicle? driverVehicle;
+  List<DriverVehicle>? data;
 
-  VechicalType({this.success, this.message, this.data});
+  VechicalType({this.success, this.message, this.driverVehicle, this.data});
 
   VechicalType.fromJson(Map<String, dynamic> json) {
     success = json['success'];
     message = json['message'];
+    driverVehicle = json['driver_vehicle'] != null
+        ? new DriverVehicle.fromJson(json['driver_vehicle'])
+        : null;
     if (json['data'] != null) {
-      data = <Data>[];
+      data = <DriverVehicle>[];
       json['data'].forEach((v) {
-        data!.add(new Data.fromJson(v));
+        data!.add(new DriverVehicle.fromJson(v));
       });
     }
   }
@@ -20,6 +24,9 @@ class VechicalType {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['success'] = this.success;
     data['message'] = this.message;
+    if (this.driverVehicle != null) {
+      data['driver_vehicle'] = this.driverVehicle!.toJson();
+    }
     if (this.data != null) {
       data['data'] = this.data!.map((v) => v.toJson()).toList();
     }
@@ -27,20 +34,21 @@ class VechicalType {
   }
 }
 
-class Data {
+class DriverVehicle {
   String? id;
   Null? companyKey;
   String? ownerId;
   String? name;
   String? icon;
-  String? iconTypesFor;
-  String? tripDispatchType;
+  Null? iconTypesFor;
+  Null? tripDispatchType;
   int? capacity;
+  Null? luggage;
   String? modelName;
-  String? size;
-  String? description;
-  String? shortDescription;
-  String? supportedVehicles;
+  int? size;
+  Null? description;
+  Null? shortDescription;
+  Null? supportedVehicles;
   int? isAcceptShareRide;
   int? active;
   int? smoking;
@@ -52,7 +60,7 @@ class Data {
   Null? deletedAt;
   String? isTaxi;
 
-  Data(
+  DriverVehicle(
       {this.id,
         this.companyKey,
         this.ownerId,
@@ -61,6 +69,7 @@ class Data {
         this.iconTypesFor,
         this.tripDispatchType,
         this.capacity,
+        this.luggage,
         this.modelName,
         this.size,
         this.description,
@@ -77,7 +86,7 @@ class Data {
         this.deletedAt,
         this.isTaxi});
 
-  Data.fromJson(Map<String, dynamic> json) {
+  DriverVehicle.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     companyKey = json['company_key'];
     ownerId = json['owner_id'];
@@ -86,6 +95,7 @@ class Data {
     iconTypesFor = json['icon_types_for'];
     tripDispatchType = json['trip_dispatch_type'];
     capacity = json['capacity'];
+    luggage = json['luggage'];
     modelName = json['model_name'];
     size = json['size'];
     description = json['description'];
@@ -113,6 +123,7 @@ class Data {
     data['icon_types_for'] = this.iconTypesFor;
     data['trip_dispatch_type'] = this.tripDispatchType;
     data['capacity'] = this.capacity;
+    data['luggage'] = this.luggage;
     data['model_name'] = this.modelName;
     data['size'] = this.size;
     data['description'] = this.description;

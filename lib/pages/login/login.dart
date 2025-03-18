@@ -9,6 +9,7 @@ import '../../functions/functions.dart';
 import '../../translation/translation.dart';
 import '../../widgets/widgets.dart';
 import '../onTripPage/map_page.dart';
+import '../vehicleInformations/vehicle_type.dart';
 import 'forgot_password.dart';
 import 'login_email_verify_screen.dart';
 
@@ -179,9 +180,7 @@ class _LoginState extends State<Login> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => Maps(),
-                                    ),
-                                  );
+                                      builder: (context) =>VehicleType()));
                                   // Show dialog after successful login
                                   // showDialog(
                                   //   context: context,

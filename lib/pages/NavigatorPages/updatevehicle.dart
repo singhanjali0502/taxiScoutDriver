@@ -11,7 +11,7 @@ import '../loadingPage/loading.dart';
 import '../vehicleInformations/vehicle_type.dart';
 
 class UpdateVehicle extends StatefulWidget {
-   UpdateVehicle({Key? key, this.companyId, this.serviceId}) : super(key: key);
+   UpdateVehicle({Key? key, this.companyId, this.serviceId}) : super(key: key );
   String? companyId;
   String? serviceId;
 
@@ -221,7 +221,7 @@ class _UpdateVehicleState extends State<UpdateVehicle> {
                               String serviceId = snapshot.data!['serviceId']!;
 
                               return VehicleType(
-                                companyId: companyId,
+                                companyId: userDetails['companyId'],
                                 serviceId: serviceId,
                               );
                             },

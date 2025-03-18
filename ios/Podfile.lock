@@ -4,6 +4,8 @@ PODS:
   - awesome_notifications (0.0.5):
     - Flutter
     - IosAwnCore (= 0.7.3)
+  - cashfree_pg (0.0.1):
+    - Flutter
   - connectivity_plus (0.0.1):
     - Flutter
     - ReachabilitySwift
@@ -125,7 +127,7 @@ PODS:
   - image_picker_ios (0.0.1):
     - Flutter
   - IosAwnCore (0.7.3)
-  - leveldb-library (1.22.6)
+  - leveldb-library (1.22.5)
   - location (0.0.1):
     - Flutter
   - nanopb (2.30909.1):
@@ -142,11 +144,11 @@ PODS:
   - permission_handler_apple (9.1.1):
     - Flutter
   - PromisesObjC (2.4.0)
-  - razorpay-pod (1.3.14)
+  - razorpay-pod (1.3.10)
   - razorpay_flutter (1.1.10):
     - Flutter
     - razorpay-pod
-  - ReachabilitySwift (5.2.4)
+  - ReachabilitySwift (5.2.3)
   - share_plus (0.0.1):
     - Flutter
   - shared_preferences_foundation (0.0.1):
@@ -182,6 +184,7 @@ PODS:
 DEPENDENCIES:
   - audioplayers (from `.symlinks/plugins/audioplayers/ios`)
   - awesome_notifications (from `.symlinks/plugins/awesome_notifications/ios`)
+  - cashfree_pg (from `.symlinks/plugins/cashfree_pg/ios`)
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
   - contacts_service (from `.symlinks/plugins/contacts_service/ios`)
   - firebase_auth (from `.symlinks/plugins/firebase_auth/ios`)
@@ -239,6 +242,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/audioplayers/ios"
   awesome_notifications:
     :path: ".symlinks/plugins/awesome_notifications/ios"
+  cashfree_pg:
+    :path: ".symlinks/plugins/cashfree_pg/ios"
   connectivity_plus:
     :path: ".symlinks/plugins/connectivity_plus/ios"
   contacts_service:
@@ -289,6 +294,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   audioplayers: 455322b54050b30ea4b1af7cd9e9d105f74efa8c
   awesome_notifications: d63d9a25f126860f9a600850d99772237895b3ba
+  cashfree_pg: 36bb2a5b4cc228a7697f55c55300b4a8b42fff00
   connectivity_plus: 413a8857dd5d9f1c399a39130850d02fe0feaf7e
   contacts_service: 849e1f84281804c8bfbec1b4c3eedcb23c5d3eca
   Firebase: 5ae8b7cf8efce559a653aef0ad95bab3f427c351
@@ -303,7 +309,7 @@ SPEC CHECKSUMS:
   FirebaseDatabase: 3de19e533a73d45e25917b46aafe1dd344ec8119
   FirebaseInstallations: 0a115432c4e223c5ab20b0dbbe4cbefa793a0e8e
   FirebaseMessaging: a4d7910e4af663c9cbfc1071c5bef34651690949
-  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
+  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_inappwebview: 3d32228f1304635e7c028b0d4252937730bbc6cf
   flutter_local_notifications: 0c0b1ae97e741e1521e4c1629a459d04b9aec743
   fluttertoast: 9f2f8e81bb5ce18facb9748d7855bf5a756fe3db
@@ -315,7 +321,7 @@ SPEC CHECKSUMS:
   GTMSessionFetcher: 3a63d75eecd6aa32c2fc79f578064e1214dfdec2
   image_picker_ios: 4a8aadfbb6dc30ad5141a2ce3832af9214a705b5
   IosAwnCore: 6494e0e174d49f04f513e8a002187be226889a37
-  leveldb-library: cc8b8f8e013647a295ad3f8cd2ddf49a6f19be19
+  leveldb-library: e8eadf9008a61f9e1dde3978c086d2b6d9b9dc28
   location: 3a2eed4dd2fab25e7b7baf2a9efefe82b512d740
   nanopb: d4d75c12cd1316f4a64e3c6963f879ecd4b5e0d5
   OrderedSet: aaeb196f7fef5a9edf55d89760da9176ad40b93c
@@ -323,9 +329,9 @@ SPEC CHECKSUMS:
   path_provider_foundation: 29f094ae23ebbca9d3d0cec13889cd9060c0e943
   permission_handler_apple: e76247795d700c14ea09e3a2d8855d41ee80a2e6
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
-  razorpay-pod: ffee2198928e2a5ed2556863af4db6b79722cea3
+  razorpay-pod: d1a41e72bf4c918b6d1f4a63767a20260abdc939
   razorpay_flutter: 84b3bfd206ae9c9c2a9ba585524a1b3d8102b6c1
-  ReachabilitySwift: 32793e867593cfc1177f5d16491e3a197d2fccda
+  ReachabilitySwift: 7f151ff156cea1481a8411701195ac6a984f4979
   share_plus: 056a1e8ac890df3e33cb503afffaf1e9b4fbae68
   shared_preferences_foundation: 5b919d13b803cadd15ed2dc053125c68730e5126
   Stripe: 2b2decd03146e08a350960966d41f3028c2eac29
@@ -338,6 +344,6 @@ SPEC CHECKSUMS:
   url_launcher_ios: 68d46cc9766d0c41dbdc884310529557e3cd7a86
   webview_flutter_wkwebview: b7e70ef1ddded7e69c796c7390ee74180182971f
 
-PODFILE CHECKSUM: 173aa94be0c95e839a95ec8b9381cc64d0b3c1ce
+PODFILE CHECKSUM: bc18b5fc0ae5f3576fa36e7ab817641b200b9dc9
 
-COCOAPODS: 1.16.2
+COCOAPODS: 1.15.2

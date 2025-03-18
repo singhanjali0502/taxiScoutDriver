@@ -46,8 +46,8 @@ class _SignupScreenState extends State<SignupScreen> {
 
 
   String? _selectedItem;
-  List<Data> _dropdownItems = [];
-  Data? _selectedVehicleType;
+  List<DriverVehicle> _dropdownItems = [];
+  DriverVehicle? _selectedVehicleType;
   @override
   void initState() {
     super.initState();
@@ -328,11 +328,11 @@ class _SignupScreenState extends State<SignupScreen> {
                       Center(
                         child: Loading(),
                       ),
-                    DropdownButtonFormField<Data>(
+                    DropdownButtonFormField<DriverVehicle>(
                       value: _selectedVehicleType,
                       hint: const Text("Select Vehicle Type"),
-                      items: _dropdownItems.map((Data vehicleType) {
-                        return DropdownMenuItem<Data>(
+                      items: _dropdownItems.map((DriverVehicle vehicleType) {
+                        return DropdownMenuItem<DriverVehicle>(
                           value: vehicleType,
                           child: Row(
                             children: [
@@ -345,7 +345,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           ),
                         );
                       }).toList(),
-                      onChanged: (Data? newValue) {
+                      onChanged: (DriverVehicle? newValue) {
                         setState(() {
                           _selectedVehicleType = newValue;
                         });

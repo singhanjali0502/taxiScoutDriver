@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tagyourtaxi_driver/functions/functions.dart';
 
 import '../pages/onTripPage/map_page.dart';
@@ -14,11 +15,13 @@ class DriverService {
 
   Future<dynamic> driverStatus() async {
     dynamic result;
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('BearerToken');
     try {
       var response = await http.post(
         Uri.parse('${url}api/v1/driver/online-offline'),
         headers: {
-          'Authorization': 'Bearer  ${bearerToken[0].token}',
+          'Authorization': 'Bearer  $token',
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
@@ -31,7 +34,7 @@ class DriverService {
         var userDetails = jsonDecode(response.body)['data'];
         result = true;
 
-        if (userDetails['active'] == false) {
+        if (userDetails['active'] == true) {
           userInactive();
           stopLocationUpdates(); // Stop location updates
         } else {
