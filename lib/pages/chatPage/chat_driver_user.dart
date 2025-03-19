@@ -208,23 +208,31 @@ class _ChatPageUserState extends State<ChatPageUser> {
                                       _sendingMessage = true;
                                     });
 
-                                    await sendMessageUser(chatText.text);
-                                    chatText.clear();
+                                    // Send message and update UI
+                                    await sendMessageForDriver(chatText.text);
+
+                                    // Ensure the new message is added to the list
                                     setState(() {
+                                      chatText.clear();
                                       _sendingMessage = false;
                                     });
+
+                                    // Scroll to bottom after updating messages
+                                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                                      controller.animateTo(
+                                        controller.position.maxScrollExtent,
+                                        duration: const Duration(milliseconds: 500),
+                                        curve: Curves.ease,
+                                      );
+                                    });
                                   },
-                                  child: SizedBox(
-                                    child: RotatedBox(
-                                      quarterTurns: (languageDirection == 'rtl') ? 2 : 0,
-                                      child: Image.asset(
-                                        'assets/images/send.png',
-                                        fit: BoxFit.contain,
-                                        width: media.width * 0.075,
-                                      ),
-                                    ),
+                                  child: Image.asset(
+                                    'assets/images/send.png',
+                                    fit: BoxFit.contain,
+                                    width: media.width * 0.075,
                                   ),
                                 ),
+
                               ],
                             ),
                           ),

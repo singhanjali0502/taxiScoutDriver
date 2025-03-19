@@ -3106,65 +3106,114 @@ messageSeenCompany() async {
 
 // chat between user and driver
 List chatListUser = [];
-getCurrentMessagesUser() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? token = prefs.getString('BearerToken');
-  try {
-    var token = await FirebaseMessaging.instance.getToken();
-    var response = await http.get(
-      Uri.parse('${url}api/v1/request/chat-history/${driverReq['id']}'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json'
-      },
-    );
-    if (response.statusCode == 200) {
-      if (jsonDecode(response.body)['success'] == true) {
-        if (chatListUser.where((element) => element['from_type'] == 2).length !=
-            jsonDecode(response.body)['data']
-                .where((element) => element['from_type'] == 2)
-                .length) {
+ getCurrentMessagesUser() {
+  if (driverReq['id'] == null) {
+    print("❌ Driver request ID is null. Cannot fetch messages.");
+    return;
+  }
+
+  DatabaseReference chatRef = FirebaseDatabase.instance.ref("messages/${driverReq['id']}");
+
+  // ✅ Cancel previous listener to prevent duplicates
+  messageStream?.cancel();
+
+  // ✅ Listen for new messages in real-time
+  messageStream = chatRef.onChildAdded.listen((event) {
+    if (event.snapshot.exists) {
+      Map<String, dynamic> messageData = Map<String, dynamic>.from(event.snapshot.value as Map);
+
+      print("📩 New Message Received: ${messageData['message']} from ${messageData['sender']}");
+
+      // ✅ Prevent duplicate messages using unique ID
+      if (!chatListUser.any((msg) => msg['id'] == messageData['id'])) {
+        chatListUser.add(messageData);
+        valueNotifierHome.incrementNotifier();
+
+        // ✅ Update message as "Seen" if it's from the driver
+        if (messageData['sender'] == "driver" && messageData['seen'] == 0) {
+          chatRef.child(event.snapshot.key!).update({"seen": 1});
+          print("👀 Message marked as seen.");
+        }
+
+        // ✅ Show notification only if the message is from the driver
+        if (messageData['sender'] == "user") {
+          LocalNotificationService.showLocalNotification(
+            title: "New Message from Driver",
+            body: messageData['message'],
+            payload: messageData,
+          );
+
+          // ✅ Play sound for new messages
           audioPlayer.play(audio);
         }
-        chatListUser = jsonDecode(response.body)['data'];
-        valueNotifierHome.incrementNotifier();
+      } else {
+        print("🚫 Duplicate message detected. Ignoring.");
       }
-    } else {
-      debugPrint(response.body);
     }
+  }, onError: (error) {
+    print("🚨 Error listening for messages: $error");
+  });
+}
+
+
+Future<void> sendMessageForDriver(String chat) async {
+  try {
+    // ✅ Ensure the request ID exists
+    if (driverReq['id'] == null) {
+      print("❌ Request ID is null. Cannot send message.");
+      return;
+    }
+
+    // ✅ Generate Unique Message ID
+    String messageId = DateTime.now().millisecondsSinceEpoch.toString();
+
+    // ✅ Store Message in Firebase Realtime Database
+    DatabaseReference chatRef =
+    FirebaseDatabase.instance.ref("messages").child(driverReq['id']);
+
+    print("🚀 Sending message to Firebase...");
+
+    await chatRef.push().set({
+      "message": chat,
+      "sender": "driver",
+      "timestamp": ServerValue.timestamp,
+      "id": messageId,
+      "from_type": 2, // 1 = User, 2 = Driver
+      "request_id": driverReq["id"],
+      "driver_id": userDetails['id'],  // ✅ Fixed this
+      "delivered": 0,
+      "seen": 0,
+      "created_at": DateTime.now().toIso8601String(),
+      "updated_at": DateTime.now().toIso8601String(),
+      "message_status": "sent",
+      "converted_created_at": formatTime(DateTime.now()),
+    });
+
+    print("✅ Message sent successfully!");
+
+    // ✅ Notify User about the New Message
+    FirebaseDatabase.instance.ref('requests/${driverReq['id']}').update({
+      'message_by_driver': chatListUser.length + 1, // Increment message count
+    });
+
+    // ✅ Add Message to Local Chat List for Instant UI Update
+    chatListUser.add({
+      'message': chat,
+      'from_type': 2, // Driver
+      'converted_created_at': formatTime(DateTime.now()),
+    });
+
+    // ✅ Update UI
+    valueNotifiercheck.incrementNotifier();
   } catch (e) {
-    if (e is SocketException) {
-      internet = false;
-    }
+    print("🚨 Error sending message: ${e.toString()}");
   }
 }
 
-sendMessageUser(chat) async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? token = prefs.getString('BearerToken');
-  try {
-    var token = await FirebaseMessaging.instance.getToken();
-    var fcm = token.toString();
-    var response = await http.post(Uri.parse('${url}api/v1/request/send'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json'
-        },
-        body: jsonEncode({'message': chat,'request_id':driverReq['id']}));
-    if (response.statusCode == 200) {
-      getCurrentMessagesUser();
-      // FirebaseDatabase.instance
-      //     .ref('requests/${driverReq['id']}')
-      //     .update({'message_by_driver': chatList.length});
-    } else {
-      debugPrint(response.body);
-    }
-  } catch (e) {
-    if (e is SocketException) {
-      internet = false;
-    }
-  }
+String formatTime(DateTime time) {
+  return "${time.hour > 12 ? time.hour - 12 : time.hour}:${time.minute.toString().padLeft(2, '0')} ${time.hour >= 12 ? 'PM' : 'AM'}";
 }
+
 
 messageSeenUser() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -4681,6 +4730,7 @@ StreamSubscription<DatabaseEvent>? requestStreamStart;
 StreamSubscription<DatabaseEvent>? requestStreamEnd;
 StreamSubscription<DatabaseEvent>? rideStreamStart;
 StreamSubscription<DatabaseEvent>? rideStreamChanges;
+StreamSubscription<DatabaseEvent>? messageStream;
 void streamRequest() {
   // Cancel existing streams to prevent duplicates
   rideStreamStart?.cancel();

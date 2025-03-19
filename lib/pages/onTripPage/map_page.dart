@@ -2018,173 +2018,173 @@ class _MapsState extends State<Maps>
 
 
                                           //driver status
-                                          (userDetails['role'] ==
-                                              'owner')
-                                              ? Container()
-                                              : Positioned(
-                                              top: MediaQuery.of(
-                                                  context)
-                                                  .padding
-                                                  .top +
-                                                  25,
-                                              child:
-                                              Container(
-                                                padding: EdgeInsets.fromLTRB(
-                                                    media.width *
-                                                        0.05,
-                                                    media.width *
-                                                        0.025,
-                                                    media.width *
-                                                        0.05,
-                                                    media.width *
-                                                        0.025),
-                                                decoration: BoxDecoration(
-                                                    borderRadius:
-                                                    BorderRadius.circular(
-                                                        10),
-                                                    boxShadow: [
-                                                      BoxShadow(
-                                                          blurRadius:
-                                                          2,
-                                                          color:
-                                                          Colors.black.withOpacity(0.2),
-                                                          spreadRadius: 2)
-                                                    ],
-                                                    color:
-                                                    page),
-                                                //driver status display
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .center,
-                                                  children: [
-
-
-                                                    /// Driver Status  Live  like  online or offline
-
-                                                    InkWell(
-                                                      onTap:
-                                                          () async {
-                                                        addressList
-                                                            .clear();
-                                                        var val = await geoCoding(
-                                                            center.latitude,
-                                                            center.longitude);
-                                                        setState(
-                                                                () {
-                                                              if (addressList.where((element) => element.id == 'pickup').isNotEmpty) {
-                                                                var add = addressList.firstWhere((element) => element.id == 'pickup');
-                                                                add.address = val;
-                                                                add.latlng = LatLng(center.latitude, center.longitude);
-                                                              } else {
-                                                                addressList.add(AddressList(id: 'pickup', address: val, latlng: LatLng(center.latitude, center.longitude)));
-                                                              }
-                                                            });
-                                                        // var val =
-                                                        //     await geoCodingForLatLng('pickup');
-
-
-                                                        // if (_pickaddress ==
-                                                        //     true) {
-                                                        //   setState(() {
-                                                        //     if (addressList.where((element) => element.id == 'pickup').isEmpty) {
-                                                        //       addressList.add(AddressList(id: 'pickup', address: val, latlng: LatLng(_centerLocation.latitude, _centerLocation.longitude)));
-                                                        //     } else {
-                                                        //       addressList.firstWhere((element) => element.id == 'pickup').address = val;
-                                                        //       addressList.firstWhere((element) => element.id == 'pickup').latlng = LatLng(_centerLocation.latitude, _centerLocation.longitude);
-                                                        //     }
-                                                        //   });
-                                                        // }
-                                                        if (addressList
-                                                            .isNotEmpty) {
-                                                          // ignore: use_build_context_synchronously
-                                                          Navigator.push(context,
-                                                              MaterialPageRoute(builder: (context) => const DropLocation()));
-                                                          // if(nav != null){
-                                                          //   if(nav){
-                                                          //     addressList.clear();
-                                                          //   }
-                                                          // }
-                                                        }
-                                                      },
-                                                      child:
-                                                      Container(
-                                                        height:
-                                                        15,
-                                                        width:
-                                                        MediaQuery.of(context).size.width * 0.5,
-                                                        decoration:
-                                                        BoxDecoration(
-                                                          // shape: BoxShape
-                                                          //     .circle,
-                                                          boxShadow: [
-                                                            BoxShadow(blurRadius: 1, color: Colors.white.withOpacity(0.1), spreadRadius: 2)
-                                                          ],
-                                                          // color: (driverReq.isEmpty)
-                                                          //     ? (userDetails['active'] == false)
-                                                          //         ? const Color(0xff666666)
-                                                          //         : const Color(0xff319900)
-                                                          //     : (driverReq['accepted_at'] != null && driverReq['arrived_at'] == null)
-                                                          //         ? const Color(0xff2E67D5)
-                                                          //         : (driverReq['accepted_at'] != null && driverReq['arrived_at'] != null && driverReq['is_trip_start'] == 0)
-                                                          //             ? const Color(0xff319900)
-                                                          //             : (driverReq['accepted_at'] != null && driverReq['arrived_at'] != null && driverReq['is_trip_start'] != null)
-                                                          //                 ? const Color(0xffFF0000)
-                                                          //                 : (driverReq['accepted'] == null && userDetails['active'] == false)
-                                                          //                     ? const Color(0xff666666)
-                                                          //                     : const Color(0xff319900)
-                                                        ),
-                                                        child:
-                                                        Center(
-                                                          child:
-                                                          Text(
-                                                            'Enter 4 letters to search',
-                                                            style: TextStyle(color: Colors.grey.withOpacity(0.4)),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-
-
-                                                    // SizedBox(
-                                                    //   width: media.width *
-                                                    //       0.02,
-                                                    // ),
-
-
-                                                    // Text(
-                                                    //   (driverReq.isEmpty)
-                                                    //       ? (userDetails['active'] == false)
-                                                    //           ? languages[choosenLanguage]['text_youareoffline']
-                                                    //           : languages[choosenLanguage]['text_youareonline']
-                                                    //       : (driverReq['accepted_at'] != null && driverReq['arrived_at'] == null)
-                                                    //           ? languages[choosenLanguage]['text_arriving']
-                                                    //           : (driverReq['accepted_at'] != null && driverReq['arrived_at'] != null && driverReq['is_trip_start'] == 0)
-                                                    //               ? languages[choosenLanguage]['text_arrived']
-                                                    //               : (driverReq['accepted_at'] != null && driverReq['arrived_at'] != null && driverReq['is_trip_start'] != null)
-                                                    //                   ? languages[choosenLanguage]['text_onride']
-                                                    //                   : (driverReq['accepted'] == null && userDetails['active'] == false)
-                                                    //                       ? languages[choosenLanguage]['text_youareoffline']
-                                                    //                       : languages[choosenLanguage]['text_youareonline'],
-                                                    //   style: GoogleFonts.roboto(
-                                                    //       fontSize: media.width * twelve,
-                                                    //       color: (driverReq.isEmpty)
-                                                    //           ? (userDetails['active'] == false)
-                                                    //               ? const Color(0xff666666)
-                                                    //               : const Color(0xff319900)
-                                                    //           : (driverReq['accepted_at'] != null && driverReq['arrived_at'] == null)
-                                                    //               ? const Color(0xff2E67D5)
-                                                    //               : (driverReq['accepted_at'] != null && driverReq['arrived_at'] != null && driverReq['is_trip_start'] == 0)
-                                                    //                   ? const Color(0xff319900)
-                                                    //                   : (driverReq['accepted_at'] != null && driverReq['arrived_at'] != null && driverReq['is_trip_start'] == 1)
-                                                    //                       ? const Color(0xffFF0000)
-                                                    //                       : (driverReq['accepted'] == null && userDetails['active'] == false)
-                                                    //                           ? const Color(0xff666666)
-                                                    //                           : const Color(0xff319900)),
-                                                    // )
-                                                  ],
-                                                ),
-                                              )),
+                                          // (userDetails['role'] ==
+                                          //     'owner')
+                                          //     ? Container()
+                                          //     : Positioned(
+                                          //     top: MediaQuery.of(
+                                          //         context)
+                                          //         .padding
+                                          //         .top +
+                                          //         25,
+                                          //     child:
+                                          //     Container(
+                                          //       padding: EdgeInsets.fromLTRB(
+                                          //           media.width *
+                                          //               0.05,
+                                          //           media.width *
+                                          //               0.025,
+                                          //           media.width *
+                                          //               0.05,
+                                          //           media.width *
+                                          //               0.025),
+                                          //       decoration: BoxDecoration(
+                                          //           borderRadius:
+                                          //           BorderRadius.circular(
+                                          //               10),
+                                          //           boxShadow: [
+                                          //             BoxShadow(
+                                          //                 blurRadius:
+                                          //                 2,
+                                          //                 color:
+                                          //                 Colors.black.withOpacity(0.2),
+                                          //                 spreadRadius: 2)
+                                          //           ],
+                                          //           color:
+                                          //           page),
+                                          //       //driver status display
+                                          //       child: Row(
+                                          //         mainAxisAlignment:
+                                          //         MainAxisAlignment
+                                          //             .center,
+                                          //         children: [
+                                          //
+                                          //
+                                          //           /// Driver Status  Live  like  online or offline
+                                          //
+                                          //           InkWell(
+                                          //             onTap:
+                                          //                 () async {
+                                          //               addressList
+                                          //                   .clear();
+                                          //               var val = await geoCoding(
+                                          //                   center.latitude,
+                                          //                   center.longitude);
+                                          //               setState(
+                                          //                       () {
+                                          //                     if (addressList.where((element) => element.id == 'pickup').isNotEmpty) {
+                                          //                       var add = addressList.firstWhere((element) => element.id == 'pickup');
+                                          //                       add.address = val;
+                                          //                       add.latlng = LatLng(center.latitude, center.longitude);
+                                          //                     } else {
+                                          //                       addressList.add(AddressList(id: 'pickup', address: val, latlng: LatLng(center.latitude, center.longitude)));
+                                          //                     }
+                                          //                   });
+                                          //               // var val =
+                                          //               //     await geoCodingForLatLng('pickup');
+                                          //
+                                          //
+                                          //               // if (_pickaddress ==
+                                          //               //     true) {
+                                          //               //   setState(() {
+                                          //               //     if (addressList.where((element) => element.id == 'pickup').isEmpty) {
+                                          //               //       addressList.add(AddressList(id: 'pickup', address: val, latlng: LatLng(_centerLocation.latitude, _centerLocation.longitude)));
+                                          //               //     } else {
+                                          //               //       addressList.firstWhere((element) => element.id == 'pickup').address = val;
+                                          //               //       addressList.firstWhere((element) => element.id == 'pickup').latlng = LatLng(_centerLocation.latitude, _centerLocation.longitude);
+                                          //               //     }
+                                          //               //   });
+                                          //               // }
+                                          //               if (addressList
+                                          //                   .isNotEmpty) {
+                                          //                 // ignore: use_build_context_synchronously
+                                          //                 Navigator.push(context,
+                                          //                     MaterialPageRoute(builder: (context) => const DropLocation()));
+                                          //                 // if(nav != null){
+                                          //                 //   if(nav){
+                                          //                 //     addressList.clear();
+                                          //                 //   }
+                                          //                 // }
+                                          //               }
+                                          //             },
+                                          //             child:
+                                          //             Container(
+                                          //               height:
+                                          //               15,
+                                          //               width:
+                                          //               MediaQuery.of(context).size.width * 0.5,
+                                          //               decoration:
+                                          //               BoxDecoration(
+                                          //                 // shape: BoxShape
+                                          //                 //     .circle,
+                                          //                 boxShadow: [
+                                          //                   BoxShadow(blurRadius: 1, color: Colors.white.withOpacity(0.1), spreadRadius: 2)
+                                          //                 ],
+                                          //                 // color: (driverReq.isEmpty)
+                                          //                 //     ? (userDetails['active'] == false)
+                                          //                 //         ? const Color(0xff666666)
+                                          //                 //         : const Color(0xff319900)
+                                          //                 //     : (driverReq['accepted_at'] != null && driverReq['arrived_at'] == null)
+                                          //                 //         ? const Color(0xff2E67D5)
+                                          //                 //         : (driverReq['accepted_at'] != null && driverReq['arrived_at'] != null && driverReq['is_trip_start'] == 0)
+                                          //                 //             ? const Color(0xff319900)
+                                          //                 //             : (driverReq['accepted_at'] != null && driverReq['arrived_at'] != null && driverReq['is_trip_start'] != null)
+                                          //                 //                 ? const Color(0xffFF0000)
+                                          //                 //                 : (driverReq['accepted'] == null && userDetails['active'] == false)
+                                          //                 //                     ? const Color(0xff666666)
+                                          //                 //                     : const Color(0xff319900)
+                                          //               ),
+                                          //               child:
+                                          //               Center(
+                                          //                 child:
+                                          //                 Text(
+                                          //                   'Enter 4 letters to search',
+                                          //                   style: TextStyle(color: Colors.grey.withOpacity(0.4)),
+                                          //                 ),
+                                          //               ),
+                                          //             ),
+                                          //           ),
+                                          //
+                                          //
+                                          //           // SizedBox(
+                                          //           //   width: media.width *
+                                          //           //       0.02,
+                                          //           // ),
+                                          //
+                                          //
+                                          //           // Text(
+                                          //           //   (driverReq.isEmpty)
+                                          //           //       ? (userDetails['active'] == false)
+                                          //           //           ? languages[choosenLanguage]['text_youareoffline']
+                                          //           //           : languages[choosenLanguage]['text_youareonline']
+                                          //           //       : (driverReq['accepted_at'] != null && driverReq['arrived_at'] == null)
+                                          //           //           ? languages[choosenLanguage]['text_arriving']
+                                          //           //           : (driverReq['accepted_at'] != null && driverReq['arrived_at'] != null && driverReq['is_trip_start'] == 0)
+                                          //           //               ? languages[choosenLanguage]['text_arrived']
+                                          //           //               : (driverReq['accepted_at'] != null && driverReq['arrived_at'] != null && driverReq['is_trip_start'] != null)
+                                          //           //                   ? languages[choosenLanguage]['text_onride']
+                                          //           //                   : (driverReq['accepted'] == null && userDetails['active'] == false)
+                                          //           //                       ? languages[choosenLanguage]['text_youareoffline']
+                                          //           //                       : languages[choosenLanguage]['text_youareonline'],
+                                          //           //   style: GoogleFonts.roboto(
+                                          //           //       fontSize: media.width * twelve,
+                                          //           //       color: (driverReq.isEmpty)
+                                          //           //           ? (userDetails['active'] == false)
+                                          //           //               ? const Color(0xff666666)
+                                          //           //               : const Color(0xff319900)
+                                          //           //           : (driverReq['accepted_at'] != null && driverReq['arrived_at'] == null)
+                                          //           //               ? const Color(0xff2E67D5)
+                                          //           //               : (driverReq['accepted_at'] != null && driverReq['arrived_at'] != null && driverReq['is_trip_start'] == 0)
+                                          //           //                   ? const Color(0xff319900)
+                                          //           //                   : (driverReq['accepted_at'] != null && driverReq['arrived_at'] != null && driverReq['is_trip_start'] == 1)
+                                          //           //                       ? const Color(0xffFF0000)
+                                          //           //                       : (driverReq['accepted'] == null && userDetails['active'] == false)
+                                          //           //                           ? const Color(0xff666666)
+                                          //           //                           : const Color(0xff319900)),
+                                          //           // )
+                                          //         ],
+                                          //       ),
+                                          //     )),
                                           //menu bar
                                           Positioned(
                                               top: MediaQuery.of(
@@ -2492,88 +2492,65 @@ class _MapsState extends State<Maps>
                                               ? Positioned(
                                               bottom: 25,
                                               child: InkWell(
-                                                onTap:
-                                                    () async {
-                                                  // await getUserDetails();
-                                                  dev.log(
-                                                      "Token: ===============>${bearerToken[0].token}");
-                                                  if (userDetails['vehicle_type_id'] !=
-                                                      null &&
-                                                      userDetails['role'] ==
-                                                          'driver') {
-                                                    if (locationAllowed ==
-                                                        true &&
-                                                        serviceEnabled ==
-                                                            true) {
-                                                      setState(
-                                                              () {
-                                                            _isLoading =
-                                                            true;
-                                                          });
+                                                onTap: () async {
+                                                  // Show loader before API call
+                                                  setState(() {
+                                                    _isLoading = true;
+                                                  });
 
+                                                  await driverService.driverStatus(); // Call API
 
-                                                      await driverService.driverStatus();
-                                                      setState(
-                                                              () {
-                                                            _isLoading =
-                                                            false;
-                                                          });
-                                                    } else if (locationAllowed ==
-                                                        true &&
-                                                        serviceEnabled ==
-                                                            false) {
-                                                      await location
-                                                          .requestService();
-                                                      if (await geolocator
-                                                          .GeolocatorPlatform
-                                                          .instance
-                                                          .isLocationServiceEnabled()) {
-                                                        serviceEnabled =
-                                                        true;
-                                                        setState(
-                                                                () {
-                                                              _isLoading =
-                                                              true;
-                                                            });
+                                                  if (userDetails['vehicle_type_id'] != null && userDetails['role'] == 'driver') {
+                                                    if (locationAllowed == true && serviceEnabled == true) {
+                                                      // API call completed, hide loader
+                                                      setState(() {
+                                                        _isLoading = false;
+                                                      });
+                                                    } else if (locationAllowed == true && serviceEnabled == false) {
+                                                      await location.requestService();
+                                                      if (await geolocator.GeolocatorPlatform.instance.isLocationServiceEnabled()) {
+                                                        serviceEnabled = true;
+                                                        setState(() {
+                                                          _isLoading = true; // Show loader again for next API call
+                                                        });
 
+                                                        await driverService.driverStatus(); // Call API again
 
-                                                        await driverService.driverStatus();
-                                                        setState(
-                                                                () {
-                                                              _isLoading =
-                                                              false;
-                                                            });
+                                                        setState(() {
+                                                          _isLoading = false; // Hide loader
+                                                        });
                                                       }
                                                     } else {
-                                                      if (serviceEnabled ==
-                                                          true) {
-                                                        setState(
-                                                                () {
-                                                              makeOnline =
-                                                              true;
-                                                              _locationDenied =
-                                                              true;
-                                                            });
+                                                      if (serviceEnabled == true) {
+                                                        setState(() {
+                                                          makeOnline = true;
+                                                          _locationDenied = true;
+                                                        });
                                                       } else {
-                                                        await location
-                                                            .requestService();
-                                                        setState(
-                                                                () {
-                                                              _isLoading =
-                                                              true;
-                                                            });
+                                                        await location.requestService();
+                                                        setState(() {
+                                                          _isLoading = true; // Show loader
+                                                        });
                                                         await getLocs();
-                                                        if (serviceEnabled ==
-                                                            true) {
+                                                        if (serviceEnabled == true) {
                                                           setState(() {
                                                             makeOnline = true;
                                                             _locationDenied = true;
                                                           });
                                                         }
+                                                        setState(() {
+                                                          _isLoading = false; // Hide loader
+                                                        });
                                                       }
                                                     }
+                                                  } else {
+                                                    // Hide loader if user is not eligible for API call
+                                                    setState(() {
+                                                      _isLoading = false;
+                                                    });
                                                   }
                                                 },
+
                                                 child:
                                                 Container(
                                                   padding: EdgeInsets.only(
@@ -2751,29 +2728,29 @@ class _MapsState extends State<Maps>
                                                   const SizedBox(
                                                     height: 20,
                                                   ),
-                                                  (driverReq.isNotEmpty &&
-                                                      driverReq['accepted_at'] !=
-                                                          null)
-                                                      ? InkWell(
-                                                    onTap:
-                                                        () async {
-                                                      (driverReq['is_trip_start'] == 1)
-                                                          ? openMap(driverReq['drop_lat'], driverReq['drop_lng'])
-                                                          : openMap(driverReq['pick_lat'], driverReq['pick_lng']);
-                                                    },
-                                                    child: Container(
-                                                        height: media.width *
-                                                            0.1,
-                                                        width: media.width *
-                                                            0.1,
-                                                        decoration:
-                                                        BoxDecoration(boxShadow: [
-                                                          BoxShadow(blurRadius: 2, color: Colors.black.withOpacity(0.2), spreadRadius: 2)
-                                                        ], color: page, borderRadius: BorderRadius.circular(media.width * 0.02)),
-                                                        alignment: Alignment.center,
-                                                        child: Image.asset('assets/images/locationFind.png', width: media.width * 0.06, color: Colors.black)),
-                                                  )
-                                                      : Container(),
+                                                  // (driverReq.isNotEmpty &&
+                                                  //     driverReq['accepted_at'] !=
+                                                  //         null)
+                                                  //     ? InkWell(
+                                                  //   onTap:
+                                                  //       () async {
+                                                  //     (driverReq['is_trip_start'] == 1)
+                                                  //         ? openMap(driverReq['drop_lat'], driverReq['drop_lng'])
+                                                  //         : openMap(driverReq['pick_lat'], driverReq['pick_lng']);
+                                                  //   },
+                                                  //   child: Container(
+                                                  //       height: media.width *
+                                                  //           0.1,
+                                                  //       width: media.width *
+                                                  //           0.1,
+                                                  //       decoration:
+                                                  //       BoxDecoration(boxShadow: [
+                                                  //         BoxShadow(blurRadius: 2, color: Colors.black.withOpacity(0.2), spreadRadius: 2)
+                                                  //       ], color: page, borderRadius: BorderRadius.circular(media.width * 0.02)),
+                                                  //       alignment: Alignment.center,
+                                                  //       child: Image.asset('assets/images/locationFind.png', width: media.width * 0.06, color: Colors.black)),
+                                                  // )
+                                                  //     : Container(),
                                                   const SizedBox(
                                                       height: 20),
                                                   //animate to current location button
@@ -3356,6 +3333,25 @@ class _MapsState extends State<Maps>
                                                                   ),
                                                                 ],
                                                               ),
+                                                            ),
+                                                            InkWell(
+                                                              onTap:
+                                                                  () async {
+                                                                (driverReq['is_trip_start'] == 1)
+                                                                    ? openMap(driverReq['drop_lat'], driverReq['drop_lng'])
+                                                                    : openMap(driverReq['pick_lat'], driverReq['pick_lng']);
+                                                              },
+                                                              child: Container(
+                                                                  height: media.width *
+                                                                      0.1,
+                                                                  width: media.width *
+                                                                      0.1,
+                                                                  decoration:
+                                                                  BoxDecoration(boxShadow: [
+                                                                    BoxShadow(blurRadius: 2, color: Colors.black.withOpacity(0.2), spreadRadius: 2)
+                                                                  ], color: page, borderRadius: BorderRadius.circular(media.width * 0.02)),
+                                                                  alignment: Alignment.center,
+                                                                  child: Image.asset('assets/images/location_arrow.png', width: media.width * 0.08, )),
                                                             ),
                                                             Expanded(
                                                               child: Row(
@@ -4248,67 +4244,7 @@ class _MapsState extends State<Maps>
                                                 ),
                                               ))
                                               : Container(),
-                                          if (driverReq.isEmpty)
-                                            Positioned(
-                                              right: 10,
-                                              top: 150,
-                                              child: InkWell(
-                                                onTap: () async {
-                                                  // if (contactus ==
-                                                  //     false) {
-                                                  //   setState(() {
-                                                  //     contactus =
-                                                  //         true;
-                                                  //   });
-                                                  // } else {
-                                                  //   setState(() {
-                                                  //     contactus =
-                                                  //         false;
-                                                  //   });
-                                                  // }
-                                                },
-                                                child: Container(
-                                                  height: media
-                                                      .width *
-                                                      0.1,
-                                                  width: media
-                                                      .width *
-                                                      0.1,
-                                                  decoration: BoxDecoration(
-                                                      boxShadow: [
-                                                        BoxShadow(
-                                                            blurRadius:
-                                                            2,
-                                                            color: Colors.black.withOpacity(
-                                                                0.2),
-                                                            spreadRadius:
-                                                            2)
-                                                      ],
-                                                      color: page,
-                                                      borderRadius:
-                                                      BorderRadius.circular(media.width *
-                                                          0.02)),
-                                                  alignment:
-                                                  Alignment
-                                                      .center,
-                                                  child:
-                                                  Image.asset(
-                                                    'assets/images/customercare.png',
-                                                    fit: BoxFit
-                                                        .contain,
-                                                    width: media
-                                                        .width *
-                                                        0.06,
-                                                  ),
-                                                  // Icon(
-                                                  //     Icons
-                                                  //         .my_location_sharp,
-                                                  //     size: media
-                                                  //             .width *
-                                                  //         0.06),
-                                                ),
-                                              ),
-                                            ),
+                                         
                                           (contactus == true)
                                               ? Positioned(
                                             right: 10,
