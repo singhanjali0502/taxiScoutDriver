@@ -55,16 +55,17 @@ class DriverService {
     return result;
   }
 
-  void startLocationUpdates() {
+  void startLocationUpdates() async{
     const updateInterval = Duration(seconds: 5);
-
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('BearerToken');
     locationTimer?.cancel(); // Ensure no duplicate timers
     locationTimer = Timer.periodic(updateInterval, (timer) async {
       try {
         var response = await http.post(
           Uri.parse('${url}api/v1/driver/current-location'),
           headers: {
-            'Authorization': 'Bearer ${bearerToken[0].token}',
+            'Authorization': 'Bearer $token',
             'Content-Type': 'application/json',
           },
           body: jsonEncode({

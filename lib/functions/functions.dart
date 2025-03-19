@@ -1698,8 +1698,8 @@ void startTimer() {
 
 
 
-Future<bool> getUserDetails() async {
-  dynamic result = false;
+getUserDetails() async {
+  dynamic result;
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String? token = prefs.getString('BearerToken');
 
@@ -1708,62 +1708,107 @@ Future<bool> getUserDetails() async {
       Uri.parse('${url}api/v1/user'),
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
+        'Authorization': 'Bearer $token'
       },
     );
-
     if (response.statusCode == 200) {
+      // printWrapped(response.body);
       userDetails = jsonDecode(response.body)['data'];
-
-      if (userDetails['notifications_count'] != null &&
-          userDetails['notifications_count'] != 0) {
+      if (userDetails['notifications_count'] != 0 &&
+          userDetails['notifications_count'] != null) {
         valueNotifierNotification.incrementNotifier();
       }
-
+      var transportType = userDetails['transport_type'];
+      if (transportType != null) {
+        // userDetails['transport_type'] is not null, so assign it to transportType
+        transportType = transportType.toString(); // Optional if 'transport_type' can be other types than String
+      } else {
+        transportType = "";
+      }
       if (userDetails['role'] != 'owner') {
         if (userDetails['sos']['data'] != null) {
           sosData = userDetails['sos']['data'];
         }
 
-        if (userDetails['metaRequest'] != null) {
-          driverReq = userDetails['metaRequest']['data'];
-          tripStops = userDetails['metaRequest']['data']['requestStops']['data'];
+
+        if (userDetails['onTripRequest'] != null) {
+          driverReq = userDetails['onTripRequest']['data'];
+
+
+          if (payby == 0 && driverReq['is_paid'] == 1) {
+            payby = 1;
+            audioPlayer.play(audio);
+          }
+
+
+          if (driverReq['is_driver_arrived'] == 1 &&
+              driverReq['is_trip_start'] == 0 &&
+              arrivedTimer == null &&
+              driverReq['is_rental'] != true) {
+            waitingBeforeStart();
+          }
+          if (driverReq['is_completed'] == 0 &&
+              driverReq['is_trip_start'] == 1 &&
+              rideTimer == null &&
+              driverReq['is_rental'] != true) {
+            waitingAfterStart();
+          }
+
+
+          if (driverReq['accepted_at'] != null) {
+            getCurrentMessagesCompany();
+          }
+          tripStops =
+          userDetails['onTripRequest']['data']['requestStops']['data'];
           valueNotifierHome.incrementNotifier();
+        } else if (userDetails['metaRequest'] != null) {
+          driverReject = false;
+          userReject = false;
+          driverReq = userDetails['metaRequest']['data'];
+          tripStops =
+          userDetails['metaRequest']['data']['requestStops']['data'];
 
 
+          if (duration == 0 || duration == 0.0) {
+            if (isBackground == true && platform == TargetPlatform.android) {
+              platforms.invokeMethod('awakeapp');
+            }
+            duration = double.parse(
+                userDetails['trip_accept_reject_duration_for_driver']
+                    .toString());
+            sound();
+          }
+
+
+          valueNotifierHome.incrementNotifier();
         } else {
           duration = 0;
+          if (driverReq.isNotEmpty) {
+            audioPlayer.play(audio);
+          }
           chatList.clear();
           driverReq = {};
           valueNotifierHome.incrementNotifier();
         }
 
-        isActive = userDetails['active'] == false ? 'false' : 'true';
-      }
 
+        if (userDetails['active'] == false) {
+          isActive = 'false';
+        } else {
+          isActive = 'true';
+        }
+      }
       result = true;
-    }
-    else if (response.statusCode == 401) {
-      print("⚠ Unauthorized (401), redirecting to login...");
-      await prefs.remove('BearerToken');
-      navigatorKey.currentState?.pushNamedAndRemoveUntil('/login', (route) => false);
-      result = false;
-    }
-    else {
+    } else {
       debugPrint(response.body);
       result = false;
     }
-  }
-  catch (e) {
+  } catch (e) {
     if (e is SocketException) {
       internet = false;
-      result = false;
-    } else {
-      print("❌ Exception: $e");
-      result = false;
+      result = 'no internet';
     }
   }
-
   return result;
 }
 
@@ -1867,13 +1912,14 @@ currentPositionUpdate() async {
   Timer.periodic(const Duration(seconds: 5), (timer) async {
     if (userDetails.isNotEmpty && userDetails['role'] == 'driver') {
       serviceEnabled =
-          await geolocs.GeolocatorPlatform.instance.isLocationServiceEnabled();
+      await geolocs.GeolocatorPlatform.instance.isLocationServiceEnabled();
       permission = await geolocs.GeolocatorPlatform.instance.checkPermission();
 
       if (userDetails['active'] == true &&
           serviceEnabled == true &&
           permission != geolocs.LocationPermission.denied &&
           permission != geolocs.LocationPermission.deniedForever) {
+
         if (driverReq.isEmpty) {
           if (requestStreamStart == null ||
               requestStreamStart?.isPaused == true) {
@@ -1915,6 +1961,8 @@ currentPositionUpdate() async {
             'service_location_id': userDetails['service_location_id'],
             'transport_type': userDetails['transport_type']
           });
+
+          // ✅ Send Notification when a new ride request is assigned
           if (driverReq.isNotEmpty) {
             if (driverReq['accepted_at'] != null &&
                 driverReq['is_completed'] == 0) {
@@ -1922,8 +1970,16 @@ currentPositionUpdate() async {
                   double.parse(heading.toString()),
                   double.parse(center.latitude.toString()),
                   double.parse(center.longitude.toString()));
+
+              // 🔔 Show Local Notification for Ride Update
+              LocalNotificationService.showLocalNotification(
+                title: "New Ride Assigned",
+                body: "You have a new ride request. Please check your app.",
+                payload: driverReq,
+              );
             }
           }
+
           valueNotifierHome.incrementNotifier();
         } catch (e) {
           if (e is SocketException) {
@@ -1931,95 +1987,42 @@ currentPositionUpdate() async {
             valueNotifierHome.incrementNotifier();
           }
         }
-      } else if (userDetails['active'] == false &&
-          serviceEnabled == true &&
-          permission != geolocs.LocationPermission.denied &&
-          permission != geolocs.LocationPermission.deniedForever) {
-        if (positionStream == null || positionStream!.isPaused) {
-          positionStreamData();
-        }
-      } else if (serviceEnabled == false && userDetails['active'] == true) {
-        await driverService.driverStatus();
-        await location.requestService();
       }
+
+      // ✅ Notify driver if their approval status changes
       if (userDetails['role'] == 'driver') {
         var driverState = await FirebaseDatabase.instance
             .ref('drivers/${userDetails['id']}')
             .get();
+
         if (driverState.child('approve').value == 0 &&
             userDetails['approve'] == true) {
           await getUserDetails();
-          if (userDetails['active'] == true) {
-            await driverService.driverStatus();
-          }
           valueNotifierHome.incrementNotifier();
           audioPlayer.play(audio);
+
+          // 🔔 Send Notification for Approval Change
+          LocalNotificationService.showLocalNotification(
+            title: "Account Approval Revoked",
+            body: "Your account approval has been revoked. Please contact support.", payload: {},
+          );
         } else if (driverState.child('approve').value == 1 &&
             userDetails['approve'] == false) {
           await getUserDetails();
           valueNotifierHome.incrementNotifier();
-
           audioPlayer.play(audio);
-        }
-        if (driverState.child('fleet_changed').value == 1) {
-          FirebaseDatabase.instance
-              .ref()
-              .child('drivers/${userDetails['id']}')
-              .update({'fleet_changed': 0});
-          await getUserDetails();
-          valueNotifierHome.incrementNotifier();
 
-          audioPlayer.play(audio);
+          // 🔔 Notify about re-approval
+          LocalNotificationService.showLocalNotification(
+            title: "Account Approved",
+            body: "Your account has been approved. You can now accept rides.", payload: {},
+          );
         }
-        if (driverState.child('is_deleted').value == 1) {
-          FirebaseDatabase.instance
-              .ref()
-              .child('drivers/${userDetails['id']}')
-              .remove();
-          await getUserDetails();
-          valueNotifierHome.incrementNotifier();
-        }
-        if (driverState.key!.contains('vehicle_type_icon')) {
-          if (driverState.child('vehicle_type_icon') !=
-              userDetails['vehicle_type_icon_for']) {
-            FirebaseDatabase.instance
-                .ref()
-                .child('drivers/${userDetails['id']}')
-                .update({
-              'vehicle_type_icon': userDetails['vehicle_type_icon_for']
-            });
-          }
-        } else {
-          FirebaseDatabase.instance
-              .ref()
-              .child('drivers/${userDetails['id']}')
-              .update(
-                  {'vehicle_type_icon': userDetails['vehicle_type_icon_for']});
-        }
-      }
-    } else if (userDetails['role'] == 'owner') {
-      var ownerStatus = await FirebaseDatabase.instance
-          .ref('owners/${userDetails['id']}')
-          .get();
-      if (ownerStatus.child('approve').value == 0 &&
-          userDetails['approve'] == true) {
-        await getUserDetails();
-        // if (userDetails['active'] == true) {
-        //   await driverStatus();
-        // }
-        valueNotifierHome.incrementNotifier();
-
-        audioPlayer.play(audio);
-      } else if (ownerStatus.child('approve').value == 1 &&
-          userDetails['approve'] == false) {
-        await getUserDetails();
-        valueNotifierHome.incrementNotifier();
-
-        audioPlayer.play(audio);
       }
     }
   });
 }
+
 
 //add request details in firebase realtime database
 
@@ -2182,7 +2185,7 @@ requestAccept() async {
         }
         valueNotifierHome.incrementNotifier();
         FirebaseDatabase.instance
-            .ref('request-meta/${driverReq['id']}')
+            .ref('requests/${driverReq['id']}')
             .remove();
       }
     } else {
@@ -4736,11 +4739,12 @@ void streamRequest() {
   });
 }
 
+
 void notifyDriver(Map<String, dynamic> rideRequest) {
   if (rideRequest.isEmpty) return;
 
   LocalNotificationService.showLocalNotification(
-    title: "New Ride Assigned",
+    title: "🚖 New Ride Assigned",
     body: "A new ride has been assigned to you. Tap to view details.",
     payload: rideRequest,
   );
@@ -4750,9 +4754,10 @@ void notifyDriver(Map<String, dynamic> rideRequest) {
 }
 
 
+
 streamEnd(id) {
   requestStreamEnd = FirebaseDatabase.instance
-      .ref('request-meta')
+      .ref('requests')
       .child(id)
       .onChildRemoved
       .handleError((onError) {
