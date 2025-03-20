@@ -132,6 +132,7 @@ class _MapsState extends State<Maps>
   Stream<List<Marker>> get mapMarkerStream => _mapMarkerSC.stream;
   final _debouncer = Debouncer(milliseconds: 1000);
 
+  Timer? _userDetailsTimer;
 
   @override
   void initState() {
@@ -140,11 +141,16 @@ class _MapsState extends State<Maps>
     show = true;
     filtericon = 0;
     polylineGot = false;
+    _startUserDetailsLoop();
     getLocs();
     getonlineoffline();
+   // First immediate call
+    driverService.startLocationUpdates();
+    // ✅ Call getUserDetails() every 3 seconds
+
+
     super.initState();
   }
-
 
   void _onMapCreated(GoogleMapController controller) {
     setState(() {
@@ -153,7 +159,16 @@ class _MapsState extends State<Maps>
     });
   }
 
-
+  void _startUserDetailsLoop() async {
+    _userDetailsTimer =
+        Timer.periodic(const Duration(seconds: 3), (timer) async {
+          var result = await getUserDetails();
+          if (result == 404) {
+            Navigator.pushReplacement(
+                context, MaterialPageRoute(builder: (context) => Login()));
+          }
+        });
+  }
   getonlineoffline() async {
     startTimer();
     if (userDetails['role'] == 'driver' &&
@@ -187,6 +202,10 @@ class _MapsState extends State<Maps>
     if (_timer != null) {
       _timer.cancel();
     }
+    WidgetsBinding.instance.removeObserver(this);
+
+    // ✅ Cancel the timer when widget is destroyed
+    _userDetailsTimer?.cancel();
     _controller?.dispose();
     _controller = null;
     animationController?.dispose();
@@ -274,7 +293,7 @@ class _MapsState extends State<Maps>
         markerIcon = await getBytesFromAsset('assets/images/top-taxi.png', 40);
         markerIcon2 = await getBytesFromAsset('assets/images/bike.png', 40);
         markerIcon3 =
-        await getBytesFromAsset('assets/images/vehicle-marker.png', 40);
+        await getBytesFromAsset('assets/images/taxi-1.png', 80);
         if (userDetails['role'] == 'owner') {
           onlinebikeicon1 =
           await getBytesFromAsset('assets/images/bike_online.png', 40);
@@ -3571,11 +3590,28 @@ class _MapsState extends State<Maps>
                                                                           'assets/images/message-square.png',
                                                                           width: media.width * 0.06,
                                                                         ),
-                                                                        (chatList.where((element) => element['from_type'] == 1 && element['seen'] == 0).isNotEmpty)
-                                                                            ? Text(
-                                                                          chatList.where((element) => element['from_type'] == 1 && element['seen'] == 0).length.toString(),
-                                                                          style: GoogleFonts.roboto(fontSize: media.width * twelve, color: const Color(0xffFF0000)),
+                                                                        (chatListUser.where((element) => element['from_type'] == 1 && element['seen'] == 0).isNotEmpty)
+                                                                            ? Container(
+                                                                          padding: EdgeInsets.all(media.width * 0.01), // Padding for better spacing
+                                                                          decoration: BoxDecoration(
+                                                                            color: Colors.red, // Red background
+                                                                            shape: BoxShape.circle, // Circular shape
+                                                                          ),
+                                                                          constraints: BoxConstraints(
+                                                                            minWidth: media.width * 0.04, // Minimum width for small numbers
+                                                                            minHeight: media.width * 0.04, // Minimum height for small numbers
+                                                                          ),
+                                                                          alignment: Alignment.center, // Center the text
+                                                                          child: Text(
+                                                                            chatListUser.where((element) => element['from_type'] == 1 && element['seen'] == 0).length.toString(),
+                                                                            style: GoogleFonts.roboto(
+                                                                              fontSize: media.width * twelve,
+                                                                              color: Colors.white, // White text
+                                                                              fontWeight: FontWeight.bold,
+                                                                            ),
+                                                                          ),
                                                                         )
+
                                                                             : Container()
                                                                       ],
                                                                     ),

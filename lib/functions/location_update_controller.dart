@@ -75,6 +75,7 @@ class DriverService {
         );
 
         if (response.statusCode == 200) {
+          getUserDetails();
           debugPrint("Location updated successfully: ${response.body}");
         } else {
           debugPrint("Failed to update location: ${response.body}");

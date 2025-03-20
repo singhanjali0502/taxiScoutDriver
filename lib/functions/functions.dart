@@ -1779,6 +1779,7 @@ getUserDetails() async {
 
 
           if (driverReq['accepted_at'] != null) {
+            getCurrentMessagesUser();
             getCurrentMessagesCompany();
           }
           tripStops =
@@ -1823,14 +1824,9 @@ getUserDetails() async {
       }
       result = true;
     } else if (response.statusCode == 401) {
-      // ❌ Unauthorized: Remove token & navigate to login
-      print('❌ Token Expired! Logging out...');
-      await prefs.remove('BearerToken');
-
-      navigatorKey.currentState?.pushNamedAndRemoveUntil(
-        '/login', // ✅ Redirect to login screen
-            (route) => false, // ✅ Clear all previous routes
-      );}
+      userLogout();
+      return 404;
+     }
 
     else {
       debugPrint(response.body);
@@ -3165,7 +3161,7 @@ List chatListUser = [];
         valueNotifierHome.incrementNotifier();
 
         // ✅ Update message as "Seen" if it's from the driver
-        if (messageData['sender'] == "driver" && messageData['seen'] == 0) {
+        if (messageData['sender'] == "user" && messageData['seen'] == 0) {
           chatRef.child(event.snapshot.key!).update({"seen": 1});
           print("👀 Message marked as seen.");
         }
