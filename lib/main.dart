@@ -1,34 +1,46 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:tagyourtaxi_driver/functions/functions.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:tagyourtaxi_driver/pages/chatPage/chat_driver_user.dart';
+import 'package:tagyourtaxi_driver/pages/loadingPage/loadingpage.dart';
 import 'package:tagyourtaxi_driver/pages/login/login.dart';
 import 'package:tagyourtaxi_driver/pages/onTripPage/map_page.dart';
 import 'package:tagyourtaxi_driver/widgets/local_notification.dart';
-import 'pages/loadingPage/loadingpage.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'dart:convert'; // Required for encoding payloads
+import 'dart:convert';
 
+import 'functions/functions.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+ValueNotifier<int> unreadMessageCount = ValueNotifier<int>(0);
 
-/// Background Message Handler
+/// Background Handler for All Notifications
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  debugPrint("💬 Background Message Received: ${message.messageId}");
+  debugPrint("🔔 Background Notification Received: ${message.messageId}");
 
+  if (message.data["type"] == "request-meta") {
+    _showNotification(message, "request-meta");
+  } else if (message.data["type"] == "messages") {
+    _showNotification(message, "messages");
+  }
+}
+
+/// Show Local Notification
+void _showNotification(RemoteMessage message, String type) {
   if (message.notification != null) {
-    String encodedPayload = jsonEncode(message.data); // ✅ Encode Map to String
+    String encodedPayload = jsonEncode(message.data);
+
     LocalNotificationService.showLocalNotification(
-      title: message.notification!.title ?? "New Ride Request",
-      body: message.notification!.body ?? "You have a new ride request",
-      payload: message.data, // Pass encoded payload
+      title: message.notification!.title ?? (type == "request-meta" ? "New Ride Request" : "New Message"),
+      body: message.notification!.body ?? (type == "request-meta" ? "You have a new ride request" : "You have received a new message"),
+      payload: message.data,
     );
   }
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(); // ✅ Ensure Firebase is initialized
+  await Firebase.initializeApp();
   await LocalNotificationService.requestPermission();
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -45,32 +57,39 @@ void main() async {
     sound: true,
   );
 
-  if (settings.authorizationStatus == AuthorizationStatus.denied) {
-    print("❌ Notifications permission denied! Please enable it in settings.");
-  }
-
   print("🔔 Notification Permissions Status: ${settings.authorizationStatus}");
 
-  // 🔹 Set up Firebase Messaging Handlers
+  // ✅ Subscribe to Separate Topics
+  FirebaseMessaging.instance.subscribeToTopic("request-meta"); // Ride requests
+  FirebaseMessaging.instance.subscribeToTopic("messages"); // Chat messages
+
+  // 🔹 Handle Background Messages
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  FirebaseMessaging.instance.subscribeToTopic("request-meta");
 
+  // 🔹 Handle Foreground Messages (Both Ride & Chat)
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    print("💡 Foreground Message Received: ${message.messageId}");
+    print("🔔 Foreground Notification: ${message.messageId}");
 
-    String encodedPayload = jsonEncode(message.data); // ✅ Encode Map to String
+    if (message.data["type"] == "request-meta") {
+      _showNotification(message, "request-meta");
+    } else if (message.data["type"] == "messages") {
+      unreadMessageCount.value += 1; // Increment badge count for chat
+      _showNotification(message, "message");
+    }
+    navigatorKey.currentState?.push(MaterialPageRoute(builder: (context) => ChatPageUser()));
 
-    // Ensure local notifications are displayed in foreground
-    LocalNotificationService.showLocalNotification(
-      title: message.notification?.title ?? "New Ride Request",
-      body: message.notification?.body ?? "You have a new ride request",
-      payload: message.data, // Pass encoded payload
-    );
   });
 
+  // 🔹 Handle Notification Clicks
   FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-    print("📬 User Opened App via Notification: ${message.messageId}");
-    _handleNotificationTap(message);
+    if (message.data["type"] == "request-meta") {
+      print("🚖 User Opened Ride Notification: ${message.messageId}");
+      navigatorKey.currentState?.push(MaterialPageRoute(builder: (context) => Maps()));
+    } else if (message.data["type"] == "messages") {
+      print("💬 User Opened Chat Notification: ${message.messageId}");
+      unreadMessageCount.value = 0; // ✅ Reset message badge count
+      navigatorKey.currentState?.push(MaterialPageRoute(builder: (context) => ChatPageUser()));
+    }
   });
 
   checkInternetConnection();
@@ -79,44 +98,20 @@ void main() async {
   runApp(const MyApp());
 }
 
-/// Handles Notification Clicks & Navigates to MapScreen
-void _handleNotificationTap(RemoteMessage message) {
-  if (message.data.isNotEmpty) {
-    print("🚖 Navigating to MapScreen with data: ${message.data}");
-
-    // Decode message data and navigate
-    Map<String, dynamic> rideData = message.data;
-
-    navigatorKey.currentState?.push(
-      MaterialPageRoute(
-        builder: (context) => Maps(),
-      ),
-    );
-  }
-}
-
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    platform = Theme.of(context).platform;
-    return GestureDetector(
-        onTap: () {
-          FocusScopeNode currentFocus = FocusScope.of(context);
-          if (!currentFocus.hasPrimaryFocus) {
-            currentFocus.unfocus();
-            FocusManager.instance.primaryFocus?.unfocus();
-          }
-        },
-        child: MaterialApp(
-            navigatorKey: navigatorKey,
-            debugShowCheckedModeBanner: false,
-            title: 'TaxiScout24 Driver',
-            theme: ThemeData(),
-            routes: {
-              '/login': (context) => Login(),
-            },
-            home: const LoadingPage()));
+    return MaterialApp(
+      navigatorKey: navigatorKey,
+      debugShowCheckedModeBanner: false,
+      title: 'TaxiScout24 Driver',
+      theme: ThemeData(),
+      routes: {
+        '/login': (context) => Login(),
+      },
+      home: const LoadingPage(),
+    );
   }
 }

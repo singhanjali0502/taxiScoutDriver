@@ -291,7 +291,7 @@ class _MapsState extends State<Maps>
           onridedeliveryicon1 = await getBytesFromAsset(
               'assets/images/onboardicon_delivery.png', 40);
           offlinedeliveryicon1 = await getBytesFromAsset(
-              'assets/images/offlineicon_delivery.png', 40);
+              'assets/images/onlineicon.png', 40);
           onlinedeliveryicon1 = await getBytesFromAsset(
               'assets/images/onlineicon_delivery.png', 40);
           onrideicon = BitmapDescriptor.fromBytes(onrideicon1);
@@ -4101,20 +4101,46 @@ class _MapsState extends State<Maps>
                                                                 },
                                                                 child: Column(
                                                                   children: [
-                                                                    Row(
+                                                                    Stack(
+                                                                      clipBehavior: Clip.none, // Allows the badge to overflow
                                                                       children: [
                                                                         Image.asset(
                                                                           'assets/images/message-square.png',
                                                                           width: media.width * 0.06,
                                                                         ),
-                                                                        (chatList.where((element) => element['from_type'] == 1 && element['seen'] == 0).isNotEmpty)
-                                                                            ? Text(
-                                                                          chatList.where((element) => element['from_type'] == 1 && element['seen'] == 0).length.toString(),
-                                                                          style: GoogleFonts.roboto(fontSize: media.width * twelve, color: const Color(0xffFF0000)),
-                                                                        )
-                                                                            : Container()
+                                                                        // Show badge only if there are unread messages
+                                                                        if (chatListUser.where((element) => element['from_type'] == 1 && element['seen'] == 0).isNotEmpty)
+                                                                          Positioned(
+                                                                            right: 0, // Align to top-right
+                                                                            top: 0,
+                                                                            child: Container(
+                                                                              padding: EdgeInsets.all(media.width * 0.008), // Padding for badge
+                                                                              decoration: BoxDecoration(
+                                                                                color: Colors.red, // Badge color
+                                                                                shape: BoxShape.circle,
+                                                                              ),
+                                                                              constraints: BoxConstraints(
+                                                                                minWidth: media.width * 0.035,
+                                                                                minHeight: media.width * 0.035,
+                                                                              ),
+                                                                              child: Center(
+                                                                                child: Text(
+                                                                                  chatListUser
+                                                                                      .where((element) => element['from_type'] == 1 && element['seen'] == 0)
+                                                                                      .length
+                                                                                      .toString(),
+                                                                                  style: GoogleFonts.roboto(
+                                                                                    fontSize: media.width * 0.03,
+                                                                                    color: Colors.white, // Text color
+                                                                                    fontWeight: FontWeight.bold,
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                          ),
                                                                       ],
                                                                     ),
+
                                                                     Text(
                                                                       languages[choosenLanguage]['text_chat'],
                                                                       style: GoogleFonts.roboto(

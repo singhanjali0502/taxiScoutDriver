@@ -442,9 +442,11 @@ getLocalData() async {
       languageDirection = pref.getString('languageDirection');
 
       if (choosenLanguage.isNotEmpty) {
-        if (pref.containsKey('Bearer')) {
-          var tokens = pref.getString('Bearer');
+        if (pref.containsKey('BearerToken')) {
+          var tokens = pref.getString('BearerToken');
+
           if (tokens != null) {
+            print('✅ Token retrieved successfully: $tokens'); // Debugging
             bearerToken.add(BearerClass(type: 'Bearer', token: tokens));
 
             var response = await getUserDetails();
@@ -455,13 +457,16 @@ getLocalData() async {
               result = '3';
             } else if (response == false) {
               result = '2';
-            } else {}
+            }
           } else {
-            result = '2';
+            print('❌ Token is null after retrieval');
+            result = '2'; // Logout
           }
         } else {
-          result = '2';
+          print('❌ No token found in SharedPreferences');
+          result = '2'; // Logout
         }
+
       } else {
         result = '1';
       }
@@ -680,25 +685,42 @@ Future<String> registerDriver({
 
     if (request.statusCode == 200) {
       var jsonVal = jsonDecode(respon.body);
+
       if (ischeckownerordriver == 'driver') {
         platforms.invokeMethod('login');
       }
+
+      // Save token in bearerToken list
       bearerToken.add(BearerClass(
-          type: jsonVal['token_type'].toString(),
-          token: jsonVal['access_token'].toString()));
-      pref.setString('Bearer', bearerToken[0].token);
+        type: jsonVal['token_type'].toString(),
+        token: jsonVal['access_token'].toString(),
+      ));
+
+      // ✅ Save token persistently in SharedPreferences
+      SharedPreferences pref = await SharedPreferences.getInstance();
+      await pref.setString('BearerToken', bearerToken[0].token); // Use consistent key!
+
+      print('✅ Token saved: ${bearerToken[0].token}'); // Debugging
+
+      // Fetch user details after saving token
       await getUserDetails();
-      if (platform == TargetPlatform.android && package != null) {
-        await FirebaseDatabase.instance
-            .ref()
-            .update({'driver_package_name': package.packageName.toString()});
-      } else if (package != null) {
-        await FirebaseDatabase.instance
-            .ref()
-            .update({'driver_bundle_id': package.packageName.toString()});
+
+      // ✅ Firebase Database Update (Ensure package is not null)
+      if (package != null) {
+        if (platform == TargetPlatform.android) {
+          await FirebaseDatabase.instance
+              .ref()
+              .update({'driver_package_name': package.packageName.toString()});
+        } else {
+          await FirebaseDatabase.instance
+              .ref()
+              .update({'driver_bundle_id': package.packageName.toString()});
+        }
       }
+
       result = 'true';
-    } else if (respon.statusCode == 422) {
+    }
+    else if (respon.statusCode == 422) {
       debugPrint(respon.body);
       var error = jsonDecode(respon.body)['errors'];
       result = error[error.keys.toList()[0]]
@@ -1576,7 +1598,7 @@ Future<bool> driverLogin({String? email, String? password}) async {
       String token = jsonVal['access_token'].toString();
 
       await saveToken(token); // ✅ Save token globally
-
+      getUserDetails();
       return true;
     } else {
       print('❌ Login Failed: ${response.body}');
@@ -1602,6 +1624,7 @@ forgotPassword({
         },
         body: jsonEncode({
           "email":email,
+          "user_type":"driver"
         }));
     if (response.statusCode == 200) {
       var jsonVal = jsonDecode(response.body);
@@ -1799,7 +1822,17 @@ getUserDetails() async {
         }
       }
       result = true;
-    } else {
+    } else if (response.statusCode == 401) {
+      // ❌ Unauthorized: Remove token & navigate to login
+      print('❌ Token Expired! Logging out...');
+      await prefs.remove('BearerToken');
+
+      navigatorKey.currentState?.pushNamedAndRemoveUntil(
+        '/login', // ✅ Redirect to login screen
+            (route) => false, // ✅ Clear all previous routes
+      );}
+
+    else {
       debugPrint(response.body);
       result = false;
     }
@@ -1972,11 +2005,11 @@ currentPositionUpdate() async {
                   double.parse(center.longitude.toString()));
 
               // 🔔 Show Local Notification for Ride Update
-              LocalNotificationService.showLocalNotification(
-                title: "New Ride Assigned",
-                body: "You have a new ride request. Please check your app.",
-                payload: driverReq,
-              );
+              // LocalNotificationService.showLocalNotification(
+              //   title: "New Ride Assigned",
+              //   body: "You have a new ride request. Please check your app.",
+              //   payload: driverReq,
+              // );
             }
           }
 
@@ -3112,6 +3145,8 @@ List chatListUser = [];
     return;
   }
 
+
+
   DatabaseReference chatRef = FirebaseDatabase.instance.ref("messages/${driverReq['id']}");
 
   // ✅ Cancel previous listener to prevent duplicates
@@ -3197,11 +3232,11 @@ Future<void> sendMessageForDriver(String chat) async {
     });
 
     // ✅ Add Message to Local Chat List for Instant UI Update
-    chatListUser.add({
-      'message': chat,
-      'from_type': 2, // Driver
-      'converted_created_at': formatTime(DateTime.now()),
-    });
+    // chatListUser.add({
+    //   'message': chat,
+    //   'from_type': 2, // Driver
+    //   'converted_created_at': formatTime(DateTime.now()),
+    // });
 
     // ✅ Update UI
     valueNotifiercheck.incrementNotifier();
@@ -4737,26 +4772,26 @@ void streamRequest() {
   rideStreamChanges?.cancel();
   requestStreamEnd?.cancel();
   requestStreamStart?.cancel();
+  messageStream?.cancel(); // Cancel existing message stream
 
   rideStreamStart = null;
   rideStreamChanges = null;
   requestStreamStart = null;
   requestStreamEnd = null;
+  messageStream = null; // Reset message stream
 
   if (userDetails['id'] == null) {
-    print("User ID is null. Cannot listen for requests.");
+    print("User ID is null. Cannot listen for requests or messages.");
     return;
   }
 
+  // ✅ Listen for new ride requests
   requestStreamStart = FirebaseDatabase.instance
       .ref('request-meta')
       .orderByChild('driver_id')
       .equalTo(userDetails['id'])
       .onChildAdded
-      .handleError((onError) {
-    print("Error in request stream: $onError");
-    requestStreamStart?.cancel();
-  }).listen((event) {
+      .listen((event) {
     if (event.snapshot.exists) {
       Map<String, dynamic> requestData =
       Map<String, dynamic>.from(event.snapshot.value as Map);
@@ -4766,13 +4801,13 @@ void streamRequest() {
         streamEnd(event.snapshot.key.toString());
         getUserDetails();
 
-        // Notify the driver
+        // ✅ Notify the driver for ride request
         notifyDriver(requestData);
       }
     }
   });
 
-  // Listen for ride status updates
+  // ✅ Listen for ride status updates
   rideStreamChanges = FirebaseDatabase.instance
       .ref('request-meta')
       .orderByChild('driver_id')
@@ -4787,8 +4822,35 @@ void streamRequest() {
       notifyDriver(updatedData);
     }
   });
+
+  // ✅ Listen for new chat messages
+  messageStream = FirebaseDatabase.instance
+      .ref('messages')
+      .orderByChild('receiver_id') // Filter messages for the driver
+      .equalTo(userDetails['id'])
+      .onChildAdded
+      .listen((event) {
+    if (event.snapshot.exists) {
+      Map<String, dynamic> messageData =
+      Map<String, dynamic>.from(event.snapshot.value as Map);
+
+      print("📩 New message received: ${messageData['message']}");
+
+      // ✅ Notify the driver for new message
+      notifyDriverMessage(messageData);
+    }
+  });
 }
 
+void notifyDriverMessage(Map<String, dynamic> messageData) {
+  if (messageData.isEmpty) return;
+
+  LocalNotificationService.showLocalNotification(
+    title: "📩 New Message",
+    body: "You have a new message: ${messageData['message']}",
+    payload: messageData,
+  );
+}
 
 void notifyDriver(Map<String, dynamic> rideRequest) {
   if (rideRequest.isEmpty) return;
