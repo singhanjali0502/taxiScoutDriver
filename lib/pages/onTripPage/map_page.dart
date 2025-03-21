@@ -3024,7 +3024,7 @@ class _MapsState extends State<Maps>
                                                                                     width: media.width * 0.2,
                                                                                     child: FittedBox(
                                                                                       child: Text(
-                                                                                        driverReq['requested_currency_symbol'] + driverReq['request_eta_amount'].toStringAsFixed(2),
+                                                                                        driverReq['request_eta_amount'].toStringAsFixed(2),
                                                                                         style: GoogleFonts.roboto(fontSize: media.width * fourteen, color: textColor),
                                                                                       ),
                                                                                     ),
@@ -3378,7 +3378,7 @@ class _MapsState extends State<Maps>
                                                                 children: [
                                                                   (driverReq['accepted_at'] == null && driverReq['show_request_eta_amount'] == true && driverReq['request_eta_amount'] != null)
                                                                       ? Text(
-                                                                    driverReq['requested_currency_symbol'] + driverReq['request_eta_amount'].toString(),
+                                                                    driverReq['request_eta_amount'].toString(),
                                                                     style: GoogleFonts.roboto(fontSize: media.width * fourteen, color: textColor),
                                                                   )
                                                                       : (driverReq['is_driver_arrived'] == 1 && waitingTime != null)
@@ -3823,7 +3823,7 @@ class _MapsState extends State<Maps>
                                                                 children: [
                                                                   (driverReq['accepted_at'] == null && driverReq['show_request_eta_amount'] == true && driverReq['request_eta_amount'] != null)
                                                                       ? Text(
-                                                                    driverReq['requested_currency_symbol'] + driverReq['request_eta_amount'].toString(),
+                                                                    driverReq['request_eta_amount'].toString(),
                                                                     style: GoogleFonts.roboto(fontSize: media.width * fourteen, color: textColor),
                                                                   )
                                                                       : (driverReq['is_driver_arrived'] == 1 && waitingTime != null)

@@ -286,9 +286,7 @@ class _InvoiceState extends State<Invoice> {
                                             color: textColor),
                                       ),
                                       Text(
-                                        driverReq['requestBill']['data']
-                                                ['requested_currency_symbol'] +
-                                            ' ' +
+                                        driverReq['requestBill']['data']+
                                             driverReq['requestBill']['data']
                                                     ['base_price']
                                                 .toString(),
@@ -314,8 +312,7 @@ class _InvoiceState extends State<Invoice> {
                                       ),
                                       Text(
                                         driverReq['requestBill']['data']
-                                                ['requested_currency_symbol'] +
-                                            ' ' +
+                                            +
                                             driverReq['requestBill']['data']
                                                     ['distance_price']
                                                 .toString(),
@@ -341,8 +338,7 @@ class _InvoiceState extends State<Invoice> {
                                       ),
                                       Text(
                                         driverReq['requestBill']['data']
-                                                ['requested_currency_symbol'] +
-                                            ' ' +
+                                               +
                                             driverReq['requestBill']['data']
                                                     ['time_price']
                                                 .toString(),
@@ -364,8 +360,7 @@ class _InvoiceState extends State<Invoice> {
                                                 ['text_waiting_price'] +
                                             ' (' +
                                             driverReq['requestBill']['data']
-                                                ['requested_currency_symbol'] +
-                                            ' ' +
+                                               +
                                             driverReq['requestBill']['data']
                                                     ['waiting_charge_per_min']
                                                 .toString() +
@@ -381,8 +376,7 @@ class _InvoiceState extends State<Invoice> {
                                       ),
                                       Text(
                                         driverReq['requestBill']['data']
-                                                ['requested_currency_symbol'] +
-                                            ' ' +
+                                               +
                                             driverReq['requestBill']['data']
                                                     ['waiting_charge']
                                                 .toString(),
@@ -415,9 +409,8 @@ class _InvoiceState extends State<Invoice> {
                                                   color: textColor),
                                             ),
                                             Text(
-                                              driverReq['requestBill']['data'][
-                                                      'requested_currency_symbol'] +
-                                                  ' ' +
+                                              driverReq['requestBill']['data']
+                                                     +
                                                   driverReq['requestBill']
                                                               ['data']
                                                           ['cancellation_fee']
@@ -453,9 +446,8 @@ class _InvoiceState extends State<Invoice> {
                                                   color: textColor),
                                             ),
                                             Text(
-                                              driverReq['requestBill']['data'][
-                                                      'requested_currency_symbol'] +
-                                                  ' ' +
+                                              driverReq['requestBill']['data']
+                                                     +
                                                   driverReq['requestBill']
                                                               ['data']
                                                           ['airport_surge_fee']
@@ -484,8 +476,7 @@ class _InvoiceState extends State<Invoice> {
                                       ),
                                       Text(
                                         driverReq['requestBill']['data']
-                                                ['requested_currency_symbol'] +
-                                            ' ' +
+                                                +
                                             driverReq['requestBill']['data']
                                                     ['admin_commision']
                                                 .toString(),
@@ -518,9 +509,7 @@ class _InvoiceState extends State<Invoice> {
                                                   color: Colors.red),
                                             ),
                                             Text(
-                                              driverReq['requestBill']['data'][
-                                                      'requested_currency_symbol'] +
-                                                  ' ' +
+                                              driverReq['requestBill']['data'] +
                                                   driverReq['requestBill']
                                                               ['data']
                                                           ['promo_discount']
@@ -549,8 +538,7 @@ class _InvoiceState extends State<Invoice> {
                                       ),
                                       Text(
                                         driverReq['requestBill']['data']
-                                                ['requested_currency_symbol'] +
-                                            ' ' +
+                                                +
                                             driverReq['requestBill']['data']
                                                     ['service_tax']
                                                 .toString(),
@@ -583,8 +571,7 @@ class _InvoiceState extends State<Invoice> {
                                       ),
                                       Text(
                                         driverReq['requestBill']['data']
-                                                ['requested_currency_symbol'] +
-                                            ' ' +
+                                                +
                                             driverReq['requestBill']['data']
                                                     ['total_amount']
                                                 .toString(),
@@ -623,8 +610,7 @@ class _InvoiceState extends State<Invoice> {
                                       ),
                                       Text(
                                         driverReq['requestBill']['data']
-                                                ['requested_currency_symbol'] +
-                                            ' ' +
+                                              +
                                             driverReq['requestBill']['data']
                                                     ['total_amount']
                                                 .toString(),
