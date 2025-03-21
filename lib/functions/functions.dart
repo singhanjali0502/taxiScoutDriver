@@ -4206,6 +4206,8 @@ userLogout() async {
       'Content-Type': 'application/json'
     });
     if (response.statusCode == 200) {
+      FirebaseMessaging.instance.unsubscribeFromTopic("requests");
+      FirebaseMessaging.instance.unsubscribeFromTopic("messages");
       platforms.invokeMethod('logout');
       // print(id);
       if (role != 'owner') {
