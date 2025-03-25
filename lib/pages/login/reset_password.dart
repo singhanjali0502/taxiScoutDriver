@@ -30,168 +30,159 @@ class _ResetPasswordState extends State<ResetPassword> {
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
+
     return Scaffold(
-      body: Stack(
-        children:[
-          Container(
-            child: Form(
-            key: _formKey,
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.only(left: 25, right: 25, top: 30),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Image.asset(
-                        'assets/images/36759121.png',
-                        height: MediaQuery.of(context).size.height * 0.30,
+      body: SizedBox(
+        height: double.infinity, // Ensure Stack takes full screen height
+        child: Stack(
+          children: [
+            Form(
+              key: _formKey,
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 25, right: 25, top: 30),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: Image.asset(
+                          'assets/images/36759121.png',
+                          height: MediaQuery.of(context).size.height * 0.30,
+                        ),
                       ),
-                    ),
-                    Text(
-                      languages[choosenLanguage]['text_resetPasswor'],
-                      style: GoogleFonts.roboto(
-                          fontSize: media.width * twentysix,
-                          fontWeight: FontWeight.bold,
-                          color: textColor),
-                    ),
-                   const SizedBox(
-                      height: 30,
-                    ),
-                    TextFormField(
-                      controller: _passwordController,
-                      decoration: InputDecoration(
-                        suffixIcon: IconButton(
-                            icon: Icon(passwordVisible
-                                ? Icons.visibility
-                                : Icons.visibility_off),
-                            onPressed: () {
-                              setState(
-                                () {
+                      Text(
+                        languages[choosenLanguage]['text_resetPasswor'],
+                        style: GoogleFonts.roboto(
+                            fontSize: media.width * twentysix,
+                            fontWeight: FontWeight.bold,
+                            color: textColor),
+                      ),
+                      const SizedBox(height: 30),
+                      TextFormField(
+                        controller: _passwordController,
+                        decoration: InputDecoration(
+                          suffixIcon: IconButton(
+                              icon: Icon(passwordVisible
+                                  ? Icons.visibility
+                                  : Icons.visibility_off),
+                              onPressed: () {
+                                setState(() {
                                   passwordVisible = !passwordVisible;
-                                },
-                              );
-                            }),
-                        filled: true,
-                        fillColor: const Color(0xffF2F3F5),
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            borderSide: BorderSide.none),
-                        labelText: "Password",
+                                });
+                              }),
+                          filled: true,
+                          fillColor: const Color(0xffF2F3F5),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15),
+                              borderSide: BorderSide.none),
+                          labelText: "Password",
+                        ),
+                        validator: validatePassword,
                       ),
-                      onSaved: (String? value) {},
-                      validator: validatePassword,
-                    ),
-                    const SizedBox(height: 20),
-                    TextFormField(
-                      controller: _confirmPassword,
-                      decoration: InputDecoration(
-                        suffixIcon: IconButton(
-                            icon: Icon(confirmPVisible
-                                ? Icons.visibility
-                                : Icons.visibility_off),
-                            onPressed: () {
-                              setState(
-                                () {
+                      const SizedBox(height: 20),
+                      TextFormField(
+                        controller: _confirmPassword,
+                        decoration: InputDecoration(
+                          suffixIcon: IconButton(
+                              icon: Icon(confirmPVisible
+                                  ? Icons.visibility
+                                  : Icons.visibility_off),
+                              onPressed: () {
+                                setState(() {
                                   confirmPVisible = !confirmPVisible;
-                                },
-                              );
-                            }),
-                        filled: true,
-                        fillColor: const Color(0xffF2F3F5),
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            borderSide: BorderSide.none),
-                        labelText: "Confirm Password",
+                                });
+                              }),
+                          filled: true,
+                          fillColor: const Color(0xffF2F3F5),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15),
+                              borderSide: BorderSide.none),
+                          labelText: "Confirm Password",
+                        ),
+                        validator: validatePassword,
                       ),
-                      onSaved: (String? value) {},
-                      validator: validatePassword,
-                    ),
-                    const SizedBox(height: 20),
-                    TextFormField(
-                      controller: _otpController,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: const Color(0xffF2F3F5),
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            borderSide: BorderSide.none),
-                        labelText: "Otp",
+                      const SizedBox(height: 20),
+                      TextFormField(
+                        controller: _otpController,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: const Color(0xffF2F3F5),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15),
+                              borderSide: BorderSide.none),
+                          labelText: "OTP",
+                        ),
+                        validator: validateOtp,
                       ),
-                      onSaved: (String? value) {},
-                      validator: validateOtp,
-                    ),
-                    const SizedBox(
-                      height: 50,
-                    ),
-                    Container(
-                      width: media.width * 1 - media.width * 0.08,
-                      alignment: Alignment.center,
-                      child: Button(
-                        onTap: () async {
-                          if (_formKey.currentState!.validate()) {
-                            _errorMessage =
-                                validatePassword(_passwordController.text);
-                            _errorMessage = validateOtp(_otpController.text);
-                            setState(() {
-                              _errorMessage = null;
-                              _isLoggingIn = true; // Show loading indicator
-                            });
-                            if (_errorMessage == null) {
-                              var _resetPass = resetPassword(
+                      const SizedBox(height: 50),
+                      Container(
+                        width: media.width * 1 - media.width * 0.08,
+                        alignment: Alignment.center,
+                        child: Button(
+                          onTap: () async {
+                            if (_formKey.currentState!.validate()) {
+                              setState(() {
+                                _errorMessage = null;
+                                _isLoggingIn = true; // Show loader
+                              });
+
+                              String? passwordError = validatePassword(_passwordController.text);
+                              String? otpError = validateOtp(_otpController.text);
+
+                              if (passwordError != null || otpError != null) {
+                                setState(() {
+                                  _errorMessage = passwordError ?? otpError;
+                                  _isLoggingIn = false; // Hide loader
+                                });
+                                return;
+                              }
+
+                              bool _resetPass = await resetPassword(
                                 email: widget.email,
                                 password: _passwordController.text,
                                 confirmPassword: _confirmPassword.text,
                                 otp: _otpController.text,
                               );
-                              setState(() {
-                                _isLoggingIn = false; // Hide loading indicator
-                              });
-                              if (_resetPass) {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => const Login()));
-                              } else {
-                                setState(() {
-                                  _errorMessage = 'Invalid Otp';
-                                });
-                              }
-                            } else {
-                              setState(() {
-                                _errorMessage = _errorMessage;
-                              });
-                            }
-                            setState(() {
-                              _isLoggingIn = false;
-                            });
-                          }
-                          FocusManager.instance.primaryFocus?.unfocus();
-                        },
-                        text: languages[choosenLanguage]['text_submit'],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-        ),
-          ),
-          if (_isLoggingIn)
-            Positioned.fill(
-              // This ensures it covers the entire screen
-              child: Container(
-                color: Colors.black54,
-                child: const Center(
-                  child: Loading(), // Your Loading widget or custom loader
-                ),
-              ),
-            ),
-      ]),
 
+                              setState(() {
+                                _isLoggingIn = false;
+                                _errorMessage = _resetPass ? null : 'Invalid OTP';
+                              });
+
+                              if (_resetPass) {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const Login()),
+                                );
+                              }
+                            }
+                            FocusManager.instance.primaryFocus?.unfocus();
+                          },
+                          text: languages[choosenLanguage]['text_submit'],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            // **Full-Screen Loader Overlay**
+            if (_isLoggingIn)
+              Positioned.fill(
+                child: Container(
+                  color: Colors.black54, // Semi-transparent background
+                  alignment: Alignment.center,
+                  child: const Loading(), // Your Loading widget
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
+
 
   String? validatePassword(String? value) {
     if (value!.isEmpty) {

@@ -44,7 +44,7 @@ class _Login_otpState extends State<Login_otp> {
       String errorMessage = '';
       if (errorMessage.isEmpty) {
         final isOtpValid = await emailVerify(
-          email: widget.email,
+          email: widget.email ?? "",
           otp: _otpController.text,
         );
         _hideLoader();

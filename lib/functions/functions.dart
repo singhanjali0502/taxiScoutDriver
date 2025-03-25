@@ -690,17 +690,8 @@ Future<String> registerDriver({
         platforms.invokeMethod('login');
       }
 
-      // Save token in bearerToken list
-      bearerToken.add(BearerClass(
-        type: jsonVal['token_type'].toString(),
-        token: jsonVal['access_token'].toString(),
-      ));
-
-      // ✅ Save token persistently in SharedPreferences
-      SharedPreferences pref = await SharedPreferences.getInstance();
-      await pref.setString('BearerToken', bearerToken[0].token); // Use consistent key!
-
-      print('✅ Token saved: ${bearerToken[0].token}'); // Debugging
+      String token = jsonVal['access_token'].toString();
+      await saveToken(token);// Debugging
 
       // Fetch user details after saving token
       await getUserDetails();
@@ -902,30 +893,29 @@ Future<String> updateDriverCar({
 //   return result;
 // }
 
-emailVerify({
-  String? email,
-  String? otp,
+Future<bool> emailVerify({
+  required String email,
+  required String otp,
 }) async {
-  dynamic result;
   try {
     var token = await FirebaseMessaging.instance.getToken();
     var fcm = token.toString();
-    var response = await http.post(Uri.parse('${url}api/v1/validate-email-otp'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          "email":email,
-          "otp":otp,
-          "device_token": fcm,
-        }));
+
+    var response = await http.post(
+      Uri.parse('${url}api/v1/validate-email-otp'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        "email": email,
+        "otp": otp,
+        "device_token": fcm,
+      }),
+    );
+
     if (response.statusCode == 200) {
       var jsonVal = jsonDecode(response.body);
-      bearerToken.add(BearerClass(
-          type: jsonVal['token_type'].toString(),
-          token: jsonVal['access_token'].toString()));
-      result = true;
-      pref.setString('Bearer', bearerToken[0].token);
+      String token = jsonVal['access_token'].toString();
+      await saveToken(token);
+
       if (platform == TargetPlatform.android && package != null) {
         await FirebaseDatabase.instance
             .ref()
@@ -935,17 +925,20 @@ emailVerify({
             .ref()
             .update({'user_bundle_id': package.packageName.toString()});
       }
+
+      return true; // ✅ Always return `true` on success
     } else {
       debugPrint(response.body);
-      result = false;
+      return false; // ✅ Always return `false` on failure
     }
-    return result;
   } catch (e) {
     if (e is SocketException) {
       internet = false;
     }
+    return false; // ✅ Always return `false` if an exception occurs
   }
 }
+
 resendOtpRegister({
   String? email,
 }) async {
