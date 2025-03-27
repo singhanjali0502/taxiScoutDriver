@@ -330,7 +330,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                     DropdownButtonFormField<DriverVehicle>(
                       value: _selectedVehicleType,
-                      hint: const Text("Select Vehicle Type"),
+                      hint: const Text("Select Vehicle"),
                       items: _dropdownItems.map((DriverVehicle vehicleType) {
                         return DropdownMenuItem<DriverVehicle>(
                           value: vehicleType,
