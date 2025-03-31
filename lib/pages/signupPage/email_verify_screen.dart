@@ -2,12 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tagyourtaxi_driver/pages/loadingPage/loading.dart';
-import 'package:tagyourtaxi_driver/pages/login/login.dart';
 import '../../functions/functions.dart';
 import '../../styles/styles.dart';
 import '../../translation/translation.dart';
 import '../../widgets/widgets.dart';
-import '../NavigatorPages/vehicle_type_update.dart';
 import '../onTripPage/map_page.dart';
 
 class Login_otp extends StatefulWidget {

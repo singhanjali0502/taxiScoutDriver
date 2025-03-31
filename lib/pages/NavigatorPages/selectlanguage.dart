@@ -75,7 +75,7 @@ class _SelectLanguageState extends State<SelectLanguage> {
                       width: media.width * 0.9,
                       height: media.height * 0.16,
                       child: Image.asset(
-                        'assets/images/selectLanguage.png',
+                        'assets/images/chooselang.jpeg',
                         fit: BoxFit.contain,
                       ),
                     ),

@@ -1,5 +1,11 @@
 Map<String, dynamic> languages = {
   "de": {
+    "text_instruction":"Setze deinen Status auf ‚Im Dienst",
+    "text_on_duty":"Im Dienst",
+    "text_off_duty":"Nicht im Dienst",
+    "text_yes":"Ja",
+    "text_no":"Nein",
+    "text_start":"Sind Sie ein Fahrer mit eigenem Auto und eigenem Taxiunternehmen?",
     "email_verify": "Bitte bestätigen Sie Ihr Konto",
     "text_resetPasswor":"Passwort zurücksetzen",
     "text_signup":"Registrieren",
@@ -75,8 +81,6 @@ Map<String, dynamic> languages = {
     "text_ok": "OK",
     "text_loc_permission":
         "Erlauben Sie den Standortzugriff jederzeit, um Fahrten zu empfangen.",
-    "text_off_duty": "Im Dienst",
-    "text_on_duty": "Aus Dienst außerhalb des Dienstes",
     "text_pickpoint": "Abholpunkt",
     "text_droppoint": "Dropout -Punkt",
     "text_decline": "Abfall",
@@ -101,7 +105,7 @@ Map<String, dynamic> languages = {
     "text_faq": "FAQ",
     "text_sos": "Notruf (SOS)",
     "text_change_language": "Sprache ändern",
-    "text_about": "Um",
+    "text_about": "About",
     "text_logout": "Ausloggen",
     "text_tripsummary": "Reisezusammenfassung",
     "text_reference": "Referenznummer",
@@ -368,8 +372,6 @@ Map<String, dynamic> languages = {
     "text_fleet_details": "Flottendetails",
     "text_delete_driver": "Fahrer löschen",
     "text_delete_confirmation": "Möchten Sie diesen Fahrer sicher löschen?",
-    "text_yes": "Ja",
-    "text_no": "NEIN",
     "text_fleet_diver_low_bal":
         "Ihr Eigentümer Brieftaschenbalance ist niedrig. Bitte wenden Sie sich an Ihren Besitzer",
     "text_add_vehicle": "Fahrzeug hinzufügen",
@@ -443,6 +445,12 @@ Map<String, dynamic> languages = {
   },
 
   "en": {
+    "text_instruction":"You need to go on duty!",
+    "text_on_duty":"On Duty",
+    "text_off_duty":"Off Duty",
+    "text_yes":"Yes",
+    "text_no":"No",
+    "text_start":"Are you a driver with your own car and your own taxi company?",
     "email_verify": "Please verify account",
     "text_resetPasswor":"Reset Password",
     "text_signup":"Signup",
@@ -875,6 +883,12 @@ Map<String, dynamic> languages = {
   },
 
   "fr": {
+    "text_instruction":"You need to go on duty!",
+    "text_on_duty":"On Duty",
+    "text_off_duty":"Off Duty",
+    "text_yes":"Yes",
+    "text_no":"No",
+    "text_start":"Are you a driver with your own car and your own taxi company?",
     "email_verify": "Please verify account",
     "text_resetPasswor":"Reset Password",
     "text_signup":"Signup",
@@ -1323,6 +1337,12 @@ Map<String, dynamic> languages = {
   },
 
   "ar": {
+    "text_instruction":"You need to go on duty!",
+    "text_on_duty":"On Duty",
+    "text_off_duty":"Off Duty",
+    "text_yes":"Yes",
+    "text_no":"No",
+    "text_start":"Are you a driver with your own car and your own taxi company?",
     "email_verify": "Please verify account",
     "text_resetPasswor":"Reset Password",
     "text_signup":"Signup",
@@ -1751,7 +1771,14 @@ Map<String, dynamic> languages = {
     "text_myroute_warning":
         "يجب ألا يكون المكان الحالي الخاص بك أقل من 5كيلو متر من عنوان المنزل الخاص بك"
   },
+
   "tr": {
+    "text_instruction":"You need to go on duty!",
+    "text_on_duty":"On Duty",
+    "text_off_duty":"Off Duty",
+    "text_yes":"Yes",
+    "text_no":"No",
+    "text_start":"Are you a driver with your own car and your own taxi company?",
     "email_verify": "Please verify account",
     "text_resetPasswor":"Reset Password",
     "text_signup":"Signup",
@@ -2187,7 +2214,14 @@ Map<String, dynamic> languages = {
     "text_myroute_warning":
         "Geçerli konumunuz ev adresinizden 5 km 'den az olmamalıdır"
   },
+
   "zh": {
+    "text_instruction":"You need to go on duty!",
+    "text_on_duty":"On Duty",
+    "text_off_duty":"Off Duty",
+    "text_yes":"Yes",
+    "text_no":"No",
+    "text_start":"Are you a driver with your own car and your own taxi company?",
     "email_verify": "Please verify account",
     "text_resetPasswor":"Reset Password",
     "text_signup":"Signup",
@@ -4316,6 +4350,12 @@ Map<String, dynamic> languages = {
   //       "Mevcut konumunuz ev adresinizden 5 km'den daha az olmamalı"
   // }
   "ru": {
+    "text_instruction":"You need to go on duty!",
+    "text_on_duty":"On Duty",
+    "text_off_duty":"Off Duty",
+    "text_yes":"Yes",
+    "text_no":"No",
+    "text_start":"Are you a driver with your own car and your own taxi company?",
     "email_verify": "Please verify account",
     "text_resetPasswor":"Reset Password",
     "text_signup":"Signup",
@@ -4756,7 +4796,14 @@ Map<String, dynamic> languages = {
     "text_myroute_warning":
         "Ваше текущее местоположение должно быть не менее чем в 5 км от вашего домашнего адреса"
   },
+
   "it": {
+    "text_instruction":"You need to go on duty!",
+    "text_on_duty":"On Duty",
+    "text_off_duty":"Off Duty",
+    "text_yes":"Yes",
+    "text_no":"No",
+    "text_start":"Are you a driver with your own car and your own taxi company?",
     "email_verify": "Please verify account",
     "text_resetPasswor":"Reset Password",
     "text_signup":"Signup",
@@ -5189,7 +5236,14 @@ Map<String, dynamic> languages = {
     "text_myroute_warning":
         "La tua posizione attuale non dovrebbe essere inferiore a 5 km dall'indirizzo di casa"
   },
+
   "pt": {
+    "text_instruction":"You need to go on duty!",
+    "text_on_duty":"On Duty",
+    "text_off_duty":"Off Duty",
+    "text_yes":"Yes",
+    "text_no":"No",
+    "text_start":"Are you a driver with your own car and your own taxi company?",
     "email_verify": "Please verify account",
     "text_resetPasswor":"Reset Password",
     "text_signup":"Signup",
@@ -5630,6 +5684,12 @@ Map<String, dynamic> languages = {
   },
 
   "id": {
+    "text_instruction":"You need to go on duty!",
+    "text_on_duty":"On Duty",
+    "text_off_duty":"Off Duty",
+    "text_yes":"Yes",
+    "text_no":"No",
+    "text_start":"Are you a driver with your own car and your own taxi company?",
     "email_verify": "Please verify account",
     "text_resetPasswor":"Reset Password",
     "text_signup":"Signup",
@@ -6066,7 +6126,14 @@ Map<String, dynamic> languages = {
     "text_myroute_warning":
         "Lokasi Anda saat ini tidak boleh kurang dari 5km dari alamat rumah Anda"
   },
+
   "ko": {
+    "text_instruction":"You need to go on duty!",
+    "text_on_duty":"On Duty",
+    "text_off_duty":"Off Duty",
+    "text_yes":"Yes",
+    "text_no":"No",
+    "text_start":"Are you a driver with your own car and your own taxi company?",
     "email_verify": "Please verify account",
     "text_resetPasswor":"Reset Password",
     "text_signup":"Signup",
@@ -6479,7 +6546,14 @@ Map<String, dynamic> languages = {
     "text_address_added_success": "주소가 성공적으로 추가되었습니다",
     "text_myroute_warning": "현재 위치는 가정 주소에서 5km 이상이어야합니다."
   },
+
   "es": {
+    "text_instruction":"You need to go on duty!",
+    "text_on_duty":"On Duty",
+    "text_off_duty":"Off Duty",
+    "text_yes":"Yes",
+    "text_no":"No",
+    "text_start":"Are you a driver with your own car and your own taxi company?",
     "email_verify": "Please verify account",
     "text_resetPasswor":"Reset Password",
     "text_signup":"Signup",
@@ -6914,7 +6988,14 @@ Map<String, dynamic> languages = {
     "text_myroute_warning":
         "Su ubicación actual no debe estar a menos de 5 km de la dirección de su casa"
   },
+
   "iw": {
+    "text_instruction":"You need to go on duty!",
+    "text_on_duty":"On Duty",
+    "text_off_duty":"Off Duty",
+    "text_yes":"Yes",
+    "text_no":"No",
+    "text_start":"Are you a driver with your own car and your own taxi company?",
     "email_verify": "Please verify account",
     "text_resetPasswor":"Reset Password",
     "text_signup":"Signup",
@@ -7336,7 +7417,14 @@ Map<String, dynamic> languages = {
     "text_myroute_warning":
         "המיקום הנוכחי שלך לא אמור להיות פחות מ- 5 ק\"מ מכתובת הבית שלך"
   },
+
   "ur": {
+    "text_instruction":"You need to go on duty!",
+    "text_on_duty":"On Duty",
+    "text_off_duty":"Off Duty",
+    "text_yes":"Yes",
+    "text_no":"No",
+    "text_start":"Are you a driver with your own car and your own taxi company?",
     "email_verify": "Please verify account",
     "text_resetPasswor":"Reset Password",
     "text_signup":"Signup",
@@ -7774,6 +7862,12 @@ Map<String, dynamic> languages = {
   },
 
   "bn": {
+    "text_instruction":"You need to go on duty!",
+    "text_on_duty":"On Duty",
+    "text_off_duty":"Off Duty",
+    "text_yes":"Yes",
+    "text_no":"No",
+    "text_start":"Are you a driver with your own car and your own taxi company?",
     "email_verify": "Please verify account",
     "text_resetPasswor":"Reset Password",
     "text_signup":"Signup",

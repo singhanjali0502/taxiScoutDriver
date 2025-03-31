@@ -3051,9 +3051,10 @@ getSosData(lat, lng) async {
 
 List chatList = [];
 
-getCurrentMessagesCompany() async {
+Future<List<dynamic>> getCurrentMessagesCompany() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String? token = prefs.getString('BearerToken');
+
   try {
     var response = await http.get(
       Uri.parse('${url}api/v1/driver/chat-history'),
@@ -3062,33 +3063,43 @@ getCurrentMessagesCompany() async {
         'Content-Type': 'application/json'
       },
     );
+
     if (response.statusCode == 200) {
-      if (jsonDecode(response.body)['success'] == true) {
+      var responseBody = jsonDecode(response.body);
+
+      if (responseBody['success'] == true) {
+        // Ensure 'data' is always a valid list
+        List<dynamic> newChatList = responseBody['data'] ?? [];
+
+        // Check if new messages arrived
         if (chatList.where((element) => element['from_type'] == 1).length !=
-            jsonDecode(response.body)['data']
-                .where((element) => element['from_type'] == 1)
-                .length) {
+            newChatList.where((element) => element['from_type'] == 1).length) {
           audioPlayer.play(audio);
         }
-        chatList = jsonDecode(response.body)['data'];
+
+        chatList = newChatList;
         valueNotifierHome.incrementNotifier();
+        return chatList; // ✅ Return the chat messages
       }
     } else {
-      debugPrint(response.body);
+      debugPrint("Error Response: ${response.body}");
     }
   } catch (e) {
     if (e is SocketException) {
       internet = false;
     }
+    debugPrint("Error fetching messages: $e");
   }
+
+  return []; // ✅ Always return a valid list
 }
+
+
 
 sendMessageCompany(chat) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String? token = prefs.getString('BearerToken');
   try {
-    var token = await FirebaseMessaging.instance.getToken();
-  var fcm = token.toString();
     var response = await http.post(Uri.parse('${url}api/v1/driver/send'),
         headers: {
           'Authorization': 'Bearer $token',

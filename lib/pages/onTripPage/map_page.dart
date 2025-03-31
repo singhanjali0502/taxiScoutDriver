@@ -9,6 +9,7 @@ import 'package:geolocator/geolocator.dart' as geolocator;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:location/location.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tagyourtaxi_driver/functions/functions.dart';
 import 'package:tagyourtaxi_driver/functions/geohash.dart';
 import 'package:tagyourtaxi_driver/functions/notifications.dart';
@@ -86,7 +87,7 @@ class _MapsState extends State<Maps>
   Location location = Location();
   String state = '';
   dynamic _controller;
-  Animation<double>? _animation;
+  late Animation<double> _animation;
   dynamic animationController;
   String _cancellingError = '';
   double mapPadding = 0.0;
@@ -114,6 +115,8 @@ class _MapsState extends State<Maps>
   bool contactus = false;
   GlobalKey iconKey = GlobalKey();
   GlobalKey iconDropKey = GlobalKey();
+  bool _showOnlinePopup = false; // Track online popup state
+  late AnimationController _anmiController;
 
 
   dynamic onrideicon;
@@ -133,7 +136,7 @@ class _MapsState extends State<Maps>
   final _debouncer = Debouncer(milliseconds: 1000);
 
   Timer? _userDetailsTimer;
-
+  bool _showPopup = true;
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
@@ -144,13 +147,36 @@ class _MapsState extends State<Maps>
     _startUserDetailsLoop();
     getLocs();
     getonlineoffline();
+    _checkFirstTimeUser();
    // First immediate call
     driverService.startLocationUpdates();
     // ✅ Call getUserDetails() every 3 seconds
+    _anmiController = AnimationController(
+      duration: Duration(seconds: 1), // Duration of one cycle
+      vsync: this,
+    )..repeat(reverse: true); // Repeat animation up and down
 
+    _animation = Tween<double>(begin: 0, end: 10).animate(
+      CurvedAnimation(parent: _anmiController, curve: Curves.easeInOut),
+    );
 
     super.initState();
   }
+
+  Future<void> _checkFirstTimeUser() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool hasSeenPopup = prefs.getBool('hasSeenPopup') ?? false;
+
+    if (!hasSeenPopup) {
+      setState(() {
+        _showPopup = true;
+      });
+
+      // Mark that the user has seen the popup so it doesn't show again
+      await prefs.setBool('hasSeenPopup', true);
+    }
+  }
+
 
   void _onMapCreated(GoogleMapController controller) {
     setState(() {
@@ -209,6 +235,7 @@ class _MapsState extends State<Maps>
     _controller?.dispose();
     _controller = null;
     animationController?.dispose();
+    _anmiController.dispose(); // Dispose animation controller
 
 
     super.dispose();
@@ -264,7 +291,7 @@ class _MapsState extends State<Maps>
 
       if (gettingPerm > 1) {
         locationAllowed = false;
-        if (userDetails['active'] == true) {
+        if (userDetails['available'] == true) {
           await driverService.driverStatus();
         }
         state = '3';
@@ -387,7 +414,7 @@ class _MapsState extends State<Maps>
       }
 
 
-      if (makeOnline == true && userDetails['active'] == false) {
+      if (makeOnline == true && userDetails['available'] == false) {
         await driverService.driverStatus();
       }
       makeOnline = false;
@@ -408,30 +435,66 @@ class _MapsState extends State<Maps>
   }
 
 
-  getLocationPermission() async {
-    if (serviceEnabled == false) {
-      await location.requestService();
+  Future<void> getLocationPermission(BuildContext context) async {
+    bool serviceEnabled = await geolocator.GeolocatorPlatform.instance.isLocationServiceEnabled();
+    geolocator.LocationPermission permission = await geolocator.GeolocatorPlatform.instance.checkPermission();
+
+    // If location service is disabled, navigate to settings
+    if (!serviceEnabled) {
+      bool openedSettings = await geolocator.Geolocator.openLocationSettings();
+      if (!openedSettings) return; // User didn't enable location service, return early
     }
-    if (await geolocator.GeolocatorPlatform.instance
-        .isLocationServiceEnabled()) {
-      if (permission == geolocator.LocationPermission.denied ||
-          permission == geolocator.LocationPermission.deniedForever) {
-        if (permission != geolocator.LocationPermission.deniedForever &&
-            await geolocator.GeolocatorPlatform.instance
-                .isLocationServiceEnabled()) {
-          if (platform == TargetPlatform.android) {
-            await perm.Permission.location.request();
-            await perm.Permission.locationAlways.request();
-          } else {
-            await [perm.Permission.location].request();
-          }
-        }
-      }
+
+    // Check again if location services are enabled after prompting
+    serviceEnabled = await geolocator.GeolocatorPlatform.instance.isLocationServiceEnabled();
+    if (!serviceEnabled) return; // Exit if still disabled
+
+    // Request location permission if not granted
+    if (permission == geolocator.LocationPermission.denied) {
+      permission = await geolocator.GeolocatorPlatform.instance.requestPermission();
     }
-    setState(() {
-      _isLoading = true;
-    });
-    getLocs();
+
+    // If permission is denied forever, navigate to app settings
+    if (permission == geolocator.LocationPermission.deniedForever) {
+      _showSettingsDialog(context);
+      return;
+    }
+
+    // If permission is granted, fetch location and show online/offline popup
+    if (permission == geolocator.LocationPermission.always ||
+        permission == geolocator.LocationPermission.whileInUse) {
+      getLocs();
+      setState(() {
+        _showOnlinePopup = true; // Show the online status popup
+      });
+    }
+  }
+
+
+// Show a dialog to navigate to settings
+  void _showSettingsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Location Permission Required"),
+        content: Text("This app needs location access. Please enable it in settings."),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Close dialog
+            },
+            child: Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () {
+              perm.openAppSettings(); // Open app settings
+              Navigator.pop(context); // Close dialog
+            },
+            child: Text("Open Settings"),
+          ),
+        ],
+      ),
+    );
   }
 
 
@@ -1969,7 +2032,7 @@ class _MapsState extends State<Maps>
                                                         0.05),
                                                 child: Button(
                                                     onTap: () async {
-                                                      getLocationPermission();
+                                                      getLocationPermission(context);
                                                     },
                                                     text: languages[
                                                     choosenLanguage]
@@ -2511,26 +2574,30 @@ class _MapsState extends State<Maps>
                                               ? Positioned(
                                               bottom: 25,
                                               child: InkWell(
-                                                onTap: () async {
-                                                  // Show loader before API call
+                                                onTap: _isLoading || _showOnlinePopup // Disable tap while loading or popup is active
+                                                    ? null
+                                                    : () async {
                                                   setState(() {
-                                                    _isLoading = true;
+                                                    _isLoading = true; // Show loader
                                                   });
 
                                                   await driverService.driverStatus(); // Call API
 
-                                                  if (userDetails['vehicle_type_id'] != null && userDetails['role'] == 'driver') {
+                                                  if (userDetails['vehicle_type_id'] != null &&
+                                                      userDetails['role'] == 'driver') {
                                                     if (locationAllowed == true && serviceEnabled == true) {
                                                       // API call completed, hide loader
                                                       setState(() {
                                                         _isLoading = false;
                                                       });
-                                                    } else if (locationAllowed == true && serviceEnabled == false) {
+                                                    } else if (locationAllowed == true &&
+                                                        serviceEnabled == false) {
                                                       await location.requestService();
-                                                      if (await geolocator.GeolocatorPlatform.instance.isLocationServiceEnabled()) {
+                                                      if (await geolocator.GeolocatorPlatform.instance
+                                                          .isLocationServiceEnabled()) {
                                                         serviceEnabled = true;
                                                         setState(() {
-                                                          _isLoading = true; // Show loader again for next API call
+                                                          _isLoading = true; // Show loader again
                                                         });
 
                                                         await driverService.driverStatus(); // Call API again
@@ -2544,6 +2611,7 @@ class _MapsState extends State<Maps>
                                                         setState(() {
                                                           makeOnline = true;
                                                           _locationDenied = true;
+                                                          _isLoading = false; // Hide loader
                                                         });
                                                       } else {
                                                         await location.requestService();
@@ -2563,76 +2631,96 @@ class _MapsState extends State<Maps>
                                                       }
                                                     }
                                                   } else {
-                                                    // Hide loader if user is not eligible for API call
                                                     setState(() {
-                                                      _isLoading = false;
+                                                      _isLoading = false; // Hide loader if user not eligible
                                                     });
                                                   }
                                                 },
 
-                                                child:
-                                                Container(
-                                                  padding: EdgeInsets.only(
-                                                      left: media.width *
-                                                          0.01,
-                                                      right: media.width *
-                                                          0.01),
-                                                  height: media
-                                                      .width *
-                                                      0.08,
-                                                  width: media
-                                                      .width *
-                                                      0.267,
-                                                  decoration:
-                                                  BoxDecoration(
-                                                    borderRadius:
-                                                    BorderRadius.circular(media.width *
-                                                        0.04),
-                                                    color: (userDetails['active'] ==
-                                                        false)
-                                                        ? offline
-                                                        : online,
-                                                  ),
-                                                  child: (userDetails['active'] ==
-                                                      false)
-                                                      ? Row(
-                                                    mainAxisAlignment:
-                                                    MainAxisAlignment.spaceBetween,
-                                                    children: [
-                                                      Container(),
-                                                      Text(
-                                                        'OFF DUTY',
-                                                        style: GoogleFonts.roboto(fontSize: media.width * twelve, color: onlineOfflineText),
-                                                      ),
-                                                      Container(
-                                                        padding: EdgeInsets.all(media.width * 0.01),
-                                                        height: media.width * 0.07,
-                                                        width: media.width * 0.07,
-                                                        decoration: BoxDecoration(shape: BoxShape.circle, color: onlineOfflineText),
-                                                        child: Image.asset('assets/images/offline.png'),
-                                                      )
-                                                    ],
-                                                  )
-                                                      : Row(
-                                                    mainAxisAlignment:
-                                                    MainAxisAlignment.spaceBetween,
-                                                    children: [
-                                                      Container(
-                                                        padding: EdgeInsets.all(media.width * 0.01),
-                                                        height: media.width * 0.07,
-                                                        width: media.width * 0.07,
-                                                        decoration: BoxDecoration(shape: BoxShape.circle, color: onlineOfflineText),
-                                                        child: Image.asset('assets/images/online.png'),
-                                                      ),
-                                                      Text(
-                                                        'ON DUTY',
-                                                        style: GoogleFonts.roboto(fontSize: media.width * twelve, color: onlineOfflineText),
-                                                      ),
-                                                      Container(),
-                                                    ],
+                                                child: IgnorePointer(
+                                                  ignoring: _isLoading || _showOnlinePopup, // Block interaction if loading
+                                                  child: Container(
+                                                    padding: EdgeInsets.only(
+                                                      left: media.width * 0.01,
+                                                      right: media.width * 0.01,
+                                                    ),
+                                                    height: media.width * 0.08,
+                                                    width: media.width * 0.315,
+                                                    decoration: BoxDecoration(
+                                                      borderRadius: BorderRadius.circular(media.width * 0.04),
+                                                      color: (userDetails['available'] == false)
+                                                          ? offline
+                                                          : online,
+                                                    ),
+                                                    child: _isLoading
+                                                        ? Row(
+                                                      mainAxisAlignment: MainAxisAlignment.center,
+                                                      children: [
+                                                        SizedBox(
+                                                          height: media.width * 0.05,
+                                                          width: media.width * 0.05,
+                                                          child: CircularProgressIndicator(
+                                                            color: Colors.white,
+                                                            strokeWidth: 2,
+                                                          ),
+                                                        ),
+                                                        SizedBox(width: 10),
+                                                        Text(
+                                                          "Please wait...",
+                                                          style: GoogleFonts.roboto(
+                                                              fontSize: media.width * twelve,
+                                                              color: Colors.white),
+                                                        ),
+                                                      ],
+                                                    )
+                                                        : (userDetails['available'] == false)
+                                                        ? Row(
+                                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                      children: [
+                                                        Container(),
+                                                        Text(
+                                                          languages[choosenLanguage]['text_off_duty'] ?? "",
+                                                          style: GoogleFonts.roboto(
+                                                              fontSize: media.width * twelve,
+                                                              color: onlineOfflineText),
+                                                        ),
+                                                        Container(
+                                                          padding: EdgeInsets.all(media.width * 0.01),
+                                                          height: media.width * 0.07,
+                                                          width: media.width * 0.07,
+                                                          decoration: BoxDecoration(
+                                                              shape: BoxShape.circle,
+                                                              color: onlineOfflineText),
+                                                          child: Image.asset('assets/images/offline.png'),
+                                                        )
+                                                      ],
+                                                    )
+                                                        : Row(
+                                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                      children: [
+                                                        Container(
+                                                          padding: EdgeInsets.all(media.width * 0.01),
+                                                          height: media.width * 0.07,
+                                                          width: media.width * 0.07,
+                                                          decoration: BoxDecoration(
+                                                              shape: BoxShape.circle,
+                                                              color: onlineOfflineText),
+                                                          child: Image.asset('assets/images/online.png'),
+                                                        ),
+                                                        Text(
+                                                          languages[choosenLanguage]['text_on_duty'] ?? "",
+                                                          style: GoogleFonts.roboto(
+                                                              fontSize: media.width * twelve,
+                                                              color: onlineOfflineText),
+                                                        ),
+                                                        Container(),
+                                                      ],
+                                                    ),
                                                   ),
                                                 ),
-                                              ))
+                                              )
+
+                                          )
                                               : (userDetails['role'] ==
                                               'driver' &&
                                               userDetails[
@@ -7041,16 +7129,96 @@ class _MapsState extends State<Maps>
                                         )),
                                   ],
                                 ),
-                              )
+                              ),
+                              const SizedBox(height:150),
+                              if (_showOnlinePopup) _buildOnlinePopupOverlay(),
+
                             ],
                           ),
+
                         );
                       }),
+
+
                 ),
+
               );
-            }),
+
+            }
+            ),
+
       ),
+
     );
+  }
+
+  Widget _buildOnlinePopupOverlay() {
+    return Positioned(
+        top: 600,
+        left: 50,
+        right: 50,
+        child: Material(
+        color: Colors.transparent,
+        child: Container(
+        padding: EdgeInsets.all(16),
+    decoration: BoxDecoration(
+    color: Colors.white,
+    borderRadius: BorderRadius.circular(12),
+    boxShadow: [
+    BoxShadow(
+    color: Colors.black26,
+    blurRadius: 8,
+    spreadRadius: 2,
+    ),
+    ],
+    ),
+    child: Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+    Text(
+      languages[choosenLanguage]['text_instruction'] ?? "",
+    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+    textAlign: TextAlign.center,
+    ),
+    SizedBox(height: 10),
+
+    // Moving arrow animation
+    AnimatedBuilder(
+    animation: _animation,
+    builder: (context, child) {
+    return Padding(
+    padding: EdgeInsets.only(top: _animation!.value),
+    child: Icon(
+    Icons.keyboard_arrow_down,
+    size: 30,
+    color: Colors.black,
+    ),
+    );
+    },
+    ),
+
+    SizedBox(height: 10),
+      ElevatedButton(
+        onPressed: () {
+          setState(() {
+            _showOnlinePopup = false; // Hide popup
+          });
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.green, // Set background color to yellow
+          foregroundColor: Colors.black, // Set text color to black for contrast
+          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12), // Adjust padding
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8), // Optional: Rounded corners
+          ),
+        ),
+        child: Text("Got it"),
+      )
+
+    ],
+    ),
+    ),
+    ));
   }
 
 
@@ -7270,4 +7438,5 @@ class OwnerCarImagecontainer extends StatelessWidget {
       ),
     );
   }
+
 }

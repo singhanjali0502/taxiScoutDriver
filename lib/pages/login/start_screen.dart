@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:tagyourtaxi_driver/pages/login/login.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../functions/functions.dart';
+import '../../translation/translation.dart';
+
 class StartScreen extends StatefulWidget {
   const StartScreen({key});
 
@@ -22,7 +25,7 @@ class _StartScreenState extends State<StartScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Are you a driver with your own car and your own taxi company?',
+                languages[choosenLanguage]['text_start'] ?? "",
                 style: TextStyle(
                   fontSize: media.width * 0.05,
                   fontWeight: FontWeight.bold,
@@ -38,7 +41,7 @@ class _StartScreenState extends State<StartScreen> {
                       _launchURL('https://www.taxiscout24.com/signup');
                     },
                     child: Text(
-                      'Yes',
+                      languages[choosenLanguage]['text_yes'] ?? "",
                       style: TextStyle(
                         fontSize: media.width * 0.05,
                       ),
@@ -57,7 +60,7 @@ class _StartScreenState extends State<StartScreen> {
                       ));
                     },
                     child: Text(
-                      'No',
+                      languages[choosenLanguage]['text_no'] ?? "",
                       style: TextStyle(
                         fontSize: media.width * 0.05,
                       ),

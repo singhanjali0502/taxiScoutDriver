@@ -1,28 +1,19 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tagyourtaxi_driver/functions/functions.dart';
 import 'package:tagyourtaxi_driver/pages/NavigatorPages/about.dart';
-import 'package:tagyourtaxi_driver/pages/NavigatorPages/bankdetails.dart';
 import 'package:tagyourtaxi_driver/pages/NavigatorPages/driverdetails.dart';
-import 'package:tagyourtaxi_driver/pages/NavigatorPages/driverearnings.dart';
 import 'package:tagyourtaxi_driver/pages/NavigatorPages/editprofile.dart';
-import 'package:tagyourtaxi_driver/pages/NavigatorPages/faq.dart';
-import 'package:tagyourtaxi_driver/pages/NavigatorPages/fleetdetails.dart';
 import 'package:tagyourtaxi_driver/pages/NavigatorPages/history.dart';
 import 'package:tagyourtaxi_driver/pages/NavigatorPages/makecomplaint.dart';
 import 'package:tagyourtaxi_driver/pages/NavigatorPages/managevehicles.dart';
 import 'package:tagyourtaxi_driver/pages/NavigatorPages/notification.dart';
-
 import 'package:tagyourtaxi_driver/pages/NavigatorPages/selectlanguage.dart';
-import 'package:tagyourtaxi_driver/pages/NavigatorPages/sos.dart';
-import 'package:tagyourtaxi_driver/pages/NavigatorPages/updatevehicle.dart';
 import 'package:tagyourtaxi_driver/pages/chatPage/chat_page.dart';
 import 'package:tagyourtaxi_driver/pages/onTripPage/map_page.dart';
 import 'package:tagyourtaxi_driver/styles/styles.dart';
 import 'package:tagyourtaxi_driver/translation/translation.dart';
-
-import '../NavigatorPages/subscriptions.dart';
-import '../../addons/trip_requests_page.dart';
 import '../vehicleInformations/vehicle_type.dart';
 
 class NavDrawer extends StatefulWidget {
@@ -34,12 +25,55 @@ class NavDrawer extends StatefulWidget {
 }
 
 class _NavDrawerState extends State<NavDrawer> {
+  ValueNotifier<int> notificationCount = ValueNotifier<int>(0);
+  ValueNotifier<List<dynamic>> valueNotifierHome = ValueNotifier([]);
+  ScrollController controller = ScrollController();
+  Timer? _timer;
   // var data;
   @override
   void initState() {
     super.initState();
+    getCurrentMessages(); // Initial fetch
+    _startAutoRefresh();
   }
 
+  void getCurrentMessages() async {
+    List<dynamic> messages = await getCurrentMessagesCompany();
+
+    // 🔄 Check only NEW messages (Assuming each message has a unique ID)
+    int newMessagesCount = 0;
+    if (valueNotifierHome.value.isNotEmpty) {
+      newMessagesCount = messages
+          .where((msg) => !valueNotifierHome.value.contains(msg)) // Find new messages
+          .length;
+    } else {
+      newMessagesCount = messages.length; // First load
+    }
+
+    // ✅ Update notification count
+    notificationCount.value = newMessagesCount;
+    valueNotifierHome.value = messages;
+
+    // Scroll to bottom when new messages arrive
+    Future.delayed(Duration(milliseconds: 300), () {
+      if (controller.hasClients) {
+        controller.jumpTo(controller.position.maxScrollExtent);
+      }
+    });
+  }
+
+  void _startAutoRefresh() {
+    _timer = Timer.periodic(Duration(seconds: 5), (timer) {
+      getCurrentMessages();
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel(); // ✅ Prevent memory leaks
+    controller.dispose();
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
@@ -52,7 +86,7 @@ class _NavDrawerState extends State<NavDrawer> {
               width: media.width * 0.8,
               child: DrawerHeader(
                   child: Image.asset(
-                "assets/images/splashNew.png",
+                "assets/images/splash1.png",
                 // fit: BoxFit.fill,
               )),
             ),
@@ -181,126 +215,6 @@ class _NavDrawerState extends State<NavDrawer> {
                       ),
                     ),
                   ),
-
-                  //wallet
-                  // userDetails['owner_id'] != null
-                  //     ? InkWell(
-                  //         onTap: () {
-                  //           Navigator.push(
-                  //               context,
-                  //               MaterialPageRoute(
-                  //                   builder: (context) =>
-                  //                       const WalletPage()));
-                  //         },
-                  //         child: Container(
-                  //           padding: EdgeInsets.all(media.width * 0.025),
-                  //           child: Row(
-                  //             children: [
-                  //               Image.asset(
-                  //                 'assets/images/walletImage.png',
-                  //                 fit: BoxFit.contain,
-                  //                 width: media.width * 0.075,
-                  //               ),
-                  //               SizedBox(
-                  //                 width: media.width * 0.025,
-                  //               ),
-                  //               SizedBox(
-                  //                 width: media.width * 0.55,
-                  //                 child: Text(
-                  //                   languages[choosenLanguage]
-                  //                       ['text_enable_wallet'],
-                  //                   overflow: TextOverflow.ellipsis,
-                  //                   style: GoogleFonts.roboto(
-                  //                       fontSize: media.width * sixteen,
-                  //                       color: textColor),
-                  //                 ),
-                  //               )
-                  //             ],
-                  //           ),
-                  //         ),
-                  //       )
-                  //     : Container(),
-
-                  // InkWell(
-                  //   onTap: () {
-                  //     //Send to requests page
-                  //     Navigator.push(
-                  //         context,
-                  //         MaterialPageRoute(
-                  //             builder: (context) => const TripRequests()));
-                  //   },
-                  //   child: Container(
-                  //     padding: EdgeInsets.all(media.width * 0.025),
-                  //     child: Row(
-                  //       children: [
-                  //         Image.asset(
-                  //           'assets/images/Ride_later.png',
-                  //           fit: BoxFit.contain,
-                  //           width: media.width * 0.075,
-                  //         ),
-                  //         SizedBox(
-                  //           width: media.width * 0.025,
-                  //         ),
-                  //         SizedBox(
-                  //           width: media.width * 0.55,
-                  //           child: Text(
-                  //             languages[choosenLanguage]
-                  //                 ['text_rental_requests'],
-                  //             overflow: TextOverflow.ellipsis,
-                  //             style: GoogleFonts.roboto(
-                  //                 fontSize: media.width * sixteen,
-                  //                 color: textColor),
-                  //           ),
-                  //         )
-                  //       ],
-                  //     ),
-                  //   ),
-                  // ),
-
-                  // notification
-
-                  // InkWell(
-                  //   onTap: () {
-                  //     Navigator.push(
-                  //         context,
-                  //         MaterialPageRoute(
-                  //             builder: (context) =>
-                  //                 const SubscriptionsPage()));
-                  //   },
-                  //   child: Row(
-                  //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  //     children: [
-                  //       Container(
-                  //         padding: EdgeInsets.all(media.width * 0.025),
-                  //         child: Row(
-                  //           children: [
-                  //             Image.asset(
-                  //               'assets/images/subscription.png',
-                  //               fit: BoxFit.contain,
-                  //               width: media.width * 0.075,
-                  //             ),
-                  //             SizedBox(
-                  //               width: media.width * 0.025,
-                  //             ),
-                  //             SizedBox(
-                  //               width: media.width * 0.49,
-                  //               child: Text(
-                  //                 languages[choosenLanguage]
-                  //                         ['text_subscriptions']
-                  //                     .toString(),
-                  //                 overflow: TextOverflow.ellipsis,
-                  //                 style: GoogleFonts.roboto(
-                  //                     fontSize: media.width * sixteen,
-                  //                     color: textColor),
-                  //               ),
-                  //             )
-                  //           ],
-                  //         ),
-                  //       ),
-                  //     ],
-                  //   ),
-                  // ),
-
                   if (userDetails['role'] == 'driver')
                     //notification
                     ValueListenableBuilder(
@@ -349,107 +263,107 @@ class _NavDrawerState extends State<NavDrawer> {
                                     ],
                                   ),
                                 ),
-                                (userDetails['notifications_count'] == 0)
-                                    ? Container()
-                                    : Container(
-                                        height: 20,
-                                        width: 20,
-                                        alignment: Alignment.center,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: buttonColor,
-                                        ),
-                                        child: Text(
-                                          userDetails['notifications_count']
-                                              .toString(),
-                                          style: GoogleFonts.roboto(
-                                              fontSize:
-                                                  media.width * fourteen,
-                                              color: buttonText),
-                                        ),
-                                      )
+                                // (userDetails['notifications_count'] == 0)
+                                //     ? Container()
+                                //     : ValueListenableBuilder<int>(
+                                //   valueListenable: notificationCount,
+                                //   builder: (context, count, child) {
+                                //     return count > 0
+                                //         ? Container(
+                                //       height: 20,
+                                //       width: 20,
+                                //       alignment: Alignment.center,
+                                //       decoration: BoxDecoration(
+                                //         shape: BoxShape.circle,
+                                //         color: verifyDeclined,
+                                //       ),
+                                //       child: Text(
+                                //         count.toString(),
+                                //         style: GoogleFonts.roboto(
+                                //           fontSize: media.width * 0.035,
+                                //           color: buttonText,
+                                //         ),
+                                //       ),
+                                //     )
+                                //         : SizedBox(); // Hide the badge if no new messages
+                                //   },
+                                // ),
+
                               ],
                             ),
                           );
                         }),
-
                   InkWell(
                     onTap: () {
                       Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const ChatPage()));
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ChatPage(),
+                        ),
+                      );
+                      // Reset the notification count when opening the chat
+                      notificationCount.value = 0;
                     },
-                    child: Container(
-                      padding: EdgeInsets.all(media.width * 0.025),
-                      child: Row(
-                        children: [
-                          Image.asset(
-                            'assets/images/walletImage.png',
-                            fit: BoxFit.contain,
-                            width: media.width * 0.075,
+                    child: Stack(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(media.width * 0.025),
+                          child: Row(
+                            children: [
+                              Image.asset(
+                                'assets/images/walletImage.png',
+                                fit: BoxFit.contain,
+                                width: media.width * 0.075,
+                              ),
+                              SizedBox(width: media.width * 0.025),
+                              SizedBox(
+                                width: media.width * 0.55,
+                                child: Text(
+                                  'Chat',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.roboto(
+                                    fontSize: media.width * sixteen,
+                                    color: textColor,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          SizedBox(
-                            width: media.width * 0.025,
+                        ),
+
+                        // 🛑 Notification Badge (Only shows when count > 0)
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          child: ValueListenableBuilder<int>(
+                            valueListenable: notificationCount,
+                            builder: (context, count, child) {
+                              return count > 0
+                                  ? Container(
+                                height: 18,
+                                width: 18,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.red, // Badge color
+                                ),
+                                child: Text(
+                                  count.toString(),
+                                  style: GoogleFonts.roboto(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              )
+                                  : SizedBox(); // Hide badge when no notifications
+                            },
                           ),
-                          SizedBox(
-                            width: media.width * 0.55,
-                            child: Text(
-                              'Chat',
-                              // languages[choosenLanguage]
-                              //     ['text_enable_wallet'],
-                              overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.roboto(
-                                  fontSize: media.width * sixteen,
-                                  color: textColor),
-                            ),
-                          )
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
 
-                  //referral
-                  // userDetails['owner_id'] == null &&
-                  //         userDetails['role'] == 'driver'
-                  //     ? InkWell(
-                  //         onTap: () {
-                  //           Navigator.push(
-                  //               context,
-                  //               MaterialPageRoute(
-                  //                   builder: (context) =>
-                  //                       const ReferralPage()));
-                  //         },
-                  //         child: Container(
-                  //           padding: EdgeInsets.all(media.width * 0.025),
-                  //           child: Row(
-                  //             children: [
-                  //               Image.asset(
-                  //                 'assets/images/referral.png',
-                  //                 fit: BoxFit.contain,
-                  //                 width: media.width * 0.075,
-                  //               ),
-                  //               SizedBox(
-                  //                 width: media.width * 0.025,
-                  //               ),
-                  //               SizedBox(
-                  //                 width: media.width * 0.55,
-                  //                 child: Text(
-                  //                   languages[choosenLanguage]
-                  //                       ['text_enable_referal'],
-                  //                   overflow: TextOverflow.ellipsis,
-                  //                   style: GoogleFonts.roboto(
-                  //                       fontSize: media.width * sixteen,
-                  //                       color: textColor),
-                  //                 ),
-                  //               )
-                  //             ],
-                  //           ),
-                  //         ),
-                  //       )
-                  //     : Container(),
-
-                  //manage vehicle
 
                   userDetails['role'] == 'owner'
                       ? InkWell(
@@ -568,201 +482,6 @@ class _NavDrawerState extends State<NavDrawer> {
                           ),
                         )
                       : Container(),
-// //fleet details
-//                   userDetails['owner_id'] != null &&
-//                           userDetails['role'] == 'driver'
-//                       ? InkWell(
-//                           onTap: () {
-//                             Navigator.push(
-//                                 context,
-//                                 MaterialPageRoute(
-//                                     builder: (context) =>
-//                                         const FleetDetails()));
-//                           },
-//                           child: Container(
-//                             padding: EdgeInsets.all(media.width * 0.025),
-//                             child: Row(
-//                               children: [
-//                                 Image.asset(
-//                                   'assets/images/updateVehicleInfo.png',
-//                                   fit: BoxFit.contain,
-//                                   width: media.width * 0.075,
-//                                 ),
-//                                 SizedBox(
-//                                   width: media.width * 0.025,
-//                                 ),
-//                                 SizedBox(
-//                                   width: media.width * 0.55,
-//                                   child: Text(
-//                                     languages[choosenLanguage]
-//                                         ['text_fleet_details'],
-//                                     overflow: TextOverflow.ellipsis,
-//                                     style: GoogleFonts.roboto(
-//                                         fontSize: media.width * sixteen,
-//                                         color: textColor),
-//                                   ),
-//                                 )
-//                               ],
-//                             ),
-//                           ),
-//                         )
-//                       : Container(),
-                  //earnings
-                  // userDetails['id'] == null
-                  //     ? InkWell(
-                  //         onTap: () {
-                  //           Navigator.push(
-                  //               context,
-                  //               MaterialPageRoute(
-                  //                   builder: (context) =>
-                  //                       const DriverEarnings()));
-                  //         },
-                  //         child: Container(
-                  //           padding: EdgeInsets.all(media.width * 0.025),
-                  //           child: Row(
-                  //             children: [
-                  //               Image.asset(
-                  //                 'assets/images/Earnings.png',
-                  //                 fit: BoxFit.contain,
-                  //                 width: media.width * 0.075,
-                  //               ),
-                  //               SizedBox(
-                  //                 width: media.width * 0.025,
-                  //               ),
-                  //               SizedBox(
-                  //                 width: media.width * 0.55,
-                  //                 child: Text(
-                  //                   languages[choosenLanguage]
-                  //                       ['text_earnings'],
-                  //                   overflow: TextOverflow.ellipsis,
-                  //                   style: GoogleFonts.roboto(
-                  //                       fontSize: media.width * sixteen,
-                  //                       color: textColor),
-                  //                 ),
-                  //               )
-                  //             ],
-                  //           ),
-                  //         ),
-                  //       )
-                  //     : Container(),
-
-                  //documents
-                  // InkWell(
-                  //   onTap: () async {
-                  //     var nav = await Navigator.push(
-                  //         context,
-                  //         MaterialPageRoute(
-                  //             builder: (context) => Docs(
-                  //                   fromPage: '2',
-                  //                 )));
-                  //     if (nav) {
-                  //       setState(() {});
-                  //     }
-                  //   },
-                  //   child: Container(
-                  //     padding: EdgeInsets.all(media.width * 0.025),
-                  //     child: Row(
-                  //       children: [
-                  //         Image.asset(
-                  //           'assets/images/manageDocuments.png',
-                  //           fit: BoxFit.contain,
-                  //           width: media.width * 0.075,
-                  //         ),
-                  //         SizedBox(
-                  //           width: media.width * 0.025,
-                  //         ),
-                  //         SizedBox(
-                  //           width: media.width * 0.55,
-                  //           child: Text(
-                  //             languages[choosenLanguage]['text_manage_docs'],
-                  //             overflow: TextOverflow.ellipsis,
-                  //             style: GoogleFonts.roboto(
-                  //                 fontSize: media.width * sixteen,
-                  //                 color: textColor),
-                  //           ),
-                  //         )
-                  //       ],
-                  //     ),
-                  //   ),
-                  // ),
-
-                  //faq
-                  // InkWell(
-                  //   onTap: () {
-                  //     Navigator.push(
-                  //         context,
-                  //         MaterialPageRoute(
-                  //             builder: (context) => const Faq()));
-                  //   },
-                  //   child: Container(
-                  //     padding: EdgeInsets.all(media.width * 0.025),
-                  //     child: Row(
-                  //       children: [
-                  //         Image.asset(
-                  //           'assets/images/faq.png',
-                  //           fit: BoxFit.contain,
-                  //           width: media.width * 0.075,
-                  //         ),
-                  //         SizedBox(
-                  //           width: media.width * 0.025,
-                  //         ),
-                  //         SizedBox(
-                  //           width: media.width * 0.55,
-                  //           child: Text(
-                  //             languages[choosenLanguage]['text_faq'],
-                  //             overflow: TextOverflow.ellipsis,
-                  //             style: GoogleFonts.roboto(
-                  //                 fontSize: media.width * sixteen,
-                  //                 color: textColor),
-                  //           ),
-                  //         )
-                  //       ],
-                  //     ),
-                  //   ),
-                  // ),
-
-                  // //sos
-                  // userDetails['role'] != 'owner'
-                  //     ? InkWell(
-                  //         onTap: () async {
-                  //           var nav = await Navigator.push(
-                  //               context,
-                  //               MaterialPageRoute(
-                  //                   builder: (context) => const Sos()));
-
-                  //           if (nav) {
-                  //             setState(() {});
-                  //           }
-                  //         },
-                  //         child: Container(
-                  //           padding: EdgeInsets.all(media.width * 0.025),
-                  //           child: Row(
-                  //             children: [
-                  //               Image.asset(
-                  //                 'assets/images/sos.png',
-                  //                 fit: BoxFit.contain,
-                  //                 width: media.width * 0.075,
-                  //               ),
-                  //               SizedBox(
-                  //                 width: media.width * 0.025,
-                  //               ),
-                  //               SizedBox(
-                  //                 width: media.width * 0.55,
-                  //                 child: Text(
-                  //                   languages[choosenLanguage]['text_sos'],
-                  //                   overflow: TextOverflow.ellipsis,
-                  //                   style: GoogleFonts.roboto(
-                  //                       fontSize: media.width * sixteen,
-                  //                       color: textColor),
-                  //                 ),
-                  //               )
-                  //             ],
-                  //           ),
-                  //         ),
-                  //       )
-                  //     : Container(),
-
-                  //language
                   InkWell(
                     onTap: () async {
                       var nav = await Navigator.push(
@@ -800,43 +519,6 @@ class _NavDrawerState extends State<NavDrawer> {
                       ),
                     ),
                   ),
-
-                  //bank details
-                  // userDetails['owner_id'] != null
-                  //     ? InkWell(
-                  //         onTap: () {
-                  //           Navigator.push(
-                  //               context,
-                  //               MaterialPageRoute(
-                  //                   builder: (context) =>
-                  //                       const BankDetails()));
-                  //         },
-                  //         child: Container(
-                  //           padding: EdgeInsets.all(media.width * 0.025),
-                  //           child: Row(
-                  //             children: [
-                  //               Icon(Icons.account_balance,
-                  //                   size: media.width * 0.075),
-                  //               SizedBox(
-                  //                 width: media.width * 0.025,
-                  //               ),
-                  //               SizedBox(
-                  //                 width: media.width * 0.55,
-                  //                 child: Text(
-                  //                   languages[choosenLanguage]
-                  //                       ['text_updateBank'],
-                  //                   overflow: TextOverflow.ellipsis,
-                  //                   style: GoogleFonts.roboto(
-                  //                       fontSize: media.width * sixteen,
-                  //                       color: textColor),
-                  //                 ),
-                  //               )
-                  //             ],
-                  //           ),
-                  //         ),
-                  //       )
-                  //     : Container(),
-                  //make complaints
                   InkWell(
                     onTap: () async {
                       var nav = await Navigator.push(
@@ -906,52 +588,12 @@ class _NavDrawerState extends State<NavDrawer> {
                       ),
                     ),
                   ),
-
-                  // //delete account
-                  // userDetails['owner_id'] == null
-                  //     ? InkWell(
-                  //         onTap: () {
-                  //           setState(() {
-                  //             deleteAccount = true;
-                  //           });
-                  //           valueNotifierHome.incrementNotifier();
-                  //           Navigator.pop(context);
-                  //         },
-                  //         child: Container(
-                  //           padding: EdgeInsets.all(media.width * 0.025),
-                  //           child: Row(
-                  //             children: [
-                  //               Icon(
-                  //                 Icons.delete_forever,
-                  //                 size: media.width * 0.075,
-                  //               ),
-                  //               SizedBox(
-                  //                 width: media.width * 0.025,
-                  //               ),
-                  //               SizedBox(
-                  //                 width: media.width * 0.55,
-                  //                 child: Text(
-                  //                   languages[choosenLanguage]
-                  //                       ['text_delete_account'],
-                  //                   overflow: TextOverflow.ellipsis,
-                  //                   style: GoogleFonts.roboto(
-                  //                       fontSize: media.width * sixteen,
-                  //                       color: textColor),
-                  //                 ),
-                  //               )
-                  //             ],
-                  //           ),
-                  //         ),
-                  //       )
-                  //     : Container(),
-
-                  //logout
                   InkWell(
                     onTap: () {
                       setState(() {
                         logout = true;
                       });
-                      valueNotifierHome.incrementNotifier();
+                      // valueNotifierHome.();
                       Navigator.pop(context);
                     },
                     child: Container(

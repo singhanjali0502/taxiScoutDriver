@@ -34,7 +34,7 @@ class DriverService {
         var userDetails = jsonDecode(response.body)['data'];
         result = true;
 
-        if (userDetails['active'] == true) {
+        if (userDetails['available'] == true) {
           userInactive();
           stopLocationUpdates(); // Stop location updates
         } else {

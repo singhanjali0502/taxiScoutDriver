@@ -156,7 +156,7 @@ class _LoadingPageState extends State<LoadingPage> {
                 //.withOpacity(0.5)
                 //Color(0xffE70000),
               ),
-              child:  Image.asset('assets/images/splashNew.png'),
+              child:  Image.asset('assets/images/splash1.png'),
               ),
 
 
