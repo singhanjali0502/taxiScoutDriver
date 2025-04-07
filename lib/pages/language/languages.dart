@@ -123,7 +123,7 @@ class _LanguagesState extends State<Languages> {
                       width: media.width * 1,
                       alignment: Alignment.center,
                       child: Text(
-                        languages[choosenLanguage]['text_choose_language'] ?? "",
+                        languages[choosenLanguage]?['text_choose_language'] ?? "Choose Language",
                         style: GoogleFonts.roboto(
                             color: textColor,
                             fontSize: media.width * sixteen,

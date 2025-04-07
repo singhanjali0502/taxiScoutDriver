@@ -75,7 +75,7 @@ class _AboutState extends State<About> {
                         //terms and conditions
                         InkWell(
                           onTap: () {
-                            openBrowser('terms and conditions url');
+                            openBrowser('https://www.taxiscout24.com/term-of-use');
                           },
                           child: Text(
                             languages[choosenLanguage]
@@ -92,7 +92,7 @@ class _AboutState extends State<About> {
                         //privacy policy
                         InkWell(
                           onTap: () {
-                            openBrowser('privacy policy url');
+                            openBrowser('https://www.taxiscout24.com/privacy-policy');
                           },
                           child: Text(
                             languages[choosenLanguage]['text_privacy'],
@@ -108,10 +108,26 @@ class _AboutState extends State<About> {
                         //website
                         InkWell(
                           onTap: () {
-                            openBrowser('your website url');
+                            openBrowser('https://www.taxiscout24.com/about-us');
                           },
                           child: Text(
                             languages[choosenLanguage]['text_about'],
+                            style: GoogleFonts.roboto(
+                                fontSize: media.width * sixteen,
+                                fontWeight: FontWeight.w600,
+                                color: textColor),
+                          ),
+                        ),
+                        SizedBox(
+                          height: media.width * 0.05,
+                        ),
+                        //privacy policy
+                        InkWell(
+                          onTap: () {
+                            openBrowser('https://www.taxiscout24.com/faq');
+                          },
+                          child: Text(
+                            languages[choosenLanguage]['text_faq'],
                             style: GoogleFonts.roboto(
                                 fontSize: media.width * sixteen,
                                 fontWeight: FontWeight.w600,

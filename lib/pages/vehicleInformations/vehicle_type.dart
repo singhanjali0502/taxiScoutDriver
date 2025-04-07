@@ -184,8 +184,8 @@ class _VehicleTypeState extends State<VehicleType> {
                               ),
                             ],
                           ),
-                         const Spacer(),
-                          const Icon(Icons.check_circle, color: Colors.green)
+                         // const Spacer(),
+                         //  const Icon(Icons.check_circle, color: Colors.green)
                         ],
                       ),
                     ),
@@ -194,9 +194,9 @@ class _VehicleTypeState extends State<VehicleType> {
                   (vehicleTypes != null && vehicleTypes.isNotEmpty)
                       ? Expanded(
                     child: ListView.builder(
-                      itemCount: vehicleType.length,
+                      itemCount: vehicleTypes.length,
                       itemBuilder: (context, index) {
-                        final vehicle = vehicleType[index];
+                        final vehicle = vehicleTypes[index];
                         bool isSelected = myVehicleId == vehicle.id;
 
                         return InkWell(
@@ -206,19 +206,14 @@ class _VehicleTypeState extends State<VehicleType> {
                               myVehicleIconFor = vehicle.icon;
                             });
                           },
-                          child: Container(
-                            margin: const EdgeInsets.symmetric(vertical: 5),
+                          child:
+                          Container(
+                            margin: const EdgeInsets.only(bottom: 10),
                             padding: const EdgeInsets.all(10),
+                            width: media.width,
                             decoration: BoxDecoration(
-                              color: isSelected
-                                  ? Colors.blue.shade100
-                                  : Colors.white,
+                              color: Colors.white, // Yellow background
                               borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                color: isSelected
-                                    ? Colors.blue
-                                    : Colors.grey.shade300,
-                              ),
                             ),
                             child: Row(
                               children: [
@@ -231,21 +226,50 @@ class _VehicleTypeState extends State<VehicleType> {
                                 )
                                     : const SizedBox(width: 50, height: 50),
                                 const SizedBox(width: 10),
-                                Expanded(
-                                  child: Text(
-                                    vehicle.name ?? "Unknown",
-                                    style: GoogleFonts.roboto(
-                                      fontSize: media.width * twenty,
-                                      color: textColor,
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      vehicle.name ?? "Unknown Vehicle",
+                                      style: GoogleFonts.roboto(
+                                        fontSize: media.width * twenty,
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  ),
+                                    Text(
+                                      "Capacity : ${vehicle.capacity.toString()}" ?? "Unknown Vehicle",
+                                      style: GoogleFonts.roboto(
+                                        fontSize: media.width * twenty,
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                    Text(
+                                      "Modal : ${vehicle.modelName}" ?? "Unknown Vehicle",
+                                      style: GoogleFonts.roboto(
+                                        fontSize: media.width * twenty,
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                    Text(
+                                      "Size : ${vehicle.size.toString()}" ?? "Unknown Vehicle",
+                                      style: GoogleFonts.roboto(
+                                        fontSize: media.width * twenty,
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                  ],
                                 ),
+                                const Spacer(),
                                 if (isSelected)
                                   const Icon(Icons.check_circle,
                                       color: Colors.green)
                               ],
                             ),
-                          ),
+                          )
                         );
                       },
                     ),
@@ -268,9 +292,9 @@ class _VehicleTypeState extends State<VehicleType> {
                           name: userDetails['name'],
                           email: userDetails['email'],
                           phNumber: userDetails['mobile'],
-                          myVehicleId: userDetails["vehicle_type_id"],
+                          myVehicleId: myVehicleId,
                           profile: userDetails['profile_picture'],
-                            serviceId:userDetails['service_location_id'],
+                          serviceId:userDetails['service_location_id'],
                         );
 
                         setState(() => _isLoading = false);

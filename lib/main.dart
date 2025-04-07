@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:tagyourtaxi_driver/pages/chatPage/chat_driver_user.dart';
+import 'package:tagyourtaxi_driver/pages/chatPage/chat_page.dart';
 import 'package:tagyourtaxi_driver/pages/loadingPage/loadingpage.dart';
 import 'package:tagyourtaxi_driver/pages/login/login.dart';
 import 'package:tagyourtaxi_driver/pages/onTripPage/map_page.dart';
@@ -23,6 +24,9 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   } else if (message.data["type"] == "messages") {
     _showNotification(message, "messages");
   }
+  else if (message.data["type"] == "companyChats") {
+    _showNotification(message, "companyChats");
+  }
 }
 
 /// Show Local Notification
@@ -42,13 +46,13 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await LocalNotificationService.requestPermission();
+  LocalNotificationService.initialize(); // 🔥 Ensure this is called
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown
   ]);
 
-  // 🔹 Initialize local notifications
-  LocalNotificationService.initialize();
 
   FirebaseMessaging messaging = FirebaseMessaging.instance;
   NotificationSettings settings = await messaging.requestPermission(
@@ -62,7 +66,7 @@ void main() async {
   // ✅ Subscribe to Separate Topics
   FirebaseMessaging.instance.subscribeToTopic("request-meta"); // Ride requests
   FirebaseMessaging.instance.subscribeToTopic("messages"); // Chat messages
-
+  FirebaseMessaging.instance.subscribeToTopic("companyChats");
   // 🔹 Handle Background Messages
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
@@ -75,7 +79,9 @@ void main() async {
     } else if (message.data["type"] == "messages") {
       unreadMessageCount.value += 1; // Increment badge count for chat
       _showNotification(message, "message");
-    }
+    }else if(message.data["type"] == "companyChats"){
+      unreadMessageCount.value += 1; // Increment badge count for chat
+    _showNotification(message, "companyChats");}
     navigatorKey.currentState?.push(MaterialPageRoute(builder: (context) => ChatPageUser()));
 
   });
@@ -89,6 +95,10 @@ void main() async {
       print("💬 User Opened Chat Notification: ${message.messageId}");
       unreadMessageCount.value = 0; // ✅ Reset message badge count
       navigatorKey.currentState?.push(MaterialPageRoute(builder: (context) => ChatPageUser()));
+    }else if (message.data["type"] == "companyChats") {
+      print("💬 User Opened Chat Notification: ${message.messageId}");
+      unreadMessageCount.value = 0; // ✅ Reset message badge count
+      navigatorKey.currentState?.push(MaterialPageRoute(builder: (context) => ChatPage()));
     }
   });
 

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
-import '../../functions/functions.dart';
+import '../../functions/functions.dart'; // Firebase Realtime Database
 
 class ChatPage extends StatefulWidget {
   const ChatPage({Key? key}) : super(key: key);
@@ -18,40 +18,57 @@ class _ChatPageState extends State<ChatPage> {
   bool _sendingMessage = false;
   Timer? _timer;
 
-  // ValueNotifier to dynamically update messages
-  ValueNotifier<List<dynamic>> valueNotifierHome = ValueNotifier([]);
-
   @override
   void initState() {
     super.initState();
-    getCurrentMessages(); // Initial fetch
-    _startAutoRefresh(); // Start auto-refresh
+    getCurrentMessagesCompany();
+    _startAutoRefresh();
   }
 
   @override
   void dispose() {
-    _timer?.cancel();
     controller.dispose();
+    chatText.dispose();
+    _timer?.cancel();
     super.dispose();
   }
 
-  // Function to fetch messages and update ValueNotifier
-  void getCurrentMessages() async {
-    List<dynamic> messages = await getCurrentMessagesCompany();
-    valueNotifierHome.value = messages;
-
-    // Scroll to the bottom when new messages arrive
-    Future.delayed(Duration(milliseconds: 300), () {
-      if (controller.hasClients) {
-        controller.jumpTo(controller.position.maxScrollExtent);
-      }
+  // ✅ Auto-refresh messages every 5 seconds
+  void _startAutoRefresh() {
+    _timer = Timer.periodic(const Duration(seconds: 2), (timer) {
+      getCurrentMessages();
     });
   }
 
-  // Auto-refresh messages every 5 seconds
-  void _startAutoRefresh() {
-    _timer = Timer.periodic(Duration(seconds: 5), (timer) {
-      getCurrentMessages();
+  // ✅ Scroll to bottom smoothly when messages update
+  void _scrollToBottom() {
+    if (controller.hasClients) {
+      controller.animateTo(
+        controller.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
+  }
+
+  // ✅ Scroll only if user is near bottom
+  void _scrollToBottomIfNeeded() {
+    if (controller.hasClients) {
+      double maxScroll = controller.position.maxScrollExtent;
+      double currentScroll = controller.position.pixels;
+      double threshold = 50.0; // If user is within 50px of the bottom
+
+      if ((maxScroll - currentScroll) <= threshold) {
+        _scrollToBottom();
+      }
+    }
+  }
+
+  // ✅ Fetch messages & auto-scroll when new ones arrive
+  Future<void> getCurrentMessages() async {
+    await getCurrentMessagesCompany(); // Your function to get messages
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToBottom(); // Always scroll to the latest message when opening
     });
   }
 
@@ -69,7 +86,7 @@ class _ChatPageState extends State<ChatPage> {
           children: [
             Column(
               children: [
-                // Chat header
+                // ✅ Chat header
                 Container(
                   padding: EdgeInsets.fromLTRB(
                     media.width * 0.05,
@@ -84,7 +101,7 @@ class _ChatPageState extends State<ChatPage> {
                         onTap: () {
                           Navigator.pop(context, true);
                         },
-                        child: Icon(Icons.arrow_back, size: 28),
+                        child: const Icon(Icons.arrow_back, size: 28),
                       ),
                       Text(
                         'Chat With Company',
@@ -93,21 +110,24 @@ class _ChatPageState extends State<ChatPage> {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      SizedBox(width: 28), // Placeholder for balance layout
+                      const SizedBox(width: 28), // Placeholder
                     ],
                   ),
                 ),
 
-                // Chat messages list
+                // ✅ Chat messages list
                 Expanded(
                   child: ValueListenableBuilder<List<dynamic>>(
-                    valueListenable: valueNotifierHome,
+                    valueListenable: valueNotifierHomes,
                     builder: (context, chatList, child) {
                       if (chatList.isEmpty) {
                         return Center(
                           child: Text(
                             "No messages yet",
-                            style: GoogleFonts.roboto(fontSize: 16, color: Colors.grey),
+                            style: GoogleFonts.roboto(
+                              fontSize: 16,
+                              color: Colors.grey,
+                            ),
                           ),
                         );
                       }
@@ -116,16 +136,22 @@ class _ChatPageState extends State<ChatPage> {
                         controller: controller,
                         itemCount: chatList.length,
                         itemBuilder: (context, index) {
-                          // ✅ Ensure index is within valid range
-                          if (index < 0 || index >= chatList.length) {
-                            return SizedBox(); // Return empty widget if index is invalid
-                          }
-
                           final chatItem = chatList[index];
                           bool isSentByUser = chatItem["from_type"] == "is_driver";
-                          String timestamp = chatItem["created_at"];
-                          DateTime dateTime = DateTime.parse(timestamp);
-                          String formattedTime = DateFormat('HH:mm').format(dateTime);
+
+                          dynamic timestamp = chatItem["created_at"];
+                          DateTime dateTime;
+
+                          if (timestamp is int) {
+                            dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
+                          } else if (timestamp is String) {
+                            dateTime = DateTime.tryParse(timestamp) ?? DateTime(1970);
+                          } else {
+                            dateTime = DateTime(1970);
+                          }
+
+                          String formattedTime =
+                          DateFormat('HH:mm').format(dateTime);
 
                           return Padding(
                             padding: EdgeInsets.symmetric(
@@ -133,16 +159,21 @@ class _ChatPageState extends State<ChatPage> {
                               horizontal: media.width * 0.05,
                             ),
                             child: Align(
-                              alignment: isSentByUser ? Alignment.centerRight : Alignment.centerLeft,
+                              alignment: isSentByUser
+                                  ? Alignment.centerRight
+                                  : Alignment.centerLeft,
                               child: Column(
-                                crossAxisAlignment:
-                                isSentByUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                                crossAxisAlignment: isSentByUser
+                                    ? CrossAxisAlignment.end
+                                    : CrossAxisAlignment.start,
                                 children: [
                                   Container(
                                     padding: EdgeInsets.all(media.width * 0.04),
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(12),
-                                      color: isSentByUser ? Colors.blue : Colors.grey[800],
+                                      color: isSentByUser
+                                          ? Colors.blue
+                                          : Colors.grey[800],
                                     ),
                                     child: Text(
                                       chatItem['message'] ?? "",
@@ -155,7 +186,10 @@ class _ChatPageState extends State<ChatPage> {
                                   const SizedBox(height: 5),
                                   Text(
                                     formattedTime,
-                                    style: TextStyle(fontSize: media.width * 0.03, color: Colors.grey),
+                                    style: TextStyle(
+                                      fontSize: media.width * 0.03,
+                                      color: Colors.grey,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -167,10 +201,12 @@ class _ChatPageState extends State<ChatPage> {
                   ),
                 ),
 
-
-                // Chat input field
+                // ✅ Chat input field
                 Container(
-                  margin: EdgeInsets.only(top: media.width * 0.025, bottom: media.width * 0.05),
+                  margin: EdgeInsets.only(
+                    top: media.width * 0.025,
+                    bottom: media.width * 0.05,
+                  ),
                   padding: EdgeInsets.symmetric(
                     horizontal: media.width * 0.025,
                     vertical: media.width * 0.01,
@@ -188,27 +224,37 @@ class _ChatPageState extends State<ChatPage> {
                           decoration: InputDecoration(
                             border: InputBorder.none,
                             hintText: "Enter message...",
-                            hintStyle: GoogleFonts.roboto(fontSize: media.width * 0.035, color: Colors.grey),
+                            hintStyle: GoogleFonts.roboto(
+                              fontSize: media.width * 0.035,
+                              color: Colors.grey,
+                            ),
                           ),
                           minLines: 1,
                         ),
                       ),
                       InkWell(
                         onTap: () async {
+                          if (chatText.text.trim().isEmpty) return;
+
                           FocusManager.instance.primaryFocus?.unfocus();
                           setState(() {
                             _sendingMessage = true;
                           });
 
-                          await sendMessageCompany(chatText.text); // Function to send message
+                          await sendMessageCompany(chatText.text);
                           chatText.clear();
-                          getCurrentMessages(); // ✅ Auto-update messages after sending
 
                           setState(() {
                             _sendingMessage = false;
                           });
+
+                          // ✅ Scroll only if user is at bottom
+                          Future.delayed(const Duration(milliseconds: 300), () {
+                            _scrollToBottomIfNeeded();
+                          });
                         },
-                        child: Icon(Icons.send, color: Colors.blue, size: 28),
+                        child: const Icon(Icons.send,
+                            color: Colors.blue, size: 28),
                       ),
                     ],
                   ),
@@ -216,14 +262,12 @@ class _ChatPageState extends State<ChatPage> {
               ],
             ),
 
-            // Loader overlay when sending a message
+            // ✅ Loader overlay when sending a message
             if (_sendingMessage)
               Container(
-                color: Colors.black.withOpacity(0.3), // Semi-transparent background
-                child: Center(
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
-                  ),
+                color: Colors.black.withOpacity(0.3),
+                child: const Center(
+                  child: CircularProgressIndicator(color: Colors.white),
                 ),
               ),
           ],

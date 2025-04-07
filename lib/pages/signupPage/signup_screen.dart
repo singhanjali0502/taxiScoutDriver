@@ -219,7 +219,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             });
                           },
                         ),
-                        labelText: "Password",
+                        labelText: languages[choosenLanguage]["text_password"],
                         filled: true,
                         fillColor: const Color(0xffF2F3F5),
                         border: OutlineInputBorder(
@@ -249,7 +249,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             });
                           },
                         ),
-                        labelText: "Confirm Password",
+                        labelText: languages[choosenLanguage]["text_confirm_password"],
                         filled: true,
                         fillColor: const Color(0xffF2F3F5),
                         border: OutlineInputBorder(
@@ -270,7 +270,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       controller: _mobileController,
                       decoration: InputDecoration(
                         prefixIcon: const Icon(Icons.phone),
-                        labelText: "Phone Number",
+                        labelText: languages[choosenLanguage]["text_phone"],
                         filled: true,
                         fillColor: const Color(0xffF2F3F5),
                         border: OutlineInputBorder(
@@ -316,7 +316,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           borderRadius: BorderRadius.circular(15),
                           borderSide: BorderSide.none,
                         ),
-                        labelText: "Company Id",
+                        labelText: languages[choosenLanguage]["text_company_id"],
                       ),
                       onChanged: (String value) {
                         // Fetch vehicle types when company ID changes
@@ -330,7 +330,9 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                     DropdownButtonFormField<DriverVehicle>(
                       value: _selectedVehicleType,
-                      hint: const Text("Select Vehicle"),
+                      hint:  Text(
+                        languages[choosenLanguage]["text_select_vehicle"],
+                      ),
                       items: _dropdownItems.map((DriverVehicle vehicleType) {
                         return DropdownMenuItem<DriverVehicle>(
                           value: vehicleType,

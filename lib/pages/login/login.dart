@@ -133,7 +133,7 @@ class _LoginState extends State<Login> {
                                   },
                                 );
                               }),
-                          labelText: "Password",
+                          labelText: languages[choosenLanguage]["text_password"],
                           filled: true,
                           fillColor: const Color(0xffF2F3F5),
                           border: OutlineInputBorder(
@@ -288,7 +288,8 @@ class _LoginState extends State<Login> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            "Need an account?",
+                            languages[choosenLanguage]
+                            ['text_account'],
                             style: GoogleFonts.roboto(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w500,
@@ -304,7 +305,8 @@ class _LoginState extends State<Login> {
                               );
                             },
                             child: Text(
-                              "SignUp",
+                              languages[choosenLanguage]
+                              ['text_signup'],
                               style: GoogleFonts.roboto(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w500,

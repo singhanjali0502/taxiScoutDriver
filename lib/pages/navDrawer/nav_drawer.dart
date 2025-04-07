@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tagyourtaxi_driver/functions/functions.dart';
@@ -25,48 +26,25 @@ class NavDrawer extends StatefulWidget {
 }
 
 class _NavDrawerState extends State<NavDrawer> {
-  ValueNotifier<int> notificationCount = ValueNotifier<int>(0);
-  ValueNotifier<List<dynamic>> valueNotifierHome = ValueNotifier([]);
+
   ScrollController controller = ScrollController();
   Timer? _timer;
   // var data;
   @override
   void initState() {
     super.initState();
-    getCurrentMessages(); // Initial fetch
-    _startAutoRefresh();
+    getCurrentMessagesCompany(); // Initial fetch
+    // _startAutoRefresh();
   }
 
-  void getCurrentMessages() async {
-    List<dynamic> messages = await getCurrentMessagesCompany();
 
-    // 🔄 Check only NEW messages (Assuming each message has a unique ID)
-    int newMessagesCount = 0;
-    if (valueNotifierHome.value.isNotEmpty) {
-      newMessagesCount = messages
-          .where((msg) => !valueNotifierHome.value.contains(msg)) // Find new messages
-          .length;
-    } else {
-      newMessagesCount = messages.length; // First load
-    }
 
-    // ✅ Update notification count
-    notificationCount.value = newMessagesCount;
-    valueNotifierHome.value = messages;
-
-    // Scroll to bottom when new messages arrive
-    Future.delayed(Duration(milliseconds: 300), () {
-      if (controller.hasClients) {
-        controller.jumpTo(controller.position.maxScrollExtent);
-      }
-    });
-  }
-
-  void _startAutoRefresh() {
-    _timer = Timer.periodic(Duration(seconds: 5), (timer) {
-      getCurrentMessages();
-    });
-  }
+  //
+  // void _startAutoRefresh() {
+  //   _timer = Timer.periodic(Duration(seconds: 5), (timer) {
+  //     getCurrentMessagesCompany();
+  //   });
+  // }
 
   @override
   void dispose() {
@@ -82,7 +60,7 @@ class _NavDrawerState extends State<NavDrawer> {
         child: Column(
           children: [
             Container(
-              decoration: BoxDecoration(color: Colors.white),
+              decoration: const BoxDecoration(color: Colors.white),
               width: media.width * 0.8,
               child: DrawerHeader(
                   child: Image.asset(
@@ -97,7 +75,7 @@ class _NavDrawerState extends State<NavDrawer> {
                   Row(mainAxisAlignment: MainAxisAlignment.start, children: [
                 userDetails['profile_picture'] != null
                     ? Container(
-                        margin: EdgeInsets.all(5),
+                        margin: const EdgeInsets.all(5),
                         height: media.width * 0.2,
                         width: media.width * 0.2,
                         child: CircleAvatar(
@@ -109,7 +87,7 @@ class _NavDrawerState extends State<NavDrawer> {
                                 : "https://cdn4.iconfinder.com/data/icons/green-shopper/1068/user.png")),
                       )
                     : Container(
-                        margin: EdgeInsets.all(5),
+                        margin: const EdgeInsets.all(5),
                         height: media.width * 0.2,
                         width: media.width * 0.2,
                         child: const CircleAvatar(
@@ -263,32 +241,6 @@ class _NavDrawerState extends State<NavDrawer> {
                                     ],
                                   ),
                                 ),
-                                // (userDetails['notifications_count'] == 0)
-                                //     ? Container()
-                                //     : ValueListenableBuilder<int>(
-                                //   valueListenable: notificationCount,
-                                //   builder: (context, count, child) {
-                                //     return count > 0
-                                //         ? Container(
-                                //       height: 20,
-                                //       width: 20,
-                                //       alignment: Alignment.center,
-                                //       decoration: BoxDecoration(
-                                //         shape: BoxShape.circle,
-                                //         color: verifyDeclined,
-                                //       ),
-                                //       child: Text(
-                                //         count.toString(),
-                                //         style: GoogleFonts.roboto(
-                                //           fontSize: media.width * 0.035,
-                                //           color: buttonText,
-                                //         ),
-                                //       ),
-                                //     )
-                                //         : SizedBox(); // Hide the badge if no new messages
-                                //   },
-                                // ),
-
                               ],
                             ),
                           );
@@ -338,6 +290,7 @@ class _NavDrawerState extends State<NavDrawer> {
                           child: ValueListenableBuilder<int>(
                             valueListenable: notificationCount,
                             builder: (context, count, child) {
+                              print("📌 Rebuilding Notification Badge - Count: $count");
                               return count > 0
                                   ? Container(
                                 height: 18,
@@ -345,7 +298,7 @@ class _NavDrawerState extends State<NavDrawer> {
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: Colors.red, // Badge color
+                                  color: Colors.red,
                                 ),
                                 child: Text(
                                   count.toString(),
@@ -359,6 +312,7 @@ class _NavDrawerState extends State<NavDrawer> {
                                   : SizedBox(); // Hide badge when no notifications
                             },
                           ),
+
                         ),
                       ],
                     ),

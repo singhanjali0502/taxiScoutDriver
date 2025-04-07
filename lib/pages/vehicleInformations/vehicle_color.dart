@@ -135,7 +135,7 @@ class _VehicleColorState extends State<VehicleColor> {
                                     serviceLocations.clear();
                                     vehicleMake.clear();
                                     vehicleModel.clear();
-                                    vehicleType.clear();
+                                    // vehicleType.clear();
                                   } else {
                                     setState(() {
                                       uploadError = reg.toString();
@@ -184,7 +184,7 @@ class _VehicleColorState extends State<VehicleColor> {
                                     serviceLocations.clear();
                                     vehicleMake.clear();
                                     vehicleModel.clear();
-                                    vehicleType.clear();
+                                    // vehicleType.clear();
                                   } else {
                                     setState(() {
                                       uploadError = reg.toString();

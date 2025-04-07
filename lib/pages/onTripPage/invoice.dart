@@ -298,240 +298,240 @@ class _InvoiceState extends State<Invoice> {
                                   SizedBox(
                                     height: media.height * 0.02,
                                   ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        languages[choosenLanguage]
-                                            ['text_distprice'],
-                                        style: GoogleFonts.roboto(
-                                            fontSize: media.width * twelve,
-                                            color: textColor),
-                                      ),
-                                      Text(
-                                            driverReq['requestBill']['data']
-                                                    ['distance_price']
-                                                .toString(),
-                                        style: GoogleFonts.roboto(
-                                            fontSize: media.width * twelve,
-                                            color: textColor),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    height: media.height * 0.02,
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        languages[choosenLanguage]
-                                            ['text_timeprice'],
-                                        style: GoogleFonts.roboto(
-                                            fontSize: media.width * twelve,
-                                            color: textColor),
-                                      ),
-                                      Text(
-                                            driverReq['requestBill']['data']
-                                                    ['time_price']
-                                                .toString(),
-                                        style: GoogleFonts.roboto(
-                                            fontSize: media.width * twelve,
-                                            color: textColor),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    height: media.height * 0.02,
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        languages[choosenLanguage]
-                                                ['text_waiting_price'] ?? "" +
-                                            driverReq['requestBill']['data']
-                                                    ['waiting_charge_per_min']
-                                                .toString() +
-                                            ' x ' +
-                                            driverReq['requestBill']['data']
-                                                    ['calculated_waiting_time']
-                                                .toString() +
-                                            ' mins' +
-                                            ')',
-                                        style: GoogleFonts.roboto(
-                                            fontSize: media.width * twelve,
-                                            color: textColor),
-                                      ),
-                                      Text(
-                                            driverReq['requestBill']['data']
-                                                    ['waiting_charge']
-                                                .toString(),
-                                        style: GoogleFonts.roboto(
-                                            fontSize: media.width * twelve,
-                                            color: textColor),
-                                      ),
-                                    ],
-                                  ),
-                                  (driverReq['requestBill']['data']
-                                              ['cancellation_fee'] !=
-                                          0)
-                                      ? SizedBox(
-                                          height: media.height * 0.02,
-                                        )
-                                      : Container(),
-                                  (driverReq['requestBill']['data']
-                                              ['cancellation_fee'] !=
-                                          0)
-                                      ? Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              languages[choosenLanguage]
-                                                  ['text_cancelfee'],
-                                              style: GoogleFonts.roboto(
-                                                  fontSize:
-                                                      media.width * twelve,
-                                                  color: textColor),
-                                            ),
-                                            Text(
-                                                  driverReq['requestBill']
-                                                              ['data']
-                                                          ['cancellation_fee']
-                                                      .toString(),
-                                              style: GoogleFonts.roboto(
-                                                  fontSize:
-                                                      media.width * twelve,
-                                                  color: textColor),
-                                            ),
-                                          ],
-                                        )
-                                      : Container(),
-                                  (driverReq['requestBill']['data']
-                                              ['airport_surge_fee'] !=
-                                          0)
-                                      ? SizedBox(
-                                          height: media.height * 0.02,
-                                        )
-                                      : Container(),
-                                  (driverReq['requestBill']['data']
-                                              ['airport_surge_fee'] !=
-                                          0)
-                                      ? Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              languages[choosenLanguage]
-                                                  ['text_surge_fee'],
-                                              style: GoogleFonts.roboto(
-                                                  fontSize:
-                                                      media.width * twelve,
-                                                  color: textColor),
-                                            ),
-                                            Text(
-                                                  driverReq['requestBill']
-                                                              ['data']
-                                                          ['airport_surge_fee']
-                                                      .toString(),
-                                              style: GoogleFonts.roboto(
-                                                  fontSize:
-                                                      media.width * twelve,
-                                                  color: textColor),
-                                            ),
-                                          ],
-                                        )
-                                      : Container(),
-                                  SizedBox(
-                                    height: media.height * 0.02,
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        languages[choosenLanguage]
-                                            ['text_convfee'],
-                                        style: GoogleFonts.roboto(
-                                            fontSize: media.width * twelve,
-                                            color: textColor),
-                                      ),
-                                      Text(
-                                            driverReq['requestBill']['data']
-                                                    ['admin_commision']
-                                                .toString(),
-                                        style: GoogleFonts.roboto(
-                                            fontSize: media.width * twelve,
-                                            color: textColor),
-                                      ),
-                                    ],
-                                  ),
-                                  (driverReq['requestBill']['data']
-                                              ['promo_discount'] !=
-                                          null)
-                                      ? SizedBox(
-                                          height: media.height * 0.02,
-                                        )
-                                      : Container(),
-                                  (driverReq['requestBill']['data']
-                                              ['promo_discount'] !=
-                                          null)
-                                      ? Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              languages[choosenLanguage]
-                                                  ['text_discount'],
-                                              style: GoogleFonts.roboto(
-                                                  fontSize:
-                                                      media.width * twelve,
-                                                  color: Colors.red),
-                                            ),
-                                            Text(
-                                                  driverReq['requestBill']
-                                                              ['data']
-                                                          ['promo_discount']
-                                                      .toString(),
-                                              style: GoogleFonts.roboto(
-                                                  fontSize:
-                                                      media.width * twelve,
-                                                  color: Colors.red),
-                                            ),
-                                          ],
-                                        )
-                                      : Container(),
-                                  SizedBox(
-                                    height: media.height * 0.02,
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        languages[choosenLanguage]
-                                            ['text_taxes'],
-                                        style: GoogleFonts.roboto(
-                                            fontSize: media.width * twelve,
-                                            color: textColor),
-                                      ),
-                                      Text(
-                                            driverReq['requestBill']['data']
-                                                    ['service_tax']
-                                                .toString(),
-                                        style: GoogleFonts.roboto(
-                                            fontSize: media.width * twelve,
-                                            color: textColor),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    height: media.height * 0.02,
-                                  ),
+                                  // Row(
+                                  //   mainAxisAlignment:
+                                  //       MainAxisAlignment.spaceBetween,
+                                  //   children: [
+                                  //     Text(
+                                  //       languages[choosenLanguage]
+                                  //           ['text_distprice'],
+                                  //       style: GoogleFonts.roboto(
+                                  //           fontSize: media.width * twelve,
+                                  //           color: textColor),
+                                  //     ),
+                                  //     Text(
+                                  //           driverReq['requestBill']['data']
+                                  //                   ['distance_price']
+                                  //               .toString(),
+                                  //       style: GoogleFonts.roboto(
+                                  //           fontSize: media.width * twelve,
+                                  //           color: textColor),
+                                  //     ),
+                                  //   ],
+                                  // ),
+                                  // SizedBox(
+                                  //   height: media.height * 0.02,
+                                  // ),
+                                  // Row(
+                                  //   mainAxisAlignment:
+                                  //       MainAxisAlignment.spaceBetween,
+                                  //   children: [
+                                  //     Text(
+                                  //       languages[choosenLanguage]
+                                  //           ['text_timeprice'],
+                                  //       style: GoogleFonts.roboto(
+                                  //           fontSize: media.width * twelve,
+                                  //           color: textColor),
+                                  //     ),
+                                  //     Text(
+                                  //           driverReq['requestBill']['data']
+                                  //                   ['time_price']
+                                  //               .toString(),
+                                  //       style: GoogleFonts.roboto(
+                                  //           fontSize: media.width * twelve,
+                                  //           color: textColor),
+                                  //     ),
+                                  //   ],
+                                  // ),
+                                  // SizedBox(
+                                  //   height: media.height * 0.02,
+                                  // ),
+                                  // Row(
+                                  //   mainAxisAlignment:
+                                  //       MainAxisAlignment.spaceBetween,
+                                  //   children: [
+                                  //     Text(
+                                  //       languages[choosenLanguage]
+                                  //               ['text_waiting_price'] ?? "" +
+                                  //           driverReq['requestBill']['data']
+                                  //                   ['waiting_charge_per_min']
+                                  //               .toString() +
+                                  //           ' x ' +
+                                  //           driverReq['requestBill']['data']
+                                  //                   ['calculated_waiting_time']
+                                  //               .toString() +
+                                  //           ' mins' +
+                                  //           ')',
+                                  //       style: GoogleFonts.roboto(
+                                  //           fontSize: media.width * twelve,
+                                  //           color: textColor),
+                                  //     ),
+                                  //     Text(
+                                  //           driverReq['requestBill']['data']
+                                  //                   ['waiting_charge']
+                                  //               .toString(),
+                                  //       style: GoogleFonts.roboto(
+                                  //           fontSize: media.width * twelve,
+                                  //           color: textColor),
+                                  //     ),
+                                  //   ],
+                                  // ),
+                                  // (driverReq['requestBill']['data']
+                                  //             ['cancellation_fee'] !=
+                                  //         0)
+                                  //     ? SizedBox(
+                                  //         height: media.height * 0.02,
+                                  //       )
+                                  //     : Container(),
+                                  // (driverReq['requestBill']['data']
+                                  //             ['cancellation_fee'] !=
+                                  //         0)
+                                  //     ? Row(
+                                  //         mainAxisAlignment:
+                                  //             MainAxisAlignment.spaceBetween,
+                                  //         children: [
+                                  //           Text(
+                                  //             languages[choosenLanguage]
+                                  //                 ['text_cancelfee'],
+                                  //             style: GoogleFonts.roboto(
+                                  //                 fontSize:
+                                  //                     media.width * twelve,
+                                  //                 color: textColor),
+                                  //           ),
+                                  //           Text(
+                                  //                 driverReq['requestBill']
+                                  //                             ['data']
+                                  //                         ['cancellation_fee']
+                                  //                     .toString(),
+                                  //             style: GoogleFonts.roboto(
+                                  //                 fontSize:
+                                  //                     media.width * twelve,
+                                  //                 color: textColor),
+                                  //           ),
+                                  //         ],
+                                  //       )
+                                  //     : Container(),
+                                  // (driverReq['requestBill']['data']
+                                  //             ['airport_surge_fee'] !=
+                                  //         0)
+                                  //     ? SizedBox(
+                                  //         height: media.height * 0.02,
+                                  //       )
+                                  //     : Container(),
+                                  // (driverReq['requestBill']['data']
+                                  //             ['airport_surge_fee'] !=
+                                  //         0)
+                                  //     ? Row(
+                                  //         mainAxisAlignment:
+                                  //             MainAxisAlignment.spaceBetween,
+                                  //         children: [
+                                  //           Text(
+                                  //             languages[choosenLanguage]
+                                  //                 ['text_surge_fee'],
+                                  //             style: GoogleFonts.roboto(
+                                  //                 fontSize:
+                                  //                     media.width * twelve,
+                                  //                 color: textColor),
+                                  //           ),
+                                  //           Text(
+                                  //                 driverReq['requestBill']
+                                  //                             ['data']
+                                  //                         ['airport_surge_fee']
+                                  //                     .toString(),
+                                  //             style: GoogleFonts.roboto(
+                                  //                 fontSize:
+                                  //                     media.width * twelve,
+                                  //                 color: textColor),
+                                  //           ),
+                                  //         ],
+                                  //       )
+                                  //     : Container(),
+                                  // SizedBox(
+                                  //   height: media.height * 0.02,
+                                  // ),
+                                  // Row(
+                                  //   mainAxisAlignment:
+                                  //       MainAxisAlignment.spaceBetween,
+                                  //   children: [
+                                  //     Text(
+                                  //       languages[choosenLanguage]
+                                  //           ['text_convfee'],
+                                  //       style: GoogleFonts.roboto(
+                                  //           fontSize: media.width * twelve,
+                                  //           color: textColor),
+                                  //     ),
+                                  //     Text(
+                                  //           driverReq['requestBill']['data']
+                                  //                   ['admin_commision']
+                                  //               .toString(),
+                                  //       style: GoogleFonts.roboto(
+                                  //           fontSize: media.width * twelve,
+                                  //           color: textColor),
+                                  //     ),
+                                  //   ],
+                                  // ),
+                                  // (driverReq['requestBill']['data']
+                                  //             ['promo_discount'] !=
+                                  //         null)
+                                  //     ? SizedBox(
+                                  //         height: media.height * 0.02,
+                                  //       )
+                                  //     : Container(),
+                                  // (driverReq['requestBill']['data']
+                                  //             ['promo_discount'] !=
+                                  //         null)
+                                  //     ? Row(
+                                  //         mainAxisAlignment:
+                                  //             MainAxisAlignment.spaceBetween,
+                                  //         children: [
+                                  //           Text(
+                                  //             languages[choosenLanguage]
+                                  //                 ['text_discount'],
+                                  //             style: GoogleFonts.roboto(
+                                  //                 fontSize:
+                                  //                     media.width * twelve,
+                                  //                 color: Colors.red),
+                                  //           ),
+                                  //           Text(
+                                  //                 driverReq['requestBill']
+                                  //                             ['data']
+                                  //                         ['promo_discount']
+                                  //                     .toString(),
+                                  //             style: GoogleFonts.roboto(
+                                  //                 fontSize:
+                                  //                     media.width * twelve,
+                                  //                 color: Colors.red),
+                                  //           ),
+                                  //         ],
+                                  //       )
+                                  //     : Container(),
+                                  // SizedBox(
+                                  //   height: media.height * 0.02,
+                                  // ),
+                                  // Row(
+                                  //   mainAxisAlignment:
+                                  //       MainAxisAlignment.spaceBetween,
+                                  //   children: [
+                                  //     Text(
+                                  //       languages[choosenLanguage]
+                                  //           ['text_taxes'],
+                                  //       style: GoogleFonts.roboto(
+                                  //           fontSize: media.width * twelve,
+                                  //           color: textColor),
+                                  //     ),
+                                  //     Text(
+                                  //           driverReq['requestBill']['data']
+                                  //                   ['service_tax']
+                                  //               .toString(),
+                                  //       style: GoogleFonts.roboto(
+                                  //           fontSize: media.width * twelve,
+                                  //           color: textColor),
+                                  //     ),
+                                  //   ],
+                                  // ),
+                                  // SizedBox(
+                                  //   height: media.height * 0.02,
+                                  // ),
                                   Container(
                                     height: 1.5,
                                     color: const Color(0xffE0E0E0),

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:tagyourtaxi_driver/pages/language/languages.dart';
 import 'package:tagyourtaxi_driver/pages/loadingPage/loading.dart';
 import 'package:tagyourtaxi_driver/pages/login/start_screen.dart';
@@ -36,19 +37,6 @@ class _LoadingPageState extends State<LoadingPage> {
 
   //navigate
   navigate() {
-    // if (userDetails['uploaded_document'] == false) {
-    //   Navigator.pushReplacement(
-    //       context, MaterialPageRoute(builder: (context) => Docs()));
-    // } else if (userDetails['uploaded_document'] == true &&
-    //     userDetails['approve'] == false) {
-    //   Navigator.pushReplacement(
-    //       context,
-    //       MaterialPageRoute(
-    //         builder: (context) => const DocsProcess(),
-    //       ));
-    // } else if (userDetails['uploaded_document'] == true &&
-    //     userDetails['approve'] == true) {
-      //status approved
       Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) =>  Maps()),
@@ -59,12 +47,50 @@ class _LoadingPageState extends State<LoadingPage> {
   @override
   void initState() {
     getLanguageDone();
-
+    checkNotificationPermission();
     super.initState();
   }
 
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
+
+
+  void checkNotificationPermission() async {
+    var status = await Permission.notification.status;
+
+    if (status.isDenied) {
+      // Request permission in the app
+      PermissionStatus newStatus = await Permission.notification.request();
+      if (newStatus.isGranted) {
+        return; // Permission granted, no need to show dialog
+      }
+    }
+
+    if (status.isPermanentlyDenied || status.isRestricted) {
+      // Show alert asking the user to enable notifications manually
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text("Enable Notifications"),
+          content: Text("To receive important updates, please enable notifications."),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close dialog
+              },
+              child: Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () {
+                openAppSettings(); // Open phone settings
+              },
+              child: Text("Open Settings"),
+            ),
+          ],
+        ),
+      );
+    }
+  }
 
 //get language json and data saved in local (bearer token , choosen language) and find users current status
   getLanguageDone() async {
