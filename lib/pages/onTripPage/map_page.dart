@@ -149,7 +149,7 @@ class _MapsState extends State<Maps>
     getonlineoffline();
     _checkFirstTimeUser();
    // First immediate call
-    driverService.startLocationUpdates();
+    driverService.startLocationUpdates(context);
     // ✅ Call getUserDetails() every 3 seconds
     _anmiController = AnimationController(
       duration: Duration(seconds: 1), // Duration of one cycle
@@ -191,7 +191,9 @@ class _MapsState extends State<Maps>
           var result = await getUserDetails();
           if (result == 404) {
             Navigator.pushReplacement(
-                context, MaterialPageRoute(builder: (context) => Login()));
+              context,
+              MaterialPageRoute(builder: (_) => Login()),
+            );
           }
         });
   }
@@ -3669,40 +3671,52 @@ class _MapsState extends State<Maps>
                                                                   : InkWell(
                                                                 onTap: () {
                                                                   Navigator.push(context, MaterialPageRoute(builder: (context) => const ChatPageUser()));
+                                                                  notificationCountUser.value = 0;
                                                                 },
                                                                 child: Column(
                                                                   children: [
-                                                                    Row(
+                                                                    Stack(
+                                                                      clipBehavior: Clip.none, // Allows the badge to overflow
                                                                       children: [
                                                                         Image.asset(
                                                                           'assets/images/message-square.png',
                                                                           width: media.width * 0.06,
                                                                         ),
-                                                                        (chatListUser.where((element) => element['from_type'] == 1 && element['seen'] == 0).isNotEmpty)
-                                                                            ? Container(
-                                                                          padding: EdgeInsets.all(media.width * 0.01), // Padding for better spacing
-                                                                          decoration: BoxDecoration(
-                                                                            color: Colors.red, // Red background
-                                                                            shape: BoxShape.circle, // Circular shape
-                                                                          ),
-                                                                          constraints: BoxConstraints(
-                                                                            minWidth: media.width * 0.04, // Minimum width for small numbers
-                                                                            minHeight: media.width * 0.04, // Minimum height for small numbers
-                                                                          ),
-                                                                          alignment: Alignment.center, // Center the text
-                                                                          child: Text(
-                                                                            chatListUser.where((element) => element['from_type'] == 1 && element['seen'] == 0).length.toString(),
-                                                                            style: GoogleFonts.roboto(
-                                                                              fontSize: media.width * twelve,
-                                                                              color: Colors.white, // White text
-                                                                              fontWeight: FontWeight.bold,
+                                                                        // Show badge only if there are unread messages
+                                                                        if (chatListUser.where((element) => element['from_type'] == 1 && element['seen'] == 0).isNotEmpty)
+                                                                          Positioned(
+                                                                            right: 0,
+                                                                            top: 0,
+                                                                            child: ValueListenableBuilder<int>(
+                                                                              valueListenable: notificationCountUser,
+                                                                              builder: (context, count, child) {
+                                                                                print("📌 Rebuilding Notification Badge - Count: $count");
+                                                                                return count > 0
+                                                                                    ? Container(
+                                                                                  height: 18,
+                                                                                  width: 18,
+                                                                                  alignment: Alignment.center,
+                                                                                  decoration: BoxDecoration(
+                                                                                    shape: BoxShape.circle,
+                                                                                    color: Colors.red,
+                                                                                  ),
+                                                                                  child: Text(
+                                                                                    count.toString(),
+                                                                                    style: GoogleFonts.roboto(
+                                                                                      fontSize: 12,
+                                                                                      fontWeight: FontWeight.bold,
+                                                                                      color: Colors.white,
+                                                                                    ),
+                                                                                  ),
+                                                                                )
+                                                                                    : SizedBox(); // Hide badge when no notifications
+                                                                              },
                                                                             ),
-                                                                          ),
-                                                                        )
 
-                                                                            : Container()
+                                                                          ),
                                                                       ],
                                                                     ),
+
                                                                     Text(
                                                                       languages[choosenLanguage]['text_chat'],
                                                                       style: GoogleFonts.roboto(
@@ -4222,6 +4236,7 @@ class _MapsState extends State<Maps>
                                                                   : InkWell(
                                                                 onTap: () {
                                                                   Navigator.push(context, MaterialPageRoute(builder: (context) => const ChatPageUser()));
+                                                                  notificationCountUser.value = 0;
                                                                 },
                                                                 child: Column(
                                                                   children: [
@@ -4235,32 +4250,34 @@ class _MapsState extends State<Maps>
                                                                         // Show badge only if there are unread messages
                                                                         if (chatListUser.where((element) => element['from_type'] == 1 && element['seen'] == 0).isNotEmpty)
                                                                           Positioned(
-                                                                            right: 0, // Align to top-right
+                                                                            right: 0,
                                                                             top: 0,
-                                                                            child: Container(
-                                                                              padding: EdgeInsets.all(media.width * 0.008), // Padding for badge
-                                                                              decoration: BoxDecoration(
-                                                                                color: Colors.red, // Badge color
-                                                                                shape: BoxShape.circle,
-                                                                              ),
-                                                                              constraints: BoxConstraints(
-                                                                                minWidth: media.width * 0.035,
-                                                                                minHeight: media.width * 0.035,
-                                                                              ),
-                                                                              child: Center(
-                                                                                child: Text(
-                                                                                  chatListUser
-                                                                                      .where((element) => element['from_type'] == 1 && element['seen'] == 0)
-                                                                                      .length
-                                                                                      .toString(),
-                                                                                  style: GoogleFonts.roboto(
-                                                                                    fontSize: media.width * 0.03,
-                                                                                    color: Colors.white, // Text color
-                                                                                    fontWeight: FontWeight.bold,
+                                                                            child: ValueListenableBuilder<int>(
+                                                                              valueListenable: notificationCountUser,
+                                                                              builder: (context, count, child) {
+                                                                                print("📌 Rebuilding Notification Badge - Count: $count");
+                                                                                return count > 0
+                                                                                    ? Container(
+                                                                                  height: 18,
+                                                                                  width: 18,
+                                                                                  alignment: Alignment.center,
+                                                                                  decoration: BoxDecoration(
+                                                                                    shape: BoxShape.circle,
+                                                                                    color: Colors.red,
                                                                                   ),
-                                                                                ),
-                                                                              ),
+                                                                                  child: Text(
+                                                                                    count.toString(),
+                                                                                    style: GoogleFonts.roboto(
+                                                                                      fontSize: 12,
+                                                                                      fontWeight: FontWeight.bold,
+                                                                                      color: Colors.white,
+                                                                                    ),
+                                                                                  ),
+                                                                                )
+                                                                                    : SizedBox(); // Hide badge when no notifications
+                                                                              },
                                                                             ),
+
                                                                           ),
                                                                       ],
                                                                     ),

@@ -2636,6 +2636,7 @@ endTrip() async {
               ? (waitingAfterTime / 60).toInt()
               : 0
         }));
+    print("Data end trip${jsonEncode}");
     if (response.statusCode == 200) {
       await getUserDetails();
       FirebaseDatabase.instance
@@ -3018,6 +3019,8 @@ List chatList = [];
 List<dynamic> chatListCompany = [];
 ValueNotifier<List<dynamic>> valueNotifierHomes = ValueNotifier([]);
 ValueNotifier<int> notificationCount = ValueNotifier<int>(0);
+ValueNotifier<int> notificationCountUser = ValueNotifier<int>(0);
+
 
 StreamSubscription<DatabaseEvent>? companyMessageStream;
 
@@ -3026,61 +3029,68 @@ getCurrentMessagesCompany() async {
   String? token = prefs.getString('BearerToken');
 
   if (token == null) {
-    print("❌ No Bearer Token found. Cannot fetch messages.");
+    print("❌ No Bearer Token found.");
     return;
   }
 
+  // Convert to Set for faster lookup
+  Set<String> notifiedIds = (prefs.getStringList('notified_message_ids') ?? []).toSet();
+
   DatabaseReference chatRef = FirebaseDatabase.instance.ref("companyChats");
 
-  // ✅ Cancel previous listener before creating a new one
   companyMessageStream?.cancel();
 
   companyMessageStream = chatRef.onChildAdded.listen((event) {
-    if (event.snapshot.exists) {
-      final rawData = event.snapshot.value as Map<dynamic, dynamic>?;
+    if (!event.snapshot.exists) return;
 
-      if (rawData == null || rawData.isEmpty) {
-        print("⚠️ Received empty or null message data. Ignoring.");
-        return;
-      }
+    final rawData = event.snapshot.value as Map<dynamic, dynamic>?;
 
-      // 🔹 Iterate through the incoming messages
-      rawData.forEach((key, value) {
-        Map<String, dynamic> messageData = Map<String, dynamic>.from(value);
+    if (rawData == null || rawData.isEmpty) {
+      print("⚠️ Empty message data.");
+      return;
+    }
 
-        String? messageId = messageData['id']?.toString();
-        String message = messageData['message'] ?? "New Message from Company";
-        String fromType = messageData['from_type'] ?? "";
+    bool hasNewMessage = false;
 
-        if (messageId == null) {
-          print("⚠️ Skipping message with no ID.");
-          return;
-        }
+    rawData.forEach((key, value) {
+      Map<String, dynamic> messageData = Map<String, dynamic>.from(value);
+      String? messageId = messageData['id']?.toString();
+      String message = messageData['message'] ?? "New Message from Company";
+      String fromType = messageData['from_type'] ?? "";
 
-        // ✅ Ensure only new messages are added
+      if (messageId == null) return;
+
+      if (!notifiedIds.contains(messageId)) {
+        // Add to local list
         if (!chatListCompany.any((msg) => msg['id'].toString() == messageId)) {
           chatListCompany.add(messageData);
-
-          // ✅ Increase notification count
           notificationCount.value++;
-          print("🔴 Updated Notification Count: ${notificationCount.value}");
-
-          // ✅ Show local notification only if sender is the company
-          if (fromType == "is_company") {
-            LocalNotificationService.showLocalNotification(
-              title: "New Message from Company",
-              body: message,
-              payload: messageData,
-            );
-          }
+          hasNewMessage = true;
         }
-      });
+
+        // Only show notification if it's from company
+        if (fromType == "is_company") {
+          LocalNotificationService.showLocalNotification(
+            title: "New Message from Company",
+            body: message,
+            payload: messageData,
+          );
+        }
+
+        notifiedIds.add(messageId);
+      } else {
+        print("🟡 Message $messageId already notified. Skipping.");
+      }
+    });
+
+    // Save updated list after loop
+    if (hasNewMessage) {
+      prefs.setStringList('notified_message_ids', notifiedIds.toList());
     }
   }, onError: (error) {
-    print("🚨 Error listening for messages: $error");
+    print("🚨 Firebase error: $error");
   });
 
-  // 🔹 Fetch old messages from API (optional)
   fetchCompanyChatHistory(token);
 }
 
@@ -3125,10 +3135,6 @@ Future<void> fetchCompanyChatHistory(String token) async {
     debugPrint("Error fetching API messages: $e");
   }
 }
-
-
-
-
 
 sendMessageCompany(String chat) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -3216,9 +3222,6 @@ List chatListUser = [];
     print("❌ Driver request ID is null. Cannot fetch messages.");
     return;
   }
-
-
-
   DatabaseReference chatRef = FirebaseDatabase.instance.ref("messages/${driverReq['id']}");
 
   // ✅ Cancel previous listener to prevent duplicates
@@ -3235,13 +3238,12 @@ List chatListUser = [];
       if (!chatListUser.any((msg) => msg['id'] == messageData['id'])) {
         chatListUser.add(messageData);
         valueNotifierHome.incrementNotifier();
-
+        notificationCountUser.value++;
         // ✅ Update message as "Seen" if it's from the driver
         if (messageData['sender'] == "user" && messageData['seen'] == 0) {
           chatRef.child(event.snapshot.key!).update({"seen": 1});
           print("👀 Message marked as seen.");
         }
-
         // ✅ Show notification only if the message is from the driver
         if (messageData['sender'] == "user") {
           LocalNotificationService.showLocalNotification(
@@ -4269,78 +4271,59 @@ cashFreePaymentSuccess() async {
 }
 
 //user logout
-
+DriverService driverServices = DriverService();
 Future<String> userLogout() async {
   dynamic result;
-  var id = userDetails['id'];
-  var role = userDetails['role'];
-
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String? token = prefs.getString('BearerToken');
+  var id = userDetails['id'];
+  var role = userDetails['role'];
 
   try {
     var response = await http.post(
       Uri.parse('${url}api/v1/logout'),
       headers: {
         'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
     );
 
-    if (response.statusCode == 200) {
-      FirebaseMessaging.instance.unsubscribeFromTopic("requests");
-      FirebaseMessaging.instance.unsubscribeFromTopic("messages");
+    // ⛔ Stop location updates BEFORE token is removed
+    driverServices.stopLocationUpdates();
+
+    FirebaseMessaging.instance.unsubscribeFromTopic("requests");
+    FirebaseMessaging.instance.unsubscribeFromTopic("request-meta");
+    FirebaseMessaging.instance.unsubscribeFromTopic("messages");
+
+    try {
       platforms.invokeMethod('logout');
+    } catch (e) {
+      debugPrint('⚠️ Logout platform channel error: $e');
+    }
 
-      if (role != 'owner') {
-        final position = FirebaseDatabase.instance.ref();
-        position.child('drivers/$id').update({
-          'is_active': 0,
-        });
-      }
+    if (role != 'owner') {
+      final position = FirebaseDatabase.instance.ref();
+      await position.child('drivers/$id').update({'is_active': 0});
+    }
 
-      rideStreamStart?.cancel();
-      rideStreamChanges?.cancel();
-      requestStreamEnd?.cancel();
-      requestStreamStart?.cancel();
+    // ✅ Cancel and clean up streams
+    await rideStreamStart?.cancel();
+    await rideStreamChanges?.cancel();
+    await requestStreamEnd?.cancel();
+    await requestStreamStart?.cancel();
 
-      rideStreamStart = null;
-      rideStreamChanges = null;
-      requestStreamStart = null;
-      requestStreamEnd = null;
+    rideStreamStart = null;
+    rideStreamChanges = null;
+    requestStreamStart = null;
+    requestStreamEnd = null;
 
-      prefs.remove('BearerToken');
+    await prefs.remove('BearerToken');
 
-      result = 'success';
-    } else if (response.statusCode == 401 || response.statusCode == 500) {
-      // Do same cleanup as above
-      FirebaseMessaging.instance.unsubscribeFromTopic("requests");
-      FirebaseMessaging.instance.unsubscribeFromTopic("messages");
-      platforms.invokeMethod('logout');
-
-      if (role != 'owner') {
-        final position = FirebaseDatabase.instance.ref();
-        position.child('drivers/$id').update({
-          'is_active': 0,
-        });
-      }
-
-      rideStreamStart?.cancel();
-      rideStreamChanges?.cancel();
-      requestStreamEnd?.cancel();
-      requestStreamStart?.cancel();
-
-      rideStreamStart = null;
-      rideStreamChanges = null;
-      requestStreamStart = null;
-      requestStreamEnd = null;
-
-      prefs.remove('BearerToken');
-
-      // Navigate to login screen using global navigator key
-      navigatorKey.currentState?.pushNamedAndRemoveUntil('/login', (route) => false);
-
+    if (response.statusCode == 401 || response.statusCode == 500) {
+      // navigatorKey.currentState?.pushNamedAndRemoveUntil('/login', (route) => false);
       result = 'unauthorized';
+    } else if (response.statusCode == 200) {
+      result = 'success';
     } else {
       debugPrint(response.body);
       result = 'failure';
@@ -4349,12 +4332,13 @@ Future<String> userLogout() async {
     if (e is SocketException) {
       result = 'no internet';
       internet = false;
+    } else {
+      debugPrint('⚠️ Logout exception: $e');
     }
   }
 
   return result;
 }
-
 
 //check internet connection
 
@@ -5063,7 +5047,7 @@ streamRide() {
         userReject = true;
       }
     } else if (event.snapshot.key.toString() == 'message_by_user') {
-      getCurrentMessagesCompany();
+      getCurrentMessagesUser();
     } else if (event.snapshot.key.toString() == 'is_paid') {
       getUserDetails();
     }
@@ -5079,7 +5063,7 @@ streamRide() {
 
       userReject = true;
     } else if (event.snapshot.key.toString() == 'message_by_user') {
-      getCurrentMessagesCompany();
+      getCurrentMessagesUser();
     } else if (event.snapshot.key.toString() == 'is_paid') {
       getUserDetails();
     }

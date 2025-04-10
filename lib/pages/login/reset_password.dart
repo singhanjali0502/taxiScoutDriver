@@ -75,7 +75,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(15),
                               borderSide: BorderSide.none),
-                          labelText: "Password",
+                          labelText: languages[choosenLanguage]['text_password'],
                         ),
                         validator: validatePassword,
                       ),
@@ -97,7 +97,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(15),
                               borderSide: BorderSide.none),
-                          labelText: "Confirm Password",
+                          labelText: languages[choosenLanguage]['text_confirm_password'],
                         ),
                         validator: validatePassword,
                       ),
@@ -111,7 +111,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(15),
                               borderSide: BorderSide.none),
-                          labelText: "OTP",
+                          labelText: languages[choosenLanguage]['text_otpCheck'],
                         ),
                         validator: validateOtp,
                       ),
@@ -193,7 +193,7 @@ class _ResetPasswordState extends State<ResetPassword> {
 
   String? validateOtp(String? value) {
     if (value!.isEmpty) {
-      return "OTP is required";
+      return "One-time password is required";
     }
     return null;
   }

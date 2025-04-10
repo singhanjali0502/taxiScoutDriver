@@ -124,9 +124,9 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                                   context: context,
                                   builder: (BuildContext context) {
                                     return AlertDialog(
-                                      title: Text("Check Your Email"),
+                                      title: Text(languages[choosenLanguage]["text_check_email"],),
                                       content: Text(
-                                          "Please check your email for OTP verification."),
+                                        languages[choosenLanguage]["text_otp"],),
                                       actions: [
                                         TextButton(
                                           onPressed: () {

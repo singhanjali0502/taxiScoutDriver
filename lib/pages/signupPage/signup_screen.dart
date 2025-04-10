@@ -406,8 +406,8 @@ class _SignupScreenState extends State<SignupScreen> {
                                 context: context,
                                 builder: (BuildContext context) {
                                   return AlertDialog(
-                                    title: Text("Registration Successful"),
-                                    content: Text("Please check your email for OTP verification."),
+                                    title: Text(languages[choosenLanguage]["text_register"],),
+                                    content: Text(languages[choosenLanguage]["text_otp"],),
                                     actions: [
                                       TextButton(
                                         onPressed: () {

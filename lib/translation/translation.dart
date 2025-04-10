@@ -1,5 +1,9 @@
 Map<String, dynamic> languages = {
   "de": {
+    "text_otpCheck":"Einmalpasswort",
+    "text_check_email":"Überprüfen Sie Ihre E-Mail",
+    "text_register":"Registrierung erfolgreich",
+    "text_otp":"Bitte geben Sie das Einmalpasswort ein, das wir Ihnen per Email gesendet haben",
     "text_driverLicense":"Führerschein",
     "text_company_id":"Firmen-ID",
     "text_select_vehicle":"Wählen Sie Fahrzeug",
@@ -452,6 +456,10 @@ Map<String, dynamic> languages = {
   },
 
   "en": {
+    "text_otpCheck":"One-time password",
+    "text_check_email":"Check Your Email",
+    "text_register":"Registration Successful",
+    "text_otp":"Please enter the one-time password we sent you via Email",
     "text_driverLicense":"Driver License",
     "text_company_id":"Company Id",
     "text_select_vehicle":"Select Vehicle",
@@ -897,6 +905,10 @@ Map<String, dynamic> languages = {
   },
 
   "fr": {
+    "text_otpCheck":"One-time password",
+    "text_check_email":"Check Your Email",
+    "text_register":"Registration Successful",
+    "text_otp":"Please enter the one-time password we sent you via Email",
     "text_driverLicense":"Driver License",
     "text_company_id":"Company Id",
     "text_select_vehicle":"Select Vehicle",
@@ -1358,6 +1370,10 @@ Map<String, dynamic> languages = {
   },
 
   "ar": {
+    "text_otpCheck":"One-time password",
+    "text_check_email":"Check Your Email",
+    "text_register":"Registration Successful",
+    "text_otp":"Please enter the one-time password we sent you via Email",
     "text_driverLicense":"Driver License",
     "text_company_id":"Company Id",
     "text_select_vehicle":"Select Vehicle",
@@ -1801,6 +1817,10 @@ Map<String, dynamic> languages = {
   },
 
   "tr": {
+    "text_otpCheck":"One-time password",
+    "text_check_email":"Check Your Email",
+    "text_register":"Registration Successful",
+    "text_otp":"Please enter the one-time password we sent you via Email",
     "text_driverLicense":"Driver License",
     "text_company_id":"Company Id",
     "text_select_vehicle":"Select Vehicle",
@@ -2251,6 +2271,10 @@ Map<String, dynamic> languages = {
   },
 
   "zh": {
+    "text_otpCheck":"One-time password",
+    "text_check_email":"Check Your Email",
+    "text_register":"Registration Successful",
+    "text_otp":"Please enter the one-time password we sent you via Email",
     "text_driverLicense":"Driver License",
     "text_company_id":"Company Id",
     "text_select_vehicle":"Select Vehicle",
@@ -2675,6 +2699,10 @@ Map<String, dynamic> languages = {
   },
 
   "ru": {
+    "text_otpCheck":"One-time password",
+    "text_check_email":"Check Your Email",
+    "text_register":"Registration Successful",
+    "text_otp":"Please enter the one-time password we sent you via Email",
     "text_driverLicense":"Driver License",
     "text_company_id":"Company Id",
     "text_select_vehicle":"Select Vehicle",
@@ -3130,6 +3158,10 @@ Map<String, dynamic> languages = {
   },
 
   "it": {
+    "text_otpCheck":"One-time password",
+    "text_check_email":"Check Your Email",
+    "text_register":"Registration Successful",
+    "text_otp":"Please enter the one-time password we sent you via Email",
     "text_driverLicense":"Driver License",
     "text_company_id":"Company Id",
     "text_select_vehicle":"Select Vehicle",
@@ -3577,6 +3609,10 @@ Map<String, dynamic> languages = {
   },
 
   "pt": {
+    "text_otpCheck":"One-time password",
+    "text_check_email":"Check Your Email",
+    "text_register":"Registration Successful",
+    "text_otp":"Please enter the one-time password we sent you via Email",
     "text_driverLicense":"Driver License",
     "text_company_id":"Company Id",
     "text_select_vehicle":"Select Vehicle",
@@ -4030,6 +4066,10 @@ Map<String, dynamic> languages = {
   },
 
   "id": {
+    "text_otpCheck":"One-time password",
+    "text_check_email":"Check Your Email",
+    "text_register":"Registration Successful",
+    "text_otp":"Please enter the one-time password we sent you via Email",
     "text_driverLicense":"Driver License",
     "text_company_id":"Company Id",
     "text_select_vehicle":"Select Vehicle",
@@ -4481,6 +4521,10 @@ Map<String, dynamic> languages = {
   },
 
   "ko": {
+    "text_otpCheck":"One-time password",
+    "text_check_email":"Check Your Email",
+    "text_register":"Registration Successful",
+    "text_otp":"Please enter the one-time password we sent you via Email",
     "text_driverLicense":"Driver License",
     "text_company_id":"Company Id",
     "text_select_vehicle":"Select Vehicle",
@@ -4908,6 +4952,10 @@ Map<String, dynamic> languages = {
   },
 
   "es": {
+    "text_otpCheck":"One-time password",
+    "text_check_email":"Check Your Email",
+    "text_register":"Registration Successful",
+    "text_otp":"Please enter the one-time password we sent you via Email",
     "text_driverLicense":"Driver License",
     "text_company_id":"Company Id",
     "text_select_vehicle":"Select Vehicle",
@@ -5357,6 +5405,10 @@ Map<String, dynamic> languages = {
   },
 
   "iw": {
+    "text_otpCheck":"One-time password",
+    "text_check_email":"Check Your Email",
+    "text_register":"Registration Successful",
+    "text_otp":"Please enter the one-time password we sent you via Email",
     "text_driverLicense":"Driver License",
     "text_company_id":"Company Id",
     "text_select_vehicle":"Select Vehicle",
@@ -5793,6 +5845,10 @@ Map<String, dynamic> languages = {
   },
 
   "ur": {
+    "text_otpCheck":"One-time password",
+    "text_check_email":"Check Your Email",
+    "text_register":"Registration Successful",
+    "text_otp":"Please enter the one-time password we sent you via Email",
     "text_driverLicense":"Driver License",
     "text_company_id":"Company Id",
     "text_select_vehicle":"Select Vehicle",
@@ -6243,6 +6299,10 @@ Map<String, dynamic> languages = {
   },
 
   "bn": {
+    "text_otpCheck":"One-time password",
+    "text_check_email":"Check Your Email",
+    "text_register":"Registration Successful",
+    "text_otp":"Please enter the one-time password we sent you via Email",
     "text_driverLicense":"Driver License",
     "text_company_id":"Company Id",
     "text_select_vehicle":"Select Vehicle",

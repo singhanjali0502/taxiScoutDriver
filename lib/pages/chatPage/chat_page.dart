@@ -21,9 +21,16 @@ class _ChatPageState extends State<ChatPage> {
   @override
   void initState() {
     super.initState();
-    getCurrentMessagesCompany();
+
+    getCurrentMessagesCompany().then((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollToBottom(); // scrolls to the bottom after messages are built
+      });
+    });
+
     _startAutoRefresh();
   }
+
 
   @override
   void dispose() {

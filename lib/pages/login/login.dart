@@ -339,9 +339,9 @@ class _LoginState extends State<Login> {
                     : Container(),
 
                 //loader
-                // (_isLoading == true)
-                //     ? const Positioned(top: 0, child: Loading())
-                //     : Container(),
+                (_isLoading == true)
+                    ? const Positioned(top: 0, child: Loading())
+                    : Container(),
 
                 // Show loader during login process
                 if (_isLoggingIn)

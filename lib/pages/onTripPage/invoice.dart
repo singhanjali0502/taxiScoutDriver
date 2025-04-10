@@ -287,7 +287,7 @@ class _InvoiceState extends State<Invoice> {
                                       ),
                                       Text(
                                             driverReq['requestBill']['data']
-                                                    ['base_price']
+                                                    ['total_amount']
                                                 .toString(),
                                         style: GoogleFonts.roboto(
                                             fontSize: media.width * twelve,
