@@ -43,6 +43,7 @@ import '../pages/login/ownerregister.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import '../translation/translation.dart';
 import '../widgets/local_notification.dart';
 import 'geohash.dart';
 import 'dart:developer' as dev;
@@ -3055,7 +3056,7 @@ getCurrentMessagesCompany() async {
     rawData.forEach((key, value) {
       Map<String, dynamic> messageData = Map<String, dynamic>.from(value);
       String? messageId = messageData['id']?.toString();
-      String message = messageData['message'] ?? "New Message from Company";
+      String message = messageData['message'] ?? languages[choosenLanguage]['text_message_company'];
       String fromType = messageData['from_type'] ?? "";
 
       if (messageId == null) return;
@@ -3071,7 +3072,7 @@ getCurrentMessagesCompany() async {
         // Only show notification if it's from company
         if (fromType == "is_company") {
           LocalNotificationService.showLocalNotification(
-            title: "New Message from Company",
+            title: languages[choosenLanguage]['text_message_company'],
             body: message,
             payload: messageData,
           );
@@ -3247,7 +3248,7 @@ List chatListUser = [];
         // ✅ Show notification only if the message is from the driver
         if (messageData['sender'] == "user") {
           LocalNotificationService.showLocalNotification(
-            title: "New Message from Driver",
+            title: languages[choosenLanguage]['text_message_user'],
             body: messageData['message'],
             payload: messageData,
           );
@@ -4998,8 +4999,8 @@ void notifyDriver(Map<String, dynamic> rideRequest) {
   if (rideRequest.isEmpty) return;
 
   LocalNotificationService.showLocalNotification(
-    title: "🚖 New Ride Assigned",
-    body: "A new ride has been assigned to you. Tap to view details.",
+    title: languages[choosenLanguage]['text_new_ride'],
+    body: languages[choosenLanguage]['text_ride_detail'],
     payload: rideRequest,
   );
 

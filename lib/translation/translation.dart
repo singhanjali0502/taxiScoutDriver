@@ -1,5 +1,9 @@
 Map<String, dynamic> languages = {
   "de": {
+    "text_message_company":"Neue Nachricht vom Unternehmen",
+    "text_message_user":"Neue Nachricht vom Benutzer",
+    "text_new_ride":"🚖 Neue Fahrt zugewiesen",
+    "text_ride_detail":"Dir wurde eine neue Fahrt zugewiesen. Tippe hier, um Details anzuzeigen.",
     "text_otpCheck":"Einmalpasswort",
     "text_check_email":"Überprüfen Sie Ihre E-Mail",
     "text_register":"Registrierung erfolgreich",
@@ -456,6 +460,10 @@ Map<String, dynamic> languages = {
   },
 
   "en": {
+    "text_message_company":"New Message from Company",
+    "text_message_user":"New Message from User",
+    "text_new_ride":"🚖 New Ride Assigned",
+    "text_ride_detail":"A new ride has been assigned to you. Tap to view details.",
     "text_otpCheck":"One-time password",
     "text_check_email":"Check Your Email",
     "text_register":"Registration Successful",
@@ -905,6 +913,10 @@ Map<String, dynamic> languages = {
   },
 
   "fr": {
+    "text_message_company":"New Message from Company",
+    "text_message_user":"New Message from User",
+    "text_new_ride":"🚖 New Ride Assigned",
+    "text_ride_detail":"A new ride has been assigned to you. Tap to view details.",
     "text_otpCheck":"One-time password",
     "text_check_email":"Check Your Email",
     "text_register":"Registration Successful",
@@ -1370,6 +1382,10 @@ Map<String, dynamic> languages = {
   },
 
   "ar": {
+    "text_message_company":"New Message from Company",
+    "text_message_user":"New Message from User",
+    "text_new_ride":"🚖 New Ride Assigned",
+    "text_ride_detail":"A new ride has been assigned to you. Tap to view details.",
     "text_otpCheck":"One-time password",
     "text_check_email":"Check Your Email",
     "text_register":"Registration Successful",
@@ -1817,6 +1833,10 @@ Map<String, dynamic> languages = {
   },
 
   "tr": {
+    "text_message_company":"New Message from Company",
+    "text_message_user":"New Message from User",
+    "text_new_ride":"🚖 New Ride Assigned",
+    "text_ride_detail":"A new ride has been assigned to you. Tap to view details.",
     "text_otpCheck":"One-time password",
     "text_check_email":"Check Your Email",
     "text_register":"Registration Successful",
@@ -2271,6 +2291,10 @@ Map<String, dynamic> languages = {
   },
 
   "zh": {
+    "text_message_company":"New Message from Company",
+    "text_message_user":"New Message from User",
+    "text_new_ride":"🚖 New Ride Assigned",
+    "text_ride_detail":"A new ride has been assigned to you. Tap to view details.",
     "text_otpCheck":"One-time password",
     "text_check_email":"Check Your Email",
     "text_register":"Registration Successful",
@@ -2699,6 +2723,10 @@ Map<String, dynamic> languages = {
   },
 
   "ru": {
+    "text_message_company":"New Message from Company",
+    "text_message_user":"New Message from User",
+    "text_new_ride":"🚖 New Ride Assigned",
+    "text_ride_detail":"A new ride has been assigned to you. Tap to view details.",
     "text_otpCheck":"One-time password",
     "text_check_email":"Check Your Email",
     "text_register":"Registration Successful",
@@ -3158,6 +3186,10 @@ Map<String, dynamic> languages = {
   },
 
   "it": {
+    "text_message_company":"New Message from Company",
+    "text_message_user":"New Message from User",
+    "text_new_ride":"🚖 New Ride Assigned",
+    "text_ride_detail":"A new ride has been assigned to you. Tap to view details.",
     "text_otpCheck":"One-time password",
     "text_check_email":"Check Your Email",
     "text_register":"Registration Successful",
@@ -3609,6 +3641,10 @@ Map<String, dynamic> languages = {
   },
 
   "pt": {
+    "text_message_company":"New Message from Company",
+    "text_message_user":"New Message from User",
+    "text_new_ride":"🚖 New Ride Assigned",
+    "text_ride_detail":"A new ride has been assigned to you. Tap to view details.",
     "text_otpCheck":"One-time password",
     "text_check_email":"Check Your Email",
     "text_register":"Registration Successful",
@@ -4066,6 +4102,10 @@ Map<String, dynamic> languages = {
   },
 
   "id": {
+    "text_message_company":"New Message from Company",
+    "text_message_user":"New Message from User",
+    "text_new_ride":"🚖 New Ride Assigned",
+    "text_ride_detail":"A new ride has been assigned to you. Tap to view details.",
     "text_otpCheck":"One-time password",
     "text_check_email":"Check Your Email",
     "text_register":"Registration Successful",
@@ -4521,6 +4561,10 @@ Map<String, dynamic> languages = {
   },
 
   "ko": {
+    "text_message_company":"New Message from Company",
+    "text_message_user":"New Message from User",
+    "text_new_ride":"🚖 New Ride Assigned",
+    "text_ride_detail":"A new ride has been assigned to you. Tap to view details.",
     "text_otpCheck":"One-time password",
     "text_check_email":"Check Your Email",
     "text_register":"Registration Successful",
@@ -4952,6 +4996,10 @@ Map<String, dynamic> languages = {
   },
 
   "es": {
+    "text_message_company":"New Message from Company",
+    "text_message_user":"New Message from User",
+    "text_new_ride":"🚖 New Ride Assigned",
+    "text_ride_detail":"A new ride has been assigned to you. Tap to view details.",
     "text_otpCheck":"One-time password",
     "text_check_email":"Check Your Email",
     "text_register":"Registration Successful",
@@ -5405,6 +5453,10 @@ Map<String, dynamic> languages = {
   },
 
   "iw": {
+    "text_message_company":"New Message from Company",
+    "text_message_user":"New Message from User",
+    "text_new_ride":"🚖 New Ride Assigned",
+    "text_ride_detail":"A new ride has been assigned to you. Tap to view details.",
     "text_otpCheck":"One-time password",
     "text_check_email":"Check Your Email",
     "text_register":"Registration Successful",
@@ -5845,6 +5897,10 @@ Map<String, dynamic> languages = {
   },
 
   "ur": {
+    "text_message_company":"New Message from Company",
+    "text_message_user":"New Message from User",
+    "text_new_ride":"🚖 New Ride Assigned",
+    "text_ride_detail":"A new ride has been assigned to you. Tap to view details.",
     "text_otpCheck":"One-time password",
     "text_check_email":"Check Your Email",
     "text_register":"Registration Successful",
@@ -6299,6 +6355,10 @@ Map<String, dynamic> languages = {
   },
 
   "bn": {
+    "text_message_company":"New Message from Company",
+    "text_message_user":"New Message from User",
+    "text_new_ride":"🚖 New Ride Assigned",
+    "text_ride_detail":"A new ride has been assigned to you. Tap to view details.",
     "text_otpCheck":"One-time password",
     "text_check_email":"Check Your Email",
     "text_register":"Registration Successful",
